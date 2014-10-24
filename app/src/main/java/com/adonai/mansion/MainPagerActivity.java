@@ -1,29 +1,38 @@
 package com.adonai.mansion;
 
-import android.app.Activity;
-import android.app.ActionBar;
-import android.app.Fragment;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.preference.PreferenceManager;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.os.Build;
+
+import com.astuetz.PagerSlidingTabStrip;
 
 
+public class MainPagerActivity extends FragmentActivity {
 
-public class MainPagerActivity extends Activity {
+    private SharedPreferences mPrefs;
+    private ViewPager mPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_pager);
         if (savedInstanceState == null) {
-            getFragmentManager().beginTransaction()
-                    .add(R.id.container, new PlaceholderFragment())
-                    .commit();
+            getFragmentManager().beginTransaction().add(R.id.container, null).commit();
         }
+
+        mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+        mPager = (ViewPager) findViewById(R.id.page_holder);
+        PagerSlidingTabStrip tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
+        tabs.setViewPager(mPager);
+        mPager.setAdapter(new ManFragmentPagerAdapter(getSupportFragmentManager()));
     }
 
 
@@ -49,19 +58,39 @@ public class MainPagerActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
+    private class ManFragmentPagerAdapter extends FragmentPagerAdapter {
 
-        public PlaceholderFragment() {
+        public ManFragmentPagerAdapter(FragmentManager fm) {
+            super(fm);
         }
 
         @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main_pager, container, false);
-            return rootView;
+        public Fragment getItem(int i)
+        {
+            switch (i) {
+                case 0:
+                    return new ManPageSearchFragment();
+                case 1:
+                    return new ManPageExplainFragment();
+            }
+            throw new IllegalArgumentException(String.format("No such fragment, index was %d", i));
+        }
+
+        @Override
+        public int getCount()
+        {
+            return 2;
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position)
+        {
+            switch(position)
+            {
+                case 0: return getString(R.string.search);
+                case 1: return getString(R.string.explain);
+                default: return null;
+            }
         }
     }
 }
