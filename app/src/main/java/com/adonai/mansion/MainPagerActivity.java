@@ -11,6 +11,7 @@ import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.adonai.mansion.database.DbProvider;
 import com.astuetz.PagerSlidingTabStrip;
 
 
@@ -22,12 +23,11 @@ public class MainPagerActivity extends FragmentActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main_pager);
-        if (savedInstanceState == null) {
-            getFragmentManager().beginTransaction().add(R.id.container, null).commit();
-        }
 
+        // preparations
+        setContentView(R.layout.activity_main_pager);
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        DbProvider.setHelper(this);
 
         mPager = (ViewPager) findViewById(R.id.page_holder);
         PagerSlidingTabStrip tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
@@ -92,5 +92,10 @@ public class MainPagerActivity extends FragmentActivity {
                 default: return null;
             }
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        DbProvider.releaseHelper();
     }
 }
