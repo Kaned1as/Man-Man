@@ -30,24 +30,20 @@ public class MainPagerActivity extends FragmentActivity {
         DbProvider.setHelper(this);
 
         mPager = (ViewPager) findViewById(R.id.page_holder);
+        mPager.setAdapter(new ManFragmentPagerAdapter(getSupportFragmentManager()));
         PagerSlidingTabStrip tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
         tabs.setViewPager(mPager);
-        mPager.setAdapter(new ManFragmentPagerAdapter(getSupportFragmentManager()));
     }
 
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main_pager, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
@@ -71,7 +67,7 @@ public class MainPagerActivity extends FragmentActivity {
                 case 0:
                     return new ManPageSearchFragment();
                 case 1:
-                    return new ManPageExplainFragment();
+                    return new ManPageShowFragment();
             }
             throw new IllegalArgumentException(String.format("No such fragment, index was %d", i));
         }
@@ -88,7 +84,7 @@ public class MainPagerActivity extends FragmentActivity {
             switch(position)
             {
                 case 0: return getString(R.string.search);
-                case 1: return getString(R.string.explain);
+                case 1: return getString(R.string.content);
                 default: return null;
             }
         }

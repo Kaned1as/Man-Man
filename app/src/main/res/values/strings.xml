@@ -8,5 +8,6 @@
     <string name="explain">Explain</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="enter_query">Enter query...</string>
+    <string name="content">Content</string>
 
 </resources>

@@ -12,11 +12,11 @@ import android.view.ViewGroup;
 
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link ManPageExplainFragment#newInstance} factory method to
+ * Use the {@link ManPageShowFragment#newInstance} factory method to
  * create an instance of this fragment.
  *
  */
-public class ManPageExplainFragment extends Fragment {
+public class ManPageShowFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -36,15 +36,15 @@ public class ManPageExplainFragment extends Fragment {
      * @return A new instance of fragment ManPageExplainFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static ManPageExplainFragment newInstance(String param1, String param2) {
-        ManPageExplainFragment fragment = new ManPageExplainFragment();
+    public static ManPageShowFragment newInstance(String param1, String param2) {
+        ManPageShowFragment fragment = new ManPageShowFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
     }
-    public ManPageExplainFragment() {
+    public ManPageShowFragment() {
         // Required empty public constructor
     }
 
@@ -61,7 +61,7 @@ public class ManPageExplainFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_man_page_explain, container, false);
+        return inflater.inflate(R.layout.fragment_man_page_show, container, false);
     }
 
 
