@@ -17,7 +17,8 @@
     <ListView
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:id="@+id/search_results_list" />
+        android:id="@+id/search_results_list"
+        android:divider="@null" />
 
 
 </LinearLayout>
