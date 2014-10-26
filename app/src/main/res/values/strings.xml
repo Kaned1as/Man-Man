@@ -7,7 +7,9 @@
     <string name="search">Search</string>
     <string name="explain">Explain</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="enter_query">Enter query...</string>
+    <string name="enter_query">Enter query…</string>
     <string name="content">Content</string>
-
+    <string name="connection_error">Connection error</string>
+    <string name="placeholder_text">Placeholder Text</string>
+    <string name="request_description">Request description</string>
 </resources>

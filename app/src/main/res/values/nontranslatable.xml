@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="man_page_chapters">
+        <item>1|General commands</item>
+        <item>2|System calls</item>
+        <item>3|Library functions</item>
+        <item>4|Special files</item>
+        <item>5|File formats</item>
+        <item>6|Games</item>
+        <item>7|Miscellanea</item>
+        <item>8|System administration</item>
+        <item>0p|POSIX header files</item>
+        <item>1p|POSIX commands</item>
+        <item>3p|POSIX functions</item>
+        <item>n|Tcl/Tk keywords</item>
+    </string-array>
+</resources>
