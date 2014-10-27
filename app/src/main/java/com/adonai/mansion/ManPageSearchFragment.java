@@ -42,10 +42,10 @@ import java.util.regex.Pattern;
 
 
 /**
- * A simple {@link Fragment} subclass.
- * Use the {@link ManPageSearchFragment#newInstance} factory method to
- * create an instance of this fragment.
+ * Fragment to show search results in a handy list view
+ * All loaders for search content are implemented here
  *
+ * @author Adonai
  */
 public class ManPageSearchFragment extends Fragment implements AdapterView.OnItemClickListener {
     private final static String SEARCH_COMMAND = "search.command";

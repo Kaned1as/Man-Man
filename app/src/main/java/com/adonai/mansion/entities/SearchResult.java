@@ -1,7 +1,9 @@
 package com.adonai.mansion.entities;
 
 /**
- * Created by adonai on 25.10.14.
+ * Object representing one of search results in corresponding API call
+ *
+ * @author Adonai
  */
 public class SearchResult {
     private String text;

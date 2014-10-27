@@ -14,7 +14,11 @@ import android.view.MenuItem;
 import com.adonai.mansion.database.DbProvider;
 import com.astuetz.PagerSlidingTabStrip;
 
-
+/**
+ * Main activity where everything takes place
+ *
+ * @author Adonai
+ */
 public class MainPagerActivity extends FragmentActivity {
 
     private SharedPreferences mPrefs;

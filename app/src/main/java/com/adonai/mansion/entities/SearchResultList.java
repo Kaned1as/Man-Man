@@ -1,8 +1,13 @@
 package com.adonai.mansion.entities;
 
-
 import java.util.List;
 
+/**
+ * Object representing search result list in API call
+ * Contains several search results or null if no results found
+ *
+ * @author Adonai
+ */
 public class SearchResultList {
     private String query;
     private boolean truncated;

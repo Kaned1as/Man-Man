@@ -1,7 +1,9 @@
 package com.adonai.mansion.entities;
 
 /**
- * Created by adonai on 25.10.14.
+ * Object representing answer on description API-call
+ *
+ * @author Adonai
  */
 public class Description {
     private String name;

@@ -8,7 +8,9 @@ import android.view.MotionEvent;
 import android.webkit.WebView;
 
 /**
- * Created by adonai on 27.10.14.
+ * Helper class created to workaround issues with WebViews in ListView items
+ *
+ * @author Adonai
  */
 public class NonClickableWebView extends WebView {
     public NonClickableWebView(Context context) {

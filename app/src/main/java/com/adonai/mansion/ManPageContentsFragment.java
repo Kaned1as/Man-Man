@@ -11,10 +11,10 @@ import android.view.ViewGroup;
 
 
 /**
- * A simple {@link Fragment} subclass.
- * Use the {@link ManPageContentsFragment#newInstance} factory method to
- * create an instance of this fragment.
+ * Fragment to show table of contents and navigate into it
+ * Note: works slower that just search!
  *
+ * @author Adonai
  */
 public class ManPageContentsFragment extends Fragment {
 
