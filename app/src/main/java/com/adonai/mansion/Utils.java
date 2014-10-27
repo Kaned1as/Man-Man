@@ -2,7 +2,7 @@ package com.adonai.mansion;
 
 import android.content.Context;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -20,7 +20,7 @@ public class Utils {
      */
     public static Map<String, String> parseStringArray(Context context, int stringArrayResourceId) {
         String[] stringArray = context.getResources().getStringArray(stringArrayResourceId);
-        Map<String, String> outputMap = new HashMap<>(stringArray.length);
+        Map<String, String> outputMap = new LinkedHashMap<>(stringArray.length);
         for (String entry : stringArray) {
             String[] splitResult = entry.split("\\|", 2);
             outputMap.put(splitResult[0], splitResult[1]);

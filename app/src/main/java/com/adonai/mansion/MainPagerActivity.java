@@ -24,6 +24,7 @@ public class MainPagerActivity extends FragmentActivity {
     final static int SEARCH_COMMAND_LOADER = 0;
     final static int SEARCH_ONELINER_LOADER = 1;
     final static int MAN_PAGE_RETRIEVER_LOADER = 2;
+    final static int CONTENTS_RETRIEVER_LOADER = 3;
 
 
     private SharedPreferences mPrefs;
@@ -90,6 +91,7 @@ public class MainPagerActivity extends FragmentActivity {
             switch(position) {
                 case 0: return getString(R.string.search);
                 case 1: return getString(R.string.contents);
+                case 3: return getString(R.string.cache);
                 default: return null;
             }
         }
