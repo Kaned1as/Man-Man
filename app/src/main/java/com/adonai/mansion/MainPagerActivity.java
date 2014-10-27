@@ -21,6 +21,11 @@ import com.astuetz.PagerSlidingTabStrip;
  */
 public class MainPagerActivity extends FragmentActivity {
 
+    final static int SEARCH_COMMAND_LOADER = 0;
+    final static int SEARCH_ONELINER_LOADER = 1;
+    final static int MAN_PAGE_RETRIEVER_LOADER = 2;
+
+
     private SharedPreferences mPrefs;
     private ViewPager mPager;
 
@@ -65,8 +70,7 @@ public class MainPagerActivity extends FragmentActivity {
         }
 
         @Override
-        public Fragment getItem(int i)
-        {
+        public Fragment getItem(int i) {
             switch (i) {
                 case 0:
                     return ManPageSearchFragment.newInstance();
@@ -77,16 +81,13 @@ public class MainPagerActivity extends FragmentActivity {
         }
 
         @Override
-        public int getCount()
-        {
+        public int getCount() {
             return 2;
         }
 
         @Override
-        public CharSequence getPageTitle(int position)
-        {
-            switch(position)
-            {
+        public CharSequence getPageTitle(int position) {
+            switch(position) {
                 case 0: return getString(R.string.search);
                 case 1: return getString(R.string.contents);
                 default: return null;

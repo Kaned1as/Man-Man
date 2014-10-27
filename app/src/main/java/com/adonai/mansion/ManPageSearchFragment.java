@@ -52,9 +52,6 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
     private final static String SEARCH_COMMAND = "search.command";
     private final static String SEARCH_ONELINER = "search.oneliner";
 
-    private final static int SEARCH_COMMAND_LOADER = 0;
-    private final static int SEARCH_ONELINER_LOADER = 1;
-
     private final static int MESSAGE_LOAD_DELAYED = 0;
 
     private final static String SEARCH_COMMAND_PREFIX = "https://www.mankier.com/api/mans/?q=";
@@ -89,8 +86,8 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getLoaderManager().initLoader(SEARCH_COMMAND_LOADER, Bundle.EMPTY, mSearchCommandCallback);
-        getLoaderManager().initLoader(SEARCH_ONELINER_LOADER, Bundle.EMPTY, mSearchOnelinerCallback);
+        getLoaderManager().initLoader(MainPagerActivity.SEARCH_COMMAND_LOADER, Bundle.EMPTY, mSearchCommandCallback);
+        getLoaderManager().initLoader(MainPagerActivity.SEARCH_ONELINER_LOADER, Bundle.EMPTY, mSearchOnelinerCallback);
     }
 
     @NonNull
@@ -113,7 +110,8 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        ManPageDialogFragment.newInstance().show(getFragmentManager(), "manPage");
+        SearchResult sr = (SearchResult) parent.getItemAtPosition(position);
+        ManPageDialogFragment.newInstance(sr.getUrl()).show(getFragmentManager(), "manPage");
     }
 
     private class SearchLoaderCallback implements LoaderManager.LoaderCallbacks<SearchResultList> {
@@ -214,7 +212,7 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
         public boolean onQueryTextChange(String newText) {
             if(TextUtils.isEmpty(newText)) {
                 currentText = newText;
-                getLoaderManager().restartLoader(SEARCH_COMMAND_LOADER, Bundle.EMPTY, mSearchCommandCallback);
+                getLoaderManager().restartLoader(MainPagerActivity.SEARCH_COMMAND_LOADER, Bundle.EMPTY, mSearchCommandCallback);
                 return true;
             }
 
@@ -236,10 +234,10 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
                     mSearchImage.setImageResource(R.drawable.rotating_wait);
                     if(!currentText.contains(" ")) { // this is a single command query, just search
                         argsForLoader.putString(SEARCH_COMMAND, currentText);
-                        getLoaderManager().restartLoader(SEARCH_COMMAND_LOADER, argsForLoader, mSearchCommandCallback);
+                        getLoaderManager().restartLoader(MainPagerActivity.SEARCH_COMMAND_LOADER, argsForLoader, mSearchCommandCallback);
                     } else { // this is oneliner with arguments/other commands
                         argsForLoader.putString(SEARCH_ONELINER, currentText);
-                        getLoaderManager().restartLoader(SEARCH_ONELINER_LOADER, argsForLoader, mSearchOnelinerCallback);
+                        getLoaderManager().restartLoader(MainPagerActivity.SEARCH_ONELINER_LOADER, argsForLoader, mSearchOnelinerCallback);
                     }
                 }
             }, 500);
