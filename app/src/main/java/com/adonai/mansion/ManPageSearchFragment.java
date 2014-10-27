@@ -267,17 +267,19 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
                 chapter.setText(chapterName);
                 final WebView description = (WebView) root.findViewById(R.id.description_text_web);
                 description.setBackgroundColor(0);
-                description.setVisibility(View.GONE);
+                unregisterForContextMenu(description);
                 final ImageView descriptionRequest = (ImageView) root.findViewById(R.id.request_description_button);
                 descriptionRequest.setImageResource(android.R.drawable.ic_menu_help);
                 descriptionRequest.setVisibility(View.VISIBLE);
 
+                // download a description on question mark click
                 descriptionRequest.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         ImageView imageView = (ImageView) v;
                         imageView.setImageResource(R.drawable.rotating_wait);
                         final String descriptionCommand = matcher.group(1) + "." + matcher.group(2);
+                        // run desc download in another thread...
                         Thread thr = new Thread(new Runnable() {
                             @Override
                             public void run() {
@@ -288,6 +290,7 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
                                     if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                                         String result = EntityUtils.toString(response.getEntity());
                                         final Description descAnswer = mJsonConverter.fromJson(result, Description.class);
+                                        // load description back into listview
                                         getActivity().runOnUiThread(new Runnable() {
                                             @Override
                                             public void run() {
@@ -299,6 +302,7 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
                                     }
                                 } catch (IOException e) {
                                     e.printStackTrace();
+                                    // show error and change drawable back to normal
                                     getActivity().runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {

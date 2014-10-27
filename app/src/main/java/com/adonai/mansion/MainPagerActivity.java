@@ -65,9 +65,9 @@ public class MainPagerActivity extends FragmentActivity {
         {
             switch (i) {
                 case 0:
-                    return new ManPageSearchFragment();
+                    return ManPageSearchFragment.newInstance();
                 case 1:
-                    return new ManPageShowFragment();
+                    return ManPageContentsFragment.newInstance();
             }
             throw new IllegalArgumentException(String.format("No such fragment, index was %d", i));
         }
@@ -84,7 +84,7 @@ public class MainPagerActivity extends FragmentActivity {
             switch(position)
             {
                 case 0: return getString(R.string.search);
-                case 1: return getString(R.string.content);
+                case 1: return getString(R.string.contents);
                 default: return null;
             }
         }

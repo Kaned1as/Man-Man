@@ -12,4 +12,5 @@
     <string name="connection_error">Connection error</string>
     <string name="placeholder_text">Placeholder Text</string>
     <string name="request_description">Request description</string>
+    <string name="contents">Contents</string>
 </resources>
