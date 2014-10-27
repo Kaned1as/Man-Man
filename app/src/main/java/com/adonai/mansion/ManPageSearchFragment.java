@@ -4,6 +4,7 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
@@ -54,8 +55,6 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
     private final static int SEARCH_COMMAND_LOADER = 0;
     private final static int SEARCH_ONELINER_LOADER = 1;
 
-    private final static int TAG_DESCRIPTION = 0;
-
     private final static int MESSAGE_LOAD_DELAYED = 0;
 
     private final static String SEARCH_COMMAND_PREFIX = "https://www.mankier.com/api/mans/?q=";
@@ -75,6 +74,7 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
 
     private Map<String, String> cachedChapters;
 
+    @NonNull
     public static ManPageSearchFragment newInstance() {
         ManPageSearchFragment fragment = new ManPageSearchFragment();
         Bundle args = new Bundle();
@@ -93,6 +93,7 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
         getLoaderManager().initLoader(SEARCH_ONELINER_LOADER, Bundle.EMPTY, mSearchOnelinerCallback);
     }
 
+    @NonNull
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         cachedChapters = Utils.parseStringArray(getActivity(), R.array.man_page_chapters);
@@ -112,6 +113,7 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        ManPageDialogFragment.newInstance().show(getFragmentManager(), "manPage");
     }
 
     private class SearchLoaderCallback implements LoaderManager.LoaderCallbacks<SearchResultList> {
