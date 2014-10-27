@@ -97,6 +97,7 @@ public class MainPagerActivity extends FragmentActivity {
 
     @Override
     protected void onDestroy() {
+        super.onDestroy();
         DbProvider.releaseHelper();
     }
 }

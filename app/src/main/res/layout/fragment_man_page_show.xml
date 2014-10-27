@@ -2,21 +2,19 @@
 <ViewFlipper xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:inAnimation="@android:anim/slide_in_left"
+    android:background="@color/semi_transparent"
     android:id="@+id/flipper">
 
-    <FrameLayout
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/wait_icon"
-            android:src="@drawable/rotating_wait"
-            android:layout_gravity="center" />
-    </FrameLayout>
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/wait_icon"
+        android:src="@drawable/rotating_wait"
+        android:layout_gravity="center" />
 
     <WebView
+        android:layerType="software"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/man_content_web" />

@@ -1,6 +1,5 @@
 package com.adonai.mansion;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -9,7 +8,10 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
 import android.webkit.WebView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
@@ -19,7 +21,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import java.io.IOException;
-import java.net.URL;
 
 /**
  * Created by adonai on 27.10.14.
@@ -49,23 +50,28 @@ public class ManPageDialogFragment extends DialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setStyle(STYLE_NO_FRAME, android.R.style.Theme_Holo_Light);
+        setStyle(DialogFragment.STYLE_NORMAL, android.R.style.Theme_Translucent);
         if(getArguments() != null) {
             mOriginalAddress = getArguments().getString(PARAM_ADDRESS);
             getLoaderManager().initLoader(MainPagerActivity.MAN_PAGE_RETRIEVER_LOADER, null, manPageCallback);
         }
     }
 
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View root = inflater.inflate(R.layout.fragment_man_page_show, container, false);
+        mFlipper = (ViewFlipper) root.findViewById(R.id.flipper);
+        mContent = (WebView) root.findViewById(R.id.man_content_web);
+        return root;
+    }
+
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
-        View root = View.inflate(getActivity(), R.layout.fragment_man_page_show, null);
-        mFlipper = (ViewFlipper) root.findViewById(R.id.flipper);
-        mContent = (WebView) root.findViewById(R.id.man_content_web);
-
-        builder.setView(root);
-        return builder.create();
+        Dialog dia = super.onCreateDialog(savedInstanceState);
+        dia.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dia.getWindow().setWindowAnimations(android.R.style.Animation_Translucent);
+        return dia;
     }
 
     @Override
@@ -95,7 +101,7 @@ public class ManPageDialogFragment extends DialogFragment {
                 public String loadInBackground() {
                     if(mOriginalAddress != null) { // just searching for a command
                         try {
-                            Document root = Jsoup.parse(new URL(mOriginalAddress), 10000);
+                            Document root = Jsoup.connect(mOriginalAddress).timeout(10000).get();
                             Element man = root.select("div.man-page").first();
                             if(man != null)
                                 return man.html();
@@ -112,7 +118,7 @@ public class ManPageDialogFragment extends DialogFragment {
         @Override
         public void onLoadFinished(Loader<String> loader, String data) {
             if(data != null) {
-                mContent.loadData(data, "text/html", "UTF-8");
+                mContent.loadDataWithBaseURL(mOriginalAddress, data, "text/html", "UTF-8", null);
                 mFlipper.showNext();
             } else {
                 dismiss();

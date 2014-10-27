@@ -204,7 +204,7 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
         @Override
         public boolean onQueryTextSubmit(String query) {
             currentText = query;
-            fireLoader();
+            fireLoader(true);
             return true;
         }
 
@@ -220,12 +220,12 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
                 return false;
 
             currentText = newText;
-            fireLoader();
+            fireLoader(false);
             return true;
         }
 
         // make a delay for not spamming requests to server so fast
-        private void fireLoader() {
+        private void fireLoader(boolean immediate) {
             final Bundle argsForLoader = new Bundle();
             mUiHandler.removeMessages(MESSAGE_LOAD_DELAYED);
             mUiHandler.postDelayed(new Runnable() {
@@ -240,7 +240,7 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
                         getLoaderManager().restartLoader(MainPagerActivity.SEARCH_ONELINER_LOADER, argsForLoader, mSearchOnelinerCallback);
                     }
                 }
-            }, 500);
+            }, immediate ? 0 : 800);
 
         }
     }
@@ -267,7 +267,7 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
                 chapter.setText(chapterName);
                 final WebView description = (WebView) root.findViewById(R.id.description_text_web);
                 description.setBackgroundColor(0);
-                unregisterForContextMenu(description);
+                description.setVisibility(View.GONE);
                 final ImageView descriptionRequest = (ImageView) root.findViewById(R.id.request_description_button);
                 descriptionRequest.setImageResource(android.R.drawable.ic_menu_help);
                 descriptionRequest.setVisibility(View.VISIBLE);
