@@ -4,6 +4,7 @@ package com.adonai.mansion;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
@@ -49,6 +50,14 @@ public class ManPageContentsFragment extends Fragment {
     private Map<String, List<ManSectionItem>> mCachedChapterContents = new HashMap<>();
 
     private ListView mListView;
+    /**
+     * Click listener for selecting a chapter from the list.
+     * The request is then sent to the loader to load chapter data asynchronously
+     * <br/>
+     * We don't have any headers at this point
+     *
+     * @see com.adonai.mansion.ManPageContentsFragment.RetrieveContentsCallback
+     */
     private AdapterView.OnItemClickListener mChapterClickListener = new AdapterView.OnItemClickListener() {
 
         @Override
@@ -60,16 +69,25 @@ public class ManPageContentsFragment extends Fragment {
             getLoaderManager().restartLoader(MainPagerActivity.CONTENTS_RETRIEVER_LOADER, args, mContentRetrieveCallback);
         }
     };
+    /**
+     * Click listener for selecting a command from the list.
+     * New instance of {@link com.adonai.mansion.ManPageDialogFragment} then created and shown
+     * for loading ful command man page
+     * <br/>
+     * We have a header "To contents" so handle this case
+     *
+     */
     private AdapterView.OnItemClickListener mCommandClickListener = new AdapterView.OnItemClickListener() {
 
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            if(position == 0) { // header
+            int headersCount = mListView.getHeaderViewsCount(); // always 1 in our case, "to contents" button
+            if(position <= headersCount) { // header
                 mListView.removeHeaderView(view);
                 mListView.setAdapter(mChaptersAdapter);
                 mListView.setOnItemClickListener(mChapterClickListener);
             } else {
-                ManSectionItem item = (ManSectionItem) parent.getItemAtPosition(position - mListView.getHeaderViewsCount());
+                ManSectionItem item = (ManSectionItem) parent.getItemAtPosition(position + headersCount);
                 ManPageDialogFragment.newInstance(item.getUrl()).show(getFragmentManager(), "manPage");
             }
         }
@@ -106,6 +124,13 @@ public class ManPageContentsFragment extends Fragment {
         return root;
     }
 
+    /**
+     * This class represents an array adapter for showing man chapters
+     * There are only about ten constant chapters, so it was convenient to place it to the string-array
+     * <br/>
+     * The array is retrieved via {@link Utils#parseStringArray(android.content.Context, int)}
+     * and stored in {@link #mCachedChapters}
+     */
     private class ChaptersArrayAdapter extends ArrayAdapter<Map.Entry<String, String>> {
 
         public ChaptersArrayAdapter(Context context, int resource, int textViewResourceId, List<Map.Entry<String, String>> objects) {
@@ -127,7 +152,43 @@ public class ManPageContentsFragment extends Fragment {
         }
     }
 
+    /**
+     * Array adapter for showing commands with their description in ListView
+     * <br/>
+     * The data retrieval is done through {@link com.adonai.mansion.ManPageContentsFragment.RetrieveContentsCallback}
+     *
+     * @see android.widget.ArrayAdapter
+     * @see com.adonai.mansion.entities.ManSectionItem
+     */
+    private class ChapterContentsArrayAdapter extends ArrayAdapter<ManSectionItem> {
 
+        public ChapterContentsArrayAdapter(Context context, int resource, int textViewResourceId, List<ManSectionItem> objects) {
+            super(context, resource, textViewResourceId, objects);
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            ManSectionItem current = getItem(position);
+            View root = super.getView(position, convertView, parent);
+
+            TextView command = (TextView) root.findViewById(R.id.command_name_label);
+            command.setText(current.getName());
+
+            TextView desc = (TextView) root.findViewById(R.id.command_description_label);
+            desc.setText(current.getDescription());
+
+            return root;
+        }
+    }
+
+
+    /**
+     * Loader callback for async loading of clicked chapter's contents and showing them in ListView afterwards
+     * <br/>
+     * The data is retrieved from local database (if cached there) or from network (if not)
+     *
+     * @see com.adonai.mansion.entities.ManSectionItem
+     */
     private class RetrieveContentsCallback implements LoaderManager.LoaderCallbacks<List<ManSectionItem>> {
         @Override
         public Loader<List<ManSectionItem>> onCreateLoader(int id, final Bundle args) {
@@ -137,6 +198,13 @@ public class ManPageContentsFragment extends Fragment {
                     forceLoad();
                 }
 
+                /**
+                 * Loads chapter page from DB or network asynchronously
+                 *
+                 * @return list of commands with their descriptions and urls
+                 * or null on error/no input provided
+                 */
+                @Nullable
                 @Override
                 public List<ManSectionItem> loadInBackground() {
                     if(args.containsKey(CHAPTER_INDEX)) { // retrieve chapter content
@@ -167,10 +235,12 @@ public class ManPageContentsFragment extends Fragment {
 
         @Override
         public void onLoadFinished(Loader<List<ManSectionItem>> loader, List<ManSectionItem> data) {
-            View text = View.inflate(getActivity(), R.layout.back_header, null);
-            mListView.addHeaderView(text);
-            //mListView.setAdapter();
-            mListView.setOnItemClickListener(mCommandClickListener);
+            if(data != null) {
+                View text = View.inflate(getActivity(), R.layout.back_header, null);
+                mListView.addHeaderView(text);
+                mListView.setAdapter(new ChapterContentsArrayAdapter(getActivity(), R.layout.chapter_command_list_item, R.id.command_name_label, data));
+                mListView.setOnItemClickListener(mCommandClickListener);
+            }
         }
 
         @Override

@@ -10,6 +10,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.Window;
 
 import com.adonai.mansion.database.DbProvider;
 import com.astuetz.PagerSlidingTabStrip;
@@ -36,6 +37,7 @@ public class MainPagerActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_pager);
+        requestWindowFeature(Window.FEATURE_PROGRESS);
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         mPager = (ViewPager) findViewById(R.id.page_holder);
