@@ -21,6 +21,8 @@ import com.astuetz.PagerSlidingTabStrip;
  */
 public class MainPagerActivity extends FragmentActivity {
 
+    final static String BACK_PRESSED = "back.pressed";
+
     final static int SEARCH_COMMAND_LOADER = 0;
     final static int SEARCH_ONELINER_LOADER = 1;
     final static int MAN_PAGE_RETRIEVER_LOADER = 2;
@@ -33,11 +35,8 @@ public class MainPagerActivity extends FragmentActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // preparations
         setContentView(R.layout.activity_main_pager);
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        DbProvider.setHelper(this);
 
         mPager = (ViewPager) findViewById(R.id.page_holder);
         mPager.setAdapter(new ManFragmentPagerAdapter(getSupportFragmentManager()));
@@ -91,15 +90,21 @@ public class MainPagerActivity extends FragmentActivity {
             switch(position) {
                 case 0: return getString(R.string.search);
                 case 1: return getString(R.string.contents);
-                case 3: return getString(R.string.cache);
+                case 2: return getString(R.string.cached);
                 default: return null;
             }
         }
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onResume() {
+        super.onResume();
+        DbProvider.setHelper(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
         DbProvider.releaseHelper();
     }
 }

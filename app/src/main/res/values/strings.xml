@@ -13,5 +13,7 @@
     <string name="placeholder_text">Placeholder Text</string>
     <string name="request_description">Request description</string>
     <string name="contents">Contents</string>
-    <string name="cache">Кэш</string>
+    <string name="cached">Cached</string>
+    <string name="to_contents">To contents</string>
+    <string name="back_icon">back icon</string>
 </resources>

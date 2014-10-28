@@ -11,6 +11,7 @@ import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -42,11 +43,37 @@ public class ManPageContentsFragment extends Fragment {
     private final static String CHAPTER_COMMANDS_PREFIX = "https://www.mankier.com/";
 
     private RetrieveContentsCallback mContentRetrieveCallback = new RetrieveContentsCallback();
+    private ChaptersArrayAdapter mChaptersAdapter;
 
-    private Map<String, String> cachedChapters;
-    private Map<String, List<ManSectionItem>> cachedChapterContents = new HashMap<>();
+    private Map<String, String> mCachedChapters;
+    private Map<String, List<ManSectionItem>> mCachedChapterContents = new HashMap<>();
 
     private ListView mListView;
+    private AdapterView.OnItemClickListener mChapterClickListener = new AdapterView.OnItemClickListener() {
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            Map.Entry<String, String> item = (Map.Entry<String, String>) parent.getItemAtPosition(position);
+            Bundle args = new Bundle();
+            args.putString(CHAPTER_INDEX, item.getKey());
+            getLoaderManager().restartLoader(MainPagerActivity.CONTENTS_RETRIEVER_LOADER, args, mContentRetrieveCallback);
+        }
+    };
+    private AdapterView.OnItemClickListener mCommandClickListener = new AdapterView.OnItemClickListener() {
+
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            if(position == 0) { // header
+                mListView.removeHeaderView(view);
+                mListView.setAdapter(mChaptersAdapter);
+                mListView.setOnItemClickListener(mChapterClickListener);
+            } else {
+                ManSectionItem item = (ManSectionItem) parent.getItemAtPosition(position - mListView.getHeaderViewsCount());
+                ManPageDialogFragment.newInstance(item.getUrl()).show(getFragmentManager(), "manPage");
+            }
+        }
+    };
 
     @NonNull
     public static ManPageContentsFragment newInstance() {
@@ -69,12 +96,13 @@ public class ManPageContentsFragment extends Fragment {
     @NonNull
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        cachedChapters = Utils.parseStringArray(getActivity(), R.array.man_page_chapters);
+        mCachedChapters = Utils.parseStringArray(getActivity(), R.array.man_page_chapters);
+        mChaptersAdapter = new ChaptersArrayAdapter(getActivity(), R.layout.chapters_list_item, R.id.chapter_index_label, new ArrayList<>(mCachedChapters.entrySet()));
         View root = inflater.inflate(R.layout.fragment_man_contents, container, false);
 
         mListView = (ListView) root.findViewById(R.id.chapter_commands_list);
-        mListView.setAdapter(new ChaptersArrayAdapter(getActivity(), R.layout.chapters_list_item, R.id.chapter_index_label, new ArrayList<>(cachedChapters.entrySet())));
-
+        mListView.setAdapter(mChaptersAdapter);
+        mListView.setOnItemClickListener(mChapterClickListener);
         return root;
     }
 
@@ -139,7 +167,10 @@ public class ManPageContentsFragment extends Fragment {
 
         @Override
         public void onLoadFinished(Loader<List<ManSectionItem>> loader, List<ManSectionItem> data) {
-
+            View text = View.inflate(getActivity(), R.layout.back_header, null);
+            mListView.addHeaderView(text);
+            //mListView.setAdapter();
+            mListView.setOnItemClickListener(mCommandClickListener);
         }
 
         @Override
