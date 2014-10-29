@@ -15,21 +15,27 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.adonai.mansion.entities.ManSectionItem;
 
-import org.jsoup.Jsoup;
+import org.jsoup.helper.DataUtil;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.io.FilterInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
 
 
 /**
@@ -50,6 +56,7 @@ public class ManPageContentsFragment extends Fragment {
     private Map<String, List<ManSectionItem>> mCachedChapterContents = new HashMap<>();
 
     private ListView mListView;
+    private ProgressBar mProgress;
     /**
      * Click listener for selecting a chapter from the list.
      * The request is then sent to the loader to load chapter data asynchronously
@@ -121,6 +128,7 @@ public class ManPageContentsFragment extends Fragment {
         mListView = (ListView) root.findViewById(R.id.chapter_commands_list);
         mListView.setAdapter(mChaptersAdapter);
         mListView.setOnItemClickListener(mChapterClickListener);
+        mProgress = (ProgressBar) getActivity().findViewById(R.id.load_progress);
         return root;
     }
 
@@ -196,6 +204,9 @@ public class ManPageContentsFragment extends Fragment {
                 @Override
                 protected void onStartLoading() {
                     forceLoad();
+                    mProgress.setIndeterminate(false);
+                    mProgress.setProgress(0);
+                    mProgress.setVisibility(View.VISIBLE);
                 }
 
                 /**
@@ -209,8 +220,14 @@ public class ManPageContentsFragment extends Fragment {
                 public List<ManSectionItem> loadInBackground() {
                     if(args.containsKey(CHAPTER_INDEX)) { // retrieve chapter content
                         String index = args.getString(CHAPTER_INDEX);
+                        String link = CHAPTER_COMMANDS_PREFIX + "/" + index;
                         try {
-                            Document root = Jsoup.connect(CHAPTER_COMMANDS_PREFIX + "/" + index).timeout(10000).get();
+                            URLConnection conn = new URL(link).openConnection();
+                            conn.setRequestProperty("Accept-Encoding", "gzip, deflate");
+                            conn.setReadTimeout(10000);
+                            conn.setConnectTimeout(5000);
+                            InputStream is = new GZIPInputStream(new CountingInputStream(conn.getInputStream(), conn.getContentLength()), conn.getContentLength());
+                            Document root = DataUtil.load(is, "UTF-8", link);
                             Elements commands = root.select("div.e");
                             if(!commands.isEmpty()) {
                                 List<ManSectionItem> msItems = new ArrayList<>(commands.size());
@@ -225,7 +242,13 @@ public class ManPageContentsFragment extends Fragment {
                             }
                         } catch (IOException e) {
                             e.printStackTrace();
-                            Toast.makeText(getActivity(), R.string.connection_error, Toast.LENGTH_SHORT).show();
+                            // can't show a toast from a thread without looper
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(getActivity(), R.string.connection_error, Toast.LENGTH_SHORT).show();
+                                }
+                            });
                         }
                     }
                     return null;
@@ -235,6 +258,7 @@ public class ManPageContentsFragment extends Fragment {
 
         @Override
         public void onLoadFinished(Loader<List<ManSectionItem>> loader, List<ManSectionItem> data) {
+            mProgress.setVisibility(View.INVISIBLE);
             if(data != null) {
                 View text = View.inflate(getActivity(), R.layout.back_header, null);
                 mListView.addHeaderView(text);
@@ -246,6 +270,32 @@ public class ManPageContentsFragment extends Fragment {
         @Override
         public void onLoaderReset(Loader<List<ManSectionItem>> loader) {
 
+        }
+    }
+
+    private class CountingInputStream extends FilterInputStream {
+
+        private final int length;
+        private int transferred;
+
+        CountingInputStream(InputStream in, int totalBytes) throws IOException {
+            super(in);
+            this.length = totalBytes;
+            this.transferred = 0;
+        }
+
+        @Override
+        public int read(byte[] buffer, int byteOffset, int byteCount) throws IOException {
+            int res = super.read(buffer, byteOffset, byteCount);
+            transferred += res;
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    int progress = transferred * 100 / length;
+                    mProgress.setProgress(progress);
+                }
+            });
+            return res;
         }
     }
 }

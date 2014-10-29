@@ -10,7 +10,6 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.Window;
 
 import com.adonai.mansion.database.DbProvider;
 import com.astuetz.PagerSlidingTabStrip;
@@ -21,8 +20,6 @@ import com.astuetz.PagerSlidingTabStrip;
  * @author Adonai
  */
 public class MainPagerActivity extends FragmentActivity {
-
-    final static String BACK_PRESSED = "back.pressed";
 
     final static int SEARCH_COMMAND_LOADER = 0;
     final static int SEARCH_ONELINER_LOADER = 1;
@@ -37,7 +34,6 @@ public class MainPagerActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_pager);
-        requestWindowFeature(Window.FEATURE_PROGRESS);
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         mPager = (ViewPager) findViewById(R.id.page_holder);
@@ -109,4 +105,6 @@ public class MainPagerActivity extends FragmentActivity {
         super.onPause();
         DbProvider.releaseHelper();
     }
+
+
 }

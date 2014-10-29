@@ -138,7 +138,13 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
                             }
                         } catch (IOException e) {
                             e.printStackTrace();
-                            Toast.makeText(getActivity(), R.string.connection_error, Toast.LENGTH_SHORT).show();
+                            // can't show a toast from a thread without looper
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(getActivity(), R.string.connection_error, Toast.LENGTH_SHORT).show();
+                                }
+                            });
                         }
                     }
                     return null;
@@ -179,7 +185,13 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
                             }
                         } catch (IOException e) {
                             e.printStackTrace();
-                            Toast.makeText(getActivity(), R.string.connection_error, Toast.LENGTH_SHORT).show();
+                            // can't show a toast from a thread without looper
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(getActivity(), R.string.connection_error, Toast.LENGTH_SHORT).show();
+                                }
+                            });
                         }
                     }
                     return null;
@@ -302,6 +314,7 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
                                     }
                                 } catch (IOException e) {
                                     e.printStackTrace();
+                                    // can't show a toast from a thread without looper
                                     // show error and change drawable back to normal
                                     getActivity().runOnUiThread(new Runnable() {
                                         @Override

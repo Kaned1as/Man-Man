@@ -107,7 +107,13 @@ public class ManPageDialogFragment extends DialogFragment {
                                 return man.html();
                         } catch (IOException e) {
                             e.printStackTrace();
-                            Toast.makeText(getActivity(), R.string.connection_error, Toast.LENGTH_SHORT).show();
+                            // can't show a toast from a thread without looper
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(getActivity(), R.string.connection_error, Toast.LENGTH_SHORT).show();
+                                }
+                            });
                         }
                     }
                     return null;
