@@ -5,13 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <fr.castorflex.android.smoothprogressbar.SmoothProgressBar
-        style="@style/SmoothProgressBar"
-        android:id="@+id/load_progress"
-        android:layout_width="match_parent"
-        android:layout_height="4dp"
-        custom:spb_mirror_mode="true"/>
-
     <com.astuetz.PagerSlidingTabStrip
         android:id="@+id/tabs"
         android:layout_width="match_parent"

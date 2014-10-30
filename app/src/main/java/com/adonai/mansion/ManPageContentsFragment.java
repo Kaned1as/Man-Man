@@ -2,6 +2,7 @@ package com.adonai.mansion;
 
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -19,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.adonai.mansion.entities.ManSectionItem;
+import com.adonai.mansion.views.ProgressBarWrapper;
 
 import org.jsoup.helper.DataUtil;
 import org.jsoup.nodes.Document;
@@ -35,8 +37,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
-
-import fr.castorflex.android.smoothprogressbar.SmoothProgressBar;
 
 
 /**
@@ -57,7 +57,7 @@ public class ManPageContentsFragment extends Fragment {
     private Map<String, List<ManSectionItem>> mCachedChapterContents = new HashMap<>();
 
     private ListView mListView;
-    private SmoothProgressBar mProgress;
+    private ProgressBarWrapper mProgress;
     /**
      * Click listener for selecting a chapter from the list.
      * The request is then sent to the loader to load chapter data asynchronously
@@ -78,9 +78,8 @@ public class ManPageContentsFragment extends Fragment {
 
             // show progressbar under actionbar
             mProgress.setIndeterminate(false);
-            mProgress.progressiveStart();
             mProgress.setProgress(0);
-            mProgress.setVisibility(View.VISIBLE);
+            mProgress.show();
         }
     };
     /**
@@ -135,7 +134,7 @@ public class ManPageContentsFragment extends Fragment {
         mListView = (ListView) root.findViewById(R.id.chapter_commands_list);
         mListView.setAdapter(mChaptersAdapter);
         mListView.setOnItemClickListener(mChapterClickListener);
-        mProgress = (SmoothProgressBar) getActivity().findViewById(R.id.load_progress);
+        mProgress = new ProgressBarWrapper(getActivity());
         return root;
     }
 
@@ -251,7 +250,7 @@ public class ManPageContentsFragment extends Fragment {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    mProgress.setVisibility(View.INVISIBLE);
+                                    mProgress.show();
                                     Toast.makeText(getActivity(), R.string.connection_error, Toast.LENGTH_SHORT).show();
                                 }
                             });
@@ -264,7 +263,7 @@ public class ManPageContentsFragment extends Fragment {
 
         @Override
         public void onLoadFinished(Loader<List<ManSectionItem>> loader, List<ManSectionItem> data) {
-            mProgress.setVisibility(View.INVISIBLE);
+            mProgress.hide();
             if(data != null) {
                 View text = View.inflate(getActivity(), R.layout.back_header, null);
                 mListView.addHeaderView(text);
@@ -277,6 +276,11 @@ public class ManPageContentsFragment extends Fragment {
         public void onLoaderReset(Loader<List<ManSectionItem>> loader) {
 
         }
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        mProgress.onOrientationChanged();
     }
 
     private class CountingInputStream extends FilterInputStream {
