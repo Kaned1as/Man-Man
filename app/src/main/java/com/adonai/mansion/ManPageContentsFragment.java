@@ -15,7 +15,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,6 +36,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
+import fr.castorflex.android.smoothprogressbar.SmoothProgressBar;
+
 
 /**
  * Fragment to show table of contents and navigate into it
@@ -56,7 +57,7 @@ public class ManPageContentsFragment extends Fragment {
     private Map<String, List<ManSectionItem>> mCachedChapterContents = new HashMap<>();
 
     private ListView mListView;
-    private ProgressBar mProgress;
+    private SmoothProgressBar mProgress;
     /**
      * Click listener for selecting a chapter from the list.
      * The request is then sent to the loader to load chapter data asynchronously
@@ -74,6 +75,12 @@ public class ManPageContentsFragment extends Fragment {
             Bundle args = new Bundle();
             args.putString(CHAPTER_INDEX, item.getKey());
             getLoaderManager().restartLoader(MainPagerActivity.CONTENTS_RETRIEVER_LOADER, args, mContentRetrieveCallback);
+
+            // show progressbar under actionbar
+            mProgress.setIndeterminate(false);
+            mProgress.progressiveStart();
+            mProgress.setProgress(0);
+            mProgress.setVisibility(View.VISIBLE);
         }
     };
     /**
@@ -128,7 +135,7 @@ public class ManPageContentsFragment extends Fragment {
         mListView = (ListView) root.findViewById(R.id.chapter_commands_list);
         mListView.setAdapter(mChaptersAdapter);
         mListView.setOnItemClickListener(mChapterClickListener);
-        mProgress = (ProgressBar) getActivity().findViewById(R.id.load_progress);
+        mProgress = (SmoothProgressBar) getActivity().findViewById(R.id.load_progress);
         return root;
     }
 
@@ -204,9 +211,6 @@ public class ManPageContentsFragment extends Fragment {
                 @Override
                 protected void onStartLoading() {
                     forceLoad();
-                    mProgress.setIndeterminate(false);
-                    mProgress.setProgress(0);
-                    mProgress.setVisibility(View.VISIBLE);
                 }
 
                 /**
@@ -221,6 +225,7 @@ public class ManPageContentsFragment extends Fragment {
                     if(args.containsKey(CHAPTER_INDEX)) { // retrieve chapter content
                         String index = args.getString(CHAPTER_INDEX);
                         String link = CHAPTER_COMMANDS_PREFIX + "/" + index;
+                        args.remove(CHAPTER_INDEX);
                         try {
                             URLConnection conn = new URL(link).openConnection();
                             conn.setRequestProperty("Accept-Encoding", "gzip, deflate");
@@ -246,6 +251,7 @@ public class ManPageContentsFragment extends Fragment {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
+                                    mProgress.setVisibility(View.INVISIBLE);
                                     Toast.makeText(getActivity(), R.string.connection_error, Toast.LENGTH_SHORT).show();
                                 }
                             });
@@ -293,6 +299,9 @@ public class ManPageContentsFragment extends Fragment {
                 public void run() {
                     int progress = transferred * 100 / length;
                     mProgress.setProgress(progress);
+                    if(progress == 100) {
+                        mProgress.setIndeterminate(true);
+                    }
                 }
             });
             return res;

@@ -11,6 +11,8 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name="com.adonai.mansion.MainPagerActivity"
+            android:windowSoftInputMode="stateHidden"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -128,6 +128,7 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
                 public SearchResultList loadInBackground() {
                     if(args.containsKey(SEARCH_COMMAND)) { // just searching for a command
                         final String command = args.getString(SEARCH_COMMAND);
+                        args.remove(SEARCH_COMMAND);
                         try {
                             DefaultHttpClient httpClient = new DefaultHttpClient();
                             HttpUriRequest post = new HttpGet(SEARCH_COMMAND_PREFIX + command);
@@ -176,6 +177,7 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
                 public String loadInBackground() {
                     if(args.containsKey(SEARCH_ONELINER)) { // just searching for a command
                         final String script = args.getString(SEARCH_ONELINER);
+                        args.remove(SEARCH_ONELINER);
                         try {
                             DefaultHttpClient httpClient = new DefaultHttpClient();
                             HttpUriRequest post = new HttpGet(SEARCH_ONELINER_PREFIX + script);
