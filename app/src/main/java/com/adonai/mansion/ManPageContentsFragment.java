@@ -10,6 +10,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,12 +18,14 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.adonai.mansion.adapters.OrmLiteCursorAdapter;
 import com.adonai.mansion.database.DbProvider;
 import com.adonai.mansion.entities.ManSectionItem;
 import com.adonai.mansion.views.ProgressBarWrapper;
+import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.misc.TransactionManager;
+import com.j256.ormlite.stmt.PreparedQuery;
 
 import org.jsoup.helper.DataUtil;
 import org.jsoup.nodes.Document;
@@ -98,13 +101,12 @@ public class ManPageContentsFragment extends Fragment {
 
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            int headersCount = mListView.getHeaderViewsCount(); // always 1 in our case, "to contents" button
-            if(position <= headersCount) { // header
+            ManSectionItem item = (ManSectionItem) parent.getItemAtPosition(position);
+            if(item == null) { // header
                 mListView.removeHeaderView(view);
                 mListView.setAdapter(mChaptersAdapter);
                 mListView.setOnItemClickListener(mChapterClickListener);
             } else {
-                ManSectionItem item = (ManSectionItem) parent.getItemAtPosition(position + headersCount);
                 ManPageDialogFragment.newInstance(item.getUrl()).show(getFragmentManager(), "manPage");
             }
         }
@@ -170,6 +172,33 @@ public class ManPageContentsFragment extends Fragment {
         }
     }
 
+    private class ChapterContentsCursorAdapter extends OrmLiteCursorAdapter<ManSectionItem> {
+
+        public ChapterContentsCursorAdapter(RuntimeExceptionDao<ManSectionItem, String> dao, PreparedQuery<ManSectionItem> query) {
+            super(getActivity(), dao, query);
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            ManSectionItem current = getItem(position);
+            final View view;
+            final LayoutInflater inflater = LayoutInflater.from(mContext);
+
+            if (convertView == null)
+                view = inflater.inflate(R.layout.chapter_command_list_item, parent, false);
+            else
+                view = convertView;
+
+            TextView command = (TextView) view.findViewById(R.id.command_name_label);
+            command.setText(current.getName());
+
+            TextView desc = (TextView) view.findViewById(R.id.command_description_label);
+            desc.setText(current.getDescription());
+
+            return view;
+        }
+    }
+
     /**
      * Array adapter for showing commands with their description in ListView
      * <br/>
@@ -207,13 +236,15 @@ public class ManPageContentsFragment extends Fragment {
      *
      * @see com.adonai.mansion.entities.ManSectionItem
      */
-    private class RetrieveContentsCallback implements LoaderManager.LoaderCallbacks<List<ManSectionItem>> {
+    private class RetrieveContentsCallback implements LoaderManager.LoaderCallbacks<ManPageContentsResult> {
         @Override
-        public Loader<List<ManSectionItem>> onCreateLoader(int id, @NonNull final Bundle args) {
-            return new AsyncTaskLoader<List<ManSectionItem>>(getActivity()) {
+        public Loader<ManPageContentsResult> onCreateLoader(int id, @NonNull final Bundle args) {
+            return new AsyncTaskLoader<ManPageContentsResult>(getActivity()) {
                 @Override
                 protected void onStartLoading() {
-                    forceLoad();
+                    if(args.containsKey(CHAPTER_INDEX)) {
+                        forceLoad();
+                    }
                 }
 
                 /**
@@ -224,96 +255,107 @@ public class ManPageContentsFragment extends Fragment {
                  */
                 @Nullable
                 @Override
-                public List<ManSectionItem> loadInBackground() {
-                    if(args.containsKey(CHAPTER_INDEX)) { // retrieve chapter content
-                        String index = args.getString(CHAPTER_INDEX);
-                        args.remove(CHAPTER_INDEX); // load only once
+                public ManPageContentsResult loadInBackground() {
+                    // retrieve chapter content
+                    String index = args.getString(CHAPTER_INDEX);
+                    args.remove(CHAPTER_INDEX); // load only once
 
-                        // check the DB for cached pages first
-                        List<ManSectionItem> sectionItems = DbProvider.getHelper().getManPagesDao().queryForEq("parentChapter", index);
-                        if(!sectionItems.isEmpty()) {
-                            return sectionItems; // got cached pages, voila
-                        }
-
-                        // If we're here, nothing is in DB for now
-                        String link = CHAPTER_COMMANDS_PREFIX + "/" + index;
-                        try {
-                            // load chapter page with command links
-                            URLConnection conn = new URL(link).openConnection();
-                            conn.setRequestProperty("Accept-Encoding", "gzip, deflate");
-                            conn.setReadTimeout(10000);
-                            conn.setConnectTimeout(5000);
-                            // count the bytes and show progress
-                            InputStream is = new GZIPInputStream(new CountingInputStream(conn.getInputStream(), conn.getContentLength()), conn.getContentLength());
-                            Document root = DataUtil.load(is, "UTF-8", link);
-                            is.close();
-                            // get the command links
-                            Elements commands = root.select("div.e");
-                            if(!commands.isEmpty()) {
-                                final List<ManSectionItem> msItems = new ArrayList<>(commands.size());
-                                for(Element command : commands) {
-                                    ManSectionItem msi = new ManSectionItem();
-                                    msi.setParentChapter(index);
-                                    msi.setName(command.child(0).text());
-                                    msi.setUrl(CHAPTER_COMMANDS_PREFIX + command.child(0).attr("href"));
-                                    msi.setDescription(command.child(2).text());
-                                    msItems.add(msi);
-                                }
-
-                                // save to DB for caching
-                                try {
-                                    TransactionManager.callInTransaction(DbProvider.getHelper().getConnectionSource(), new Callable<Void>() {
-                                        @Override
-                                        public Void call() throws Exception {
-                                            for(ManSectionItem msi : msItems) {
-                                                DbProvider.getHelper().getManPagesDao().createOrUpdate(msi);
-                                            }
-                                            return null;
-                                        }
-                                    });
-                                } catch (SQLException e) {
-                                    // can't show a toast from a thread without looper
-                                    getActivity().runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            Toast.makeText(getActivity(), R.string.database_save_error, Toast.LENGTH_SHORT).show();
-                                        }
-                                    });
-                                }
-
-                                return msItems;
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            // can't show a toast from a thread without looper
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mProgress.hide();
-                                    Toast.makeText(getActivity(), R.string.connection_error, Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        }
+                    // check the DB for cached pages first
+                    try {
+                        PreparedQuery<ManSectionItem> query = DbProvider.getHelper().getManPagesDao().queryBuilder().where().eq("parentChapter", index).prepare();
+                        if(DbProvider.getHelper().getManPagesDao().queryForFirst(query) != null) // we have it in cache
+                        return new ManPageContentsResult(DbProvider.getHelper().getManPagesDao(), query);
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                        Utils.showToastFromAnyThread(getActivity(), R.string.database_retrieve_error);
                     }
+
+                    // If we're here, nothing is in DB for now
+                    List<ManSectionItem> results = loadFromNetwork(index, CHAPTER_COMMANDS_PREFIX + "/" + index);
+                    if(results != null) {
+                        saveToDb(results);
+                        return new ManPageContentsResult(results);
+                    }
+
                     return null;
+                }
+
+                private List<ManSectionItem> loadFromNetwork(String index, String link) {
+                    try {
+                        // load chapter page with command links
+                        URLConnection conn = new URL(link).openConnection();
+                        conn.setRequestProperty("Accept-Encoding", "gzip, deflate");
+                        conn.setReadTimeout(10000);
+                        conn.setConnectTimeout(5000);
+                        // count the bytes and show progress
+                        InputStream is = new GZIPInputStream(new CountingInputStream(conn.getInputStream(), conn.getContentLength()), conn.getContentLength());
+                        Document root = DataUtil.load(is, "UTF-8", link);
+                        is.close();
+                        // get the command links
+                        Elements commands = root.select("div.e");
+                        if(!commands.isEmpty()) {
+                            final List<ManSectionItem> msItems = new ArrayList<>(commands.size());
+                            for(Element command : commands) {
+                                ManSectionItem msi = new ManSectionItem();
+                                msi.setParentChapter(index);
+                                msi.setName(command.child(0).text());
+                                msi.setUrl(CHAPTER_COMMANDS_PREFIX + command.child(0).attr("href"));
+                                msi.setDescription(command.child(2).text());
+                                msItems.add(msi);
+                            }
+                            return msItems;
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        // can't show a toast from a thread without looper
+                        Utils.showToastFromAnyThread(getActivity(), R.string.connection_error);
+                    }
+                    return  null;
+                }
+
+                private void saveToDb(final List<ManSectionItem> msItems) {
+                    // save to DB for caching
+                    try {
+                        TransactionManager.callInTransaction(DbProvider.getHelper().getConnectionSource(), new Callable<Void>() {
+                            @Override
+                            public Void call() throws Exception {
+                                for (ManSectionItem msi : msItems) {
+                                    DbProvider.getHelper().getManPagesDao().createOrUpdate(msi);
+                                }
+                                return null;
+                            }
+                        });
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                        // can't show a toast from a thread without looper
+                        Utils.showToastFromAnyThread(getActivity(), R.string.database_save_error);
+                    }
                 }
             };
         }
 
         @Override
-        public void onLoadFinished(Loader<List<ManSectionItem>> loader, List<ManSectionItem> data) {
+        public void onLoadFinished(Loader<ManPageContentsResult> loader, ManPageContentsResult data) {
             mProgress.hide();
-            if(data != null) {
+            if(data != null) { // if no error happened
                 View text = View.inflate(getActivity(), R.layout.back_header, null);
+                mListView.setAdapter(null);
                 mListView.addHeaderView(text);
-                mListView.setAdapter(new ChapterContentsArrayAdapter(getActivity(), R.layout.chapter_command_list_item, R.id.command_name_label, data));
+                if(data.choiceDbCache != null) {
+                    mListView.setAdapter(new ChapterContentsCursorAdapter(data.choiceDbCache.first, data.choiceDbCache.second));
+                } else {
+                    mListView.setAdapter(new ChapterContentsArrayAdapter(getActivity(), R.layout.chapter_command_list_item, R.id.command_name_label, data.choiceList));
+                }
                 mListView.setOnItemClickListener(mCommandClickListener);
             }
         }
 
         @Override
-        public void onLoaderReset(Loader<List<ManSectionItem>> loader) {
-
+        public void onLoaderReset(Loader<ManPageContentsResult> loader) {
+            if(mListView.getAdapter() instanceof ChapterContentsCursorAdapter) {
+                ((ChapterContentsCursorAdapter) mListView.getAdapter()).closeCursor();
+            }
+            mListView.setAdapter(null);
         }
     }
 
@@ -340,12 +382,7 @@ public class ManPageContentsFragment extends Fragment {
             if(shouldWarn) {
                 shouldWarn = false;
                 if(length > (25 << 10)) { // 25 kbytes
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(getActivity(), R.string.long_load_warn, Toast.LENGTH_LONG).show();
-                        }
-                    });
+                    Utils.showToastFromAnyThread(getActivity(), R.string.long_load_warn);
                 }
             }
 
@@ -365,5 +402,25 @@ public class ManPageContentsFragment extends Fragment {
             }
             return res;
         }
+    }
+
+    /**
+     * Convenience class for selecting exclusively one of the result types
+     * <br/>
+     * The first is for network load and the second is the DB retrieval
+     *
+     */
+    private static class ManPageContentsResult {
+
+        private ManPageContentsResult(List<ManSectionItem> choiceList) {
+            this.choiceList = choiceList;
+        }
+
+        private ManPageContentsResult(RuntimeExceptionDao<ManSectionItem, String> dao, PreparedQuery<ManSectionItem> query) {
+            this.choiceDbCache = Pair.create(dao, query);
+        }
+
+        private List<ManSectionItem> choiceList; // from network
+        private Pair<RuntimeExceptionDao<ManSectionItem, String>, PreparedQuery<ManSectionItem>> choiceDbCache; // from DB
     }
 }

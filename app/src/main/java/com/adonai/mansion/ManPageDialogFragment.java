@@ -13,7 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.webkit.WebView;
-import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 import org.jsoup.Jsoup;
@@ -108,12 +107,7 @@ public class ManPageDialogFragment extends DialogFragment {
                         } catch (IOException e) {
                             e.printStackTrace();
                             // can't show a toast from a thread without looper
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(getActivity(), R.string.connection_error, Toast.LENGTH_SHORT).show();
-                                }
-                            });
+                            Utils.showToastFromAnyThread(getActivity(), R.string.connection_error);
                         }
                     }
                     return null;

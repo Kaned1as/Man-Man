@@ -140,12 +140,7 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
                         } catch (IOException e) {
                             e.printStackTrace();
                             // can't show a toast from a thread without looper
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(getActivity(), R.string.connection_error, Toast.LENGTH_SHORT).show();
-                                }
-                            });
+                            Utils.showToastFromAnyThread(getActivity(), R.string.connection_error);
                         }
                     }
                     return null;
@@ -188,12 +183,7 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
                         } catch (IOException e) {
                             e.printStackTrace();
                             // can't show a toast from a thread without looper
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(getActivity(), R.string.connection_error, Toast.LENGTH_SHORT).show();
-                                }
-                            });
+                            Utils.showToastFromAnyThread(getActivity(), R.string.connection_error);
                         }
                     }
                     return null;

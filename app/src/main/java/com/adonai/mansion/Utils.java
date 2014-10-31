@@ -1,6 +1,8 @@
 package com.adonai.mansion;
 
+import android.app.Activity;
 import android.content.Context;
+import android.widget.Toast;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -26,5 +28,15 @@ public class Utils {
             outputMap.put(splitResult[0], splitResult[1]);
         }
         return outputMap;
+    }
+
+    public static void showToastFromAnyThread(final Activity target, final int stringRes) {
+        // can't show a toast from a thread without looper
+        target.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(target, stringRes, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }
