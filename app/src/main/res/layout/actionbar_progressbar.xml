@@ -7,4 +7,5 @@
     android:layout_height="wrap_content"
     android:maxHeight="4dp"
     android:minHeight="4dp"
-    custom:spb_mirror_mode="true"/>
+    custom:spb_mirror_mode="true"
+    custom:spb_progressiveStart_activated="true"/>

@@ -19,7 +19,15 @@ import android.widget.ProgressBar;
 import com.adonai.mansion.R;
 
 /**
- * Created by adonai on 30.10.14.
+ * This view is for showing progress bar under a actionbar
+ * I looked through the github and found only progressbars bound to other projects
+ * So it will be here in case someone needs it.
+ * <br/>
+ * SmoothProgressBar is easily replaceable with any other type in layout
+ *
+ * Original author should be Chris Banes
+ *
+ * @author Adonai
  */
 public class ProgressBarWrapper {
 

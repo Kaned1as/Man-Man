@@ -117,7 +117,7 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
     private class SearchLoaderCallback implements LoaderManager.LoaderCallbacks<SearchResultList> {
 
         @Override
-        public Loader<SearchResultList> onCreateLoader(int id, final Bundle args) {
+        public Loader<SearchResultList> onCreateLoader(int id, @NonNull final Bundle args) {
             return new AsyncTaskLoader<SearchResultList>(getActivity()) {
                 @Override
                 protected void onStartLoading() {
@@ -128,7 +128,7 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
                 public SearchResultList loadInBackground() {
                     if(args.containsKey(SEARCH_COMMAND)) { // just searching for a command
                         final String command = args.getString(SEARCH_COMMAND);
-                        args.remove(SEARCH_COMMAND);
+                        args.remove(SEARCH_COMMAND); // load only once
                         try {
                             DefaultHttpClient httpClient = new DefaultHttpClient();
                             HttpUriRequest post = new HttpGet(SEARCH_COMMAND_PREFIX + command);
@@ -171,13 +171,13 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
 
     private class SearchOnelinerLoaderCallback implements LoaderManager.LoaderCallbacks<String> {
         @Override
-        public Loader<String> onCreateLoader(int id, final Bundle args) {
+        public Loader<String> onCreateLoader(int id, @NonNull final Bundle args) {
             return new AsyncTaskLoader<String>(getActivity()) {
                 @Override
                 public String loadInBackground() {
                     if(args.containsKey(SEARCH_ONELINER)) { // just searching for a command
                         final String script = args.getString(SEARCH_ONELINER);
-                        args.remove(SEARCH_ONELINER);
+                        args.remove(SEARCH_ONELINER); // load only once
                         try {
                             DefaultHttpClient httpClient = new DefaultHttpClient();
                             HttpUriRequest post = new HttpGet(SEARCH_ONELINER_PREFIX + script);

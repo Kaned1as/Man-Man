@@ -16,4 +16,6 @@
     <string name="cached">Cached</string>
     <string name="to_contents">To contents</string>
     <string name="back_icon">back icon</string>
+    <string name="database_save_error">Database saving error</string>
+    <string name="long_load_warn">Initial fill can take some time, please be patient</string>
 </resources>

@@ -1,12 +1,29 @@
 package com.adonai.mansion.entities;
 
+import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.table.DatabaseTable;
+
 /**
- * Created by adonai on 28.10.14.
+ * Object represents an item in browse-chapter page of mankier.com
+ *
+ * It also serves as DB entity-mirroring class
  */
+@DatabaseTable(tableName = "man_pages")
 public class ManSectionItem {
-    private String name;
-    private String description;
+
+    // this is filled with parent chapter
+    @DatabaseField(index = true, canBeNull = false)
+    private String parentChapter;
+
+    // these are filled by page
+    @DatabaseField(id = true)
     private String url;
+
+    @DatabaseField(canBeNull = false)
+    private String name;
+
+    @DatabaseField
+    private String description;
 
     public String getName() {
         return name;
@@ -30,5 +47,13 @@ public class ManSectionItem {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public String getParentChapter() {
+        return parentChapter;
+    }
+
+    public void setParentChapter(String parentChapter) {
+        this.parentChapter = parentChapter;
     }
 }

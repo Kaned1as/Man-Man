@@ -19,8 +19,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.adonai.mansion.database.DbProvider;
 import com.adonai.mansion.entities.ManSectionItem;
 import com.adonai.mansion.views.ProgressBarWrapper;
+import com.j256.ormlite.misc.TransactionManager;
 
 import org.jsoup.helper.DataUtil;
 import org.jsoup.nodes.Document;
@@ -32,10 +34,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.zip.GZIPInputStream;
 
 
@@ -205,7 +209,7 @@ public class ManPageContentsFragment extends Fragment {
      */
     private class RetrieveContentsCallback implements LoaderManager.LoaderCallbacks<List<ManSectionItem>> {
         @Override
-        public Loader<List<ManSectionItem>> onCreateLoader(int id, final Bundle args) {
+        public Loader<List<ManSectionItem>> onCreateLoader(int id, @NonNull final Bundle args) {
             return new AsyncTaskLoader<List<ManSectionItem>>(getActivity()) {
                 @Override
                 protected void onStartLoading() {
@@ -223,25 +227,60 @@ public class ManPageContentsFragment extends Fragment {
                 public List<ManSectionItem> loadInBackground() {
                     if(args.containsKey(CHAPTER_INDEX)) { // retrieve chapter content
                         String index = args.getString(CHAPTER_INDEX);
+                        args.remove(CHAPTER_INDEX); // load only once
+
+                        // check the DB for cached pages first
+                        List<ManSectionItem> sectionItems = DbProvider.getHelper().getManPagesDao().queryForEq("parentChapter", index);
+                        if(!sectionItems.isEmpty()) {
+                            return sectionItems; // got cached pages, voila
+                        }
+
+                        // If we're here, nothing is in DB for now
                         String link = CHAPTER_COMMANDS_PREFIX + "/" + index;
-                        args.remove(CHAPTER_INDEX);
                         try {
+                            // load chapter page with command links
                             URLConnection conn = new URL(link).openConnection();
                             conn.setRequestProperty("Accept-Encoding", "gzip, deflate");
                             conn.setReadTimeout(10000);
                             conn.setConnectTimeout(5000);
+                            // count the bytes and show progress
                             InputStream is = new GZIPInputStream(new CountingInputStream(conn.getInputStream(), conn.getContentLength()), conn.getContentLength());
                             Document root = DataUtil.load(is, "UTF-8", link);
+                            is.close();
+                            // get the command links
                             Elements commands = root.select("div.e");
                             if(!commands.isEmpty()) {
-                                List<ManSectionItem> msItems = new ArrayList<>(commands.size());
+                                final List<ManSectionItem> msItems = new ArrayList<>(commands.size());
                                 for(Element command : commands) {
                                     ManSectionItem msi = new ManSectionItem();
+                                    msi.setParentChapter(index);
                                     msi.setName(command.child(0).text());
                                     msi.setUrl(CHAPTER_COMMANDS_PREFIX + command.child(0).attr("href"));
                                     msi.setDescription(command.child(2).text());
                                     msItems.add(msi);
                                 }
+
+                                // save to DB for caching
+                                try {
+                                    TransactionManager.callInTransaction(DbProvider.getHelper().getConnectionSource(), new Callable<Void>() {
+                                        @Override
+                                        public Void call() throws Exception {
+                                            for(ManSectionItem msi : msItems) {
+                                                DbProvider.getHelper().getManPagesDao().createOrUpdate(msi);
+                                            }
+                                            return null;
+                                        }
+                                    });
+                                } catch (SQLException e) {
+                                    // can't show a toast from a thread without looper
+                                    getActivity().runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Toast.makeText(getActivity(), R.string.database_save_error, Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                                }
+
                                 return msItems;
                             }
                         } catch (IOException e) {
@@ -250,7 +289,7 @@ public class ManPageContentsFragment extends Fragment {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    mProgress.show();
+                                    mProgress.hide();
                                     Toast.makeText(getActivity(), R.string.connection_error, Toast.LENGTH_SHORT).show();
                                 }
                             });
@@ -287,27 +326,43 @@ public class ManPageContentsFragment extends Fragment {
 
         private final int length;
         private int transferred;
+        private boolean shouldCount = true;
+        private boolean shouldWarn = true;
 
         CountingInputStream(InputStream in, int totalBytes) throws IOException {
             super(in);
             this.length = totalBytes;
-            this.transferred = 0;
         }
 
         @Override
         public int read(byte[] buffer, int byteOffset, int byteCount) throws IOException {
             int res = super.read(buffer, byteOffset, byteCount);
-            transferred += res;
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    int progress = transferred * 100 / length;
-                    mProgress.setProgress(progress);
-                    if(progress == 100) {
-                        mProgress.setIndeterminate(true);
-                    }
+            if(shouldWarn) {
+                shouldWarn = false;
+                if(length > (25 << 10)) { // 25 kbytes
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getActivity(), R.string.long_load_warn, Toast.LENGTH_LONG).show();
+                        }
+                    });
                 }
-            });
+            }
+
+            if(shouldCount) {
+                transferred += res;
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        int progress = transferred * 100 / length;
+                        mProgress.setProgress(progress);
+                        if (progress == 100) {
+                            mProgress.setIndeterminate(true);
+                            shouldCount = false; // don't count further, it's pointless
+                        }
+                    }
+                });
+            }
             return res;
         }
     }
