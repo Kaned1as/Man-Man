@@ -64,7 +64,11 @@ public class ProgressBarWrapper {
     }
 
     public void show() {
-        mAddRunnable.start();
+        if(mActivity.getWindow().getDecorView().getWindowToken() != null) { // activity is created and running
+            addProgressBarToActivity();
+        } else { // activity is not yet finished initialization - wait for it and attach
+            mAddRunnable.start();
+        }
     }
 
     public void hide() {
@@ -103,7 +107,7 @@ public class ProgressBarWrapper {
     private class AddHeaderViewRunnable implements Runnable {
         @Override
         public void run() {
-            if (mActivity.getWindow().getDecorView().getWindowToken() != null) {
+            if (getDecorView().getWindowToken() != null) {
             // The Decor View has a Window Token, so we can add the HeaderView!
                 addProgressBarToActivity();
             } else {

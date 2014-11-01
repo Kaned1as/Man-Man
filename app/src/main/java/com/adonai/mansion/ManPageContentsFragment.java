@@ -172,6 +172,15 @@ public class ManPageContentsFragment extends Fragment {
         }
     }
 
+    /**
+     * Cursor adapter for showing large lists of commands from DB
+     * For example, General commands chapter has about 14900 ones
+     * so we should load only a window of those
+     * <br/>
+     * The data retrieval is done through {@link com.adonai.mansion.ManPageContentsFragment.RetrieveContentsCallback}
+     *
+     * @see com.adonai.mansion.adapters.OrmLiteCursorAdapter
+     */
     private class ChapterContentsCursorAdapter extends OrmLiteCursorAdapter<ManSectionItem> {
 
         public ChapterContentsCursorAdapter(RuntimeExceptionDao<ManSectionItem, String> dao, PreparedQuery<ManSectionItem> query) {
@@ -201,6 +210,8 @@ public class ManPageContentsFragment extends Fragment {
 
     /**
      * Array adapter for showing commands with their description in ListView
+     * It's convenient whet all the data is retrieved via network,
+     * so we have complete command list at hand
      * <br/>
      * The data retrieval is done through {@link com.adonai.mansion.ManPageContentsFragment.RetrieveContentsCallback}
      *
@@ -280,6 +291,7 @@ public class ManPageContentsFragment extends Fragment {
                     return null;
                 }
 
+                @Nullable
                 private List<ManSectionItem> loadFromNetwork(String index, String link) {
                     try {
                         // load chapter page with command links
@@ -339,6 +351,10 @@ public class ManPageContentsFragment extends Fragment {
             mProgress.hide();
             if(data != null) { // if no error happened
                 View text = View.inflate(getActivity(), R.layout.back_header, null);
+                if(mListView.getAdapter() instanceof ChapterContentsCursorAdapter) {
+                    // close opened cursor prior to adapter change
+                    ((ChapterContentsCursorAdapter) mListView.getAdapter()).closeCursor();
+                }
                 mListView.setAdapter(null);
                 mListView.addHeaderView(text);
                 if(data.choiceDbCache != null) {
@@ -352,10 +368,6 @@ public class ManPageContentsFragment extends Fragment {
 
         @Override
         public void onLoaderReset(Loader<ManPageContentsResult> loader) {
-            if(mListView.getAdapter() instanceof ChapterContentsCursorAdapter) {
-                ((ChapterContentsCursorAdapter) mListView.getAdapter()).closeCursor();
-            }
-            mListView.setAdapter(null);
         }
     }
 
@@ -412,15 +424,17 @@ public class ManPageContentsFragment extends Fragment {
      */
     private static class ManPageContentsResult {
 
-        private ManPageContentsResult(List<ManSectionItem> choiceList) {
+        private ManPageContentsResult(@NonNull List<ManSectionItem> choiceList) {
             this.choiceList = choiceList;
+            choiceDbCache = null;
         }
 
-        private ManPageContentsResult(RuntimeExceptionDao<ManSectionItem, String> dao, PreparedQuery<ManSectionItem> query) {
+        private ManPageContentsResult(@NonNull RuntimeExceptionDao<ManSectionItem, String> dao, @NonNull PreparedQuery<ManSectionItem> query) {
             this.choiceDbCache = Pair.create(dao, query);
+            choiceList = null;
         }
 
-        private List<ManSectionItem> choiceList; // from network
-        private Pair<RuntimeExceptionDao<ManSectionItem, String>, PreparedQuery<ManSectionItem>> choiceDbCache; // from DB
+        private final List<ManSectionItem> choiceList; // from network
+        private final Pair<RuntimeExceptionDao<ManSectionItem, String>, PreparedQuery<ManSectionItem>> choiceDbCache; // from DB
     }
 }
