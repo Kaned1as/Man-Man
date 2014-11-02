@@ -442,52 +442,64 @@ public class ManPageContentsFragment extends Fragment {
 
         private StringBuilder holder;
         private boolean flagCommand;
-        private boolean flagUrl;
-        private boolean flagDescription;
+        private boolean flagLink;
+        private boolean flagDesc;
 
         public ManSectionExtractor(String index, List<ManSectionItem> msItems) {
             this.index = index;
             this.msItems = msItems;
             holder = new StringBuilder(50);
-            flagCommand = false;
-            flagUrl = false;
-            flagDescription = false;
         }
 
         @Override
         public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-            if("div".equals(qName) && "e".equals(attributes.getValue("class"))) {
-                ManSectionItem msi = new ManSectionItem();
-                msi.setParentChapter(index);
-                msItems.add(msi);
-                flagCommand = true;
-            } else if(flagCommand && "a".equals(qName)) {
-                msItems.get(msItems.size() - 1).setUrl(CHAPTER_COMMANDS_PREFIX + attributes.getValue("href"));
-                flagUrl = true;
-            } else if(flagCommand && "span".equals(qName)) {
-                flagDescription = true;
+            if (flagCommand) {
+                if ("a".equals(qName)) { // first child of div.e -> href, link to a command page
+                    msItems.get(msItems.size() - 1).setUrl(CHAPTER_COMMANDS_PREFIX + attributes.getValue("href"));
+                    flagLink = true;
+                } else if ("span".equals(qName)) {
+                    flagDesc = true;
+                }
+            } else {
+                if ("div".equals(qName) && "e".equals(attributes.getValue("class"))) {
+                    ManSectionItem msi = new ManSectionItem();
+                    msi.setParentChapter(index);
+                    msItems.add(msi);
+                    flagCommand = true;
+                }
             }
         }
 
         @Override
         public void characters(char[] ch, int start, int length) throws SAXException {
-            if(flagUrl || flagDescription) {
+            if(flagLink || flagDesc) {
                 holder.append(ch, start, length);
             }
         }
 
         @Override
         public void endElement(String uri, String localName, String qName) throws SAXException {
-            if("div".equals(qName) && flagCommand) {
-                flagCommand = false;
-            } else if("a".equals(qName) && flagUrl) {
-                msItems.get(msItems.size() - 1).setName(holder.toString());
-                holder.setLength(0);
-                flagUrl = false;
-            } else if("span".equals(qName) && flagDescription) {
-                msItems.get(msItems.size() - 1).setDescription(holder.toString());
-                holder.setLength(0);
-                flagDescription = false;
+            if(flagCommand) {
+                switch (qName) {
+                    case "div":
+                        flagCommand = false;
+                        break;
+                    case "a":
+                        if (flagLink && !flagDesc) { // first child of div.e, name of a command
+                            ManSectionItem msi = msItems.get(msItems.size() - 1);
+                            msi.setName(holder.toString());
+                            holder.setLength(0);
+                        }
+                        flagLink = false;
+                        break;
+                    case "span":
+                        if (flagDesc) {  // third child of div.e, description of a command
+                            msItems.get(msItems.size() - 1).setDescription(holder.toString());
+                            holder.setLength(0);
+                        }
+                        flagDesc = false;
+                        break;
+                }
             }
         }
     }
