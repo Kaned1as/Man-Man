@@ -40,7 +40,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -62,7 +61,6 @@ public class ManPageContentsFragment extends Fragment {
     private ChaptersArrayAdapter mChaptersAdapter;
 
     private Map<String, String> mCachedChapters;
-    private Map<String, List<ManSectionItem>> mCachedChapterContents = new HashMap<>();
 
     private ListView mListView;
     private ProgressBarWrapper mProgress;
@@ -387,7 +385,7 @@ public class ManPageContentsFragment extends Fragment {
         }
 
         @Override
-        public int read(byte[] buffer, int byteOffset, int byteCount) throws IOException {
+        public int read(@NonNull byte[] buffer, int byteOffset, int byteCount) throws IOException {
             int res = super.read(buffer, byteOffset, byteCount);
             if(shouldWarn) {
                 shouldWarn = false;
@@ -436,6 +434,16 @@ public class ManPageContentsFragment extends Fragment {
         private final Pair<RuntimeExceptionDao<ManSectionItem, String>, PreparedQuery<ManSectionItem>> choiceDbCache; // from DB
     }
 
+    /**
+     * SAX parser for chapter contents. The reason for creation of this class is
+     * the chapter pages being rather huge (around 6-7 Mbytes). Their parsing via Jsoup
+     * produces OutOfMemoryError for android phone heap sizes
+     * <br/>
+     * A nice benefit from that is that CountingInputStream counts page as it's being parsed
+     *
+     * @see org.ccil.cowan.tagsoup.Parser
+     *
+     */
     private class ManSectionExtractor extends DefaultHandler {
         private final String index;
         private final List<ManSectionItem> msItems;
