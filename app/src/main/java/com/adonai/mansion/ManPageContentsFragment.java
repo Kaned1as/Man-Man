@@ -27,10 +27,11 @@ import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.misc.TransactionManager;
 import com.j256.ormlite.stmt.PreparedQuery;
 
-import org.jsoup.helper.DataUtil;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
+import org.ccil.cowan.tagsoup.Parser;
+import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 import java.io.FilterInputStream;
 import java.io.IOException;
@@ -292,7 +293,7 @@ public class ManPageContentsFragment extends Fragment {
                 }
 
                 @Nullable
-                private List<ManSectionItem> loadFromNetwork(String index, String link) {
+                private List<ManSectionItem> loadFromNetwork(final String index, String link) {
                     try {
                         // load chapter page with command links
                         URLConnection conn = new URL(link).openConnection();
@@ -301,23 +302,13 @@ public class ManPageContentsFragment extends Fragment {
                         conn.setConnectTimeout(5000);
                         // count the bytes and show progress
                         InputStream is = new GZIPInputStream(new CountingInputStream(conn.getInputStream(), conn.getContentLength()), conn.getContentLength());
-                        Document root = DataUtil.load(is, "UTF-8", link);
-                        is.close();
-                        // get the command links
-                        Elements commands = root.select("div.e");
-                        if(!commands.isEmpty()) {
-                            final List<ManSectionItem> msItems = new ArrayList<>(commands.size());
-                            for(Element command : commands) {
-                                ManSectionItem msi = new ManSectionItem();
-                                msi.setParentChapter(index);
-                                msi.setName(command.child(0).text());
-                                msi.setUrl(CHAPTER_COMMANDS_PREFIX + command.child(0).attr("href"));
-                                msi.setDescription(command.child(2).text());
-                                msItems.add(msi);
-                            }
-                            return msItems;
-                        }
-                    } catch (IOException e) {
+                        final Parser parser = new Parser();
+                        final List<ManSectionItem> msItems = new ArrayList<>(500);
+                        parser.setContentHandler(new ManSectionExtractor(index, msItems));
+                        parser.setFeature(Parser.namespacesFeature, false);
+                        parser.parse(new InputSource(is));
+                        return msItems;
+                    } catch (Exception e) {
                         e.printStackTrace();
                         // can't show a toast from a thread without looper
                         Utils.showToastFromAnyThread(getActivity(), R.string.connection_error);
@@ -369,6 +360,7 @@ public class ManPageContentsFragment extends Fragment {
         @Override
         public void onLoaderReset(Loader<ManPageContentsResult> loader) {
         }
+
     }
 
     @Override
@@ -376,6 +368,12 @@ public class ManPageContentsFragment extends Fragment {
         mProgress.onOrientationChanged();
     }
 
+    /**
+     * Convenience class for counting progress in cases we have
+     * exact length of what we want to receive
+     *
+     * @see java.io.FilterInputStream
+     */
     private class CountingInputStream extends FilterInputStream {
 
         private final int length;
@@ -436,5 +434,61 @@ public class ManPageContentsFragment extends Fragment {
 
         private final List<ManSectionItem> choiceList; // from network
         private final Pair<RuntimeExceptionDao<ManSectionItem, String>, PreparedQuery<ManSectionItem>> choiceDbCache; // from DB
+    }
+
+    private class ManSectionExtractor extends DefaultHandler {
+        private final String index;
+        private final List<ManSectionItem> msItems;
+
+        private StringBuilder holder;
+        private boolean flagCommand;
+        private boolean flagUrl;
+        private boolean flagDescription;
+
+        public ManSectionExtractor(String index, List<ManSectionItem> msItems) {
+            this.index = index;
+            this.msItems = msItems;
+            holder = new StringBuilder(50);
+            flagCommand = false;
+            flagUrl = false;
+            flagDescription = false;
+        }
+
+        @Override
+        public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+            if("div".equals(qName) && "e".equals(attributes.getValue("class"))) {
+                ManSectionItem msi = new ManSectionItem();
+                msi.setParentChapter(index);
+                msItems.add(msi);
+                flagCommand = true;
+            } else if(flagCommand && "a".equals(qName)) {
+                msItems.get(msItems.size() - 1).setUrl(CHAPTER_COMMANDS_PREFIX + attributes.getValue("href"));
+                flagUrl = true;
+            } else if(flagCommand && "span".equals(qName)) {
+                flagDescription = true;
+            }
+        }
+
+        @Override
+        public void characters(char[] ch, int start, int length) throws SAXException {
+            if(flagUrl || flagDescription) {
+                holder.append(ch, start, length);
+            }
+        }
+
+        @Override
+        public void endElement(String uri, String localName, String qName) throws SAXException {
+            if("div".equals(qName) && flagCommand) {
+                flagCommand = false;
+            } else if("a".equals(qName) && flagUrl) {
+                msItems.get(msItems.size() - 1).setName(holder.toString());
+                holder.setLength(0);
+                flagUrl = false;
+            } else if("span".equals(qName) && flagDescription) {
+                msItems.get(msItems.size() - 1).setDescription(holder.toString());
+                holder.setLength(0);
+                flagDescription = false;
+            }
+        }
     }
 }
