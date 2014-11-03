@@ -13,7 +13,10 @@ import com.j256.ormlite.stmt.PreparedQuery;
 import java.sql.SQLException;
 
 /**
- * Created by adonai on 01.11.14.
+ * Convenient class for creating ListView adapters
+ * <br/>
+ * This task could be achieved using just ArrayAdapter with OrmLite query results
+ * but for some chapters with 15000 commands in them it takes too much time
  */
 public abstract class OrmLiteCursorAdapter<T> extends BaseAdapter {
 

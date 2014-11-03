@@ -52,7 +52,7 @@ import java.util.zip.GZIPInputStream;
  *
  * @author Adonai
  */
-public class ManPageContentsFragment extends Fragment {
+public class ManChaptersFragment extends Fragment {
     private final static String CHAPTER_INDEX = "chapter.index";
 
     private final static String CHAPTER_COMMANDS_PREFIX = "https://www.mankier.com/";
@@ -70,7 +70,7 @@ public class ManPageContentsFragment extends Fragment {
      * <br/>
      * We don't have any headers at this point
      *
-     * @see com.adonai.manman.ManPageContentsFragment.RetrieveContentsCallback
+     * @see ManChaptersFragment.RetrieveContentsCallback
      */
     private AdapterView.OnItemClickListener mChapterClickListener = new AdapterView.OnItemClickListener() {
 
@@ -112,14 +112,14 @@ public class ManPageContentsFragment extends Fragment {
     };
 
     @NonNull
-    public static ManPageContentsFragment newInstance() {
-        ManPageContentsFragment fragment = new ManPageContentsFragment();
+    public static ManChaptersFragment newInstance() {
+        ManChaptersFragment fragment = new ManChaptersFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
     }
 
-    public ManPageContentsFragment() {
+    public ManChaptersFragment() {
         // Required empty public constructor
     }
 
@@ -176,7 +176,7 @@ public class ManPageContentsFragment extends Fragment {
      * For example, General commands chapter has about 14900 ones
      * so we should load only a window of those
      * <br/>
-     * The data retrieval is done through {@link com.adonai.manman.ManPageContentsFragment.RetrieveContentsCallback}
+     * The data retrieval is done through {@link ManChaptersFragment.RetrieveContentsCallback}
      *
      * @see com.adonai.manman.adapters.OrmLiteCursorAdapter
      */
@@ -212,7 +212,7 @@ public class ManPageContentsFragment extends Fragment {
      * It's convenient whet all the data is retrieved via network,
      * so we have complete command list at hand
      * <br/>
-     * The data retrieval is done through {@link com.adonai.manman.ManPageContentsFragment.RetrieveContentsCallback}
+     * The data retrieval is done through {@link ManChaptersFragment.RetrieveContentsCallback}
      *
      * @see android.widget.ArrayAdapter
      * @see com.adonai.manman.entities.ManSectionItem

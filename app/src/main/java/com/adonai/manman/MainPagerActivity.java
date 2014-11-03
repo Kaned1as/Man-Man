@@ -73,7 +73,7 @@ public class MainPagerActivity extends FragmentActivity {
                 case 0:
                     return ManPageSearchFragment.newInstance();
                 case 1:
-                    return ManPageContentsFragment.newInstance();
+                    return ManChaptersFragment.newInstance();
             }
             throw new IllegalArgumentException(String.format("No such fragment, index was %d", i));
         }
