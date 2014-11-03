@@ -12,6 +12,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.SearchView;
@@ -27,7 +28,7 @@ import java.util.List;
 /**
  * Created by adonai on 03.11.14.
  */
-public class ManPageCacheFragment extends Fragment {
+public class ManPageCacheFragment extends Fragment implements AdapterView.OnItemClickListener {
 
     private final static String SEARCH_QUERY = "search.query";
 
@@ -63,9 +64,16 @@ public class ManPageCacheFragment extends Fragment {
         mSearchCacheView = (SearchView) root.findViewById(R.id.cache_search_edit);
         mSearchCacheView.setOnQueryTextListener(new SearchInCacheListener());
         mCacheList = (ListView) root.findViewById(R.id.cached_pages_list);
+        mCacheList.setOnItemClickListener(this);
 //        mListView.setAdapter(mChaptersAdapter);
 //        mListView.setOnItemClickListener(mChapterClickListener);
         return root;
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        ManPage manPage = (ManPage) parent.getItemAtPosition(position);
+        ManPageDialogFragment.newInstance(manPage.getName(), manPage.getUrl()).show(getFragmentManager(), "manPage");
     }
 
     /**
@@ -136,8 +144,8 @@ public class ManPageCacheFragment extends Fragment {
             TextView command = (TextView) root.findViewById(R.id.command_name_label);
             command.setText(current.getName());
 
-            TextView desc = (TextView) root.findViewById(R.id.command_description_label);
-            desc.setText("");
+            TextView url = (TextView) root.findViewById(R.id.command_description_label);
+            url.setText(current.getUrl());
 
             return root;
         }
