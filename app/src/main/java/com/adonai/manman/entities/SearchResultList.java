@@ -1,4 +1,4 @@
-package com.adonai.mansion.entities;
+package com.adonai.manman.entities;
 
 import java.util.List;
 

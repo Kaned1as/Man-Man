@@ -1,15 +1,17 @@
-package com.adonai.mansion;
+package com.adonai.manman;
 
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.text.TextUtils;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,9 +24,9 @@ import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.adonai.mansion.entities.Description;
-import com.adonai.mansion.entities.SearchResult;
-import com.adonai.mansion.entities.SearchResultList;
+import com.adonai.manman.entities.Description;
+import com.adonai.manman.entities.SearchResult;
+import com.adonai.manman.entities.SearchResultList;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -111,7 +113,10 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         SearchResult sr = (SearchResult) parent.getItemAtPosition(position);
-        ManPageDialogFragment.newInstance(sr.getUrl()).show(getFragmentManager(), "manPage");
+        Pair<String, String> nameChapter = getNameChapterFromResult(sr);
+        if(nameChapter != null) {
+            ManPageDialogFragment.newInstance(nameChapter.first, sr.getUrl()).show(getFragmentManager(), "manPage");
+        }
     }
 
     private class SearchLoaderCallback implements LoaderManager.LoaderCallbacks<SearchResultList> {
@@ -249,6 +254,24 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
         }
     }
 
+    /**
+     * Search result text comes in form of &lt;command-name&gt;(&lt;chapter_index&gt;)
+     * so we should extract name and index explicitly
+     * @param sr search result to be parsed
+     * @return pair of command-name and chapter index or null if nothing matches
+     *         (actually doesn't happen)
+     */
+    @Nullable
+    private Pair<String, String> getNameChapterFromResult(SearchResult sr) {
+        String regex = "(\\w+)\\((.+)\\)";
+        Pattern parser = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+        final Matcher matcher = parser.matcher(sr.getText());
+        if(matcher.find()) {
+            return Pair.create(matcher.group(1), matcher.group(2));
+        }
+        return null;
+    }
+
     private class SearchResultArrayAdapter extends ArrayAdapter<SearchResult> {
         public SearchResultArrayAdapter(SearchResultList data) {
             super(getActivity(), R.layout.man_list_item, R.id.command_name_label, data.getResults());
@@ -257,16 +280,13 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             final View root = super.getView(position, convertView, parent);
-            SearchResult res = getItem(position);
-            String regex = "(\\w+)\\((.+)\\)";
-            Pattern parser = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
-            final Matcher matcher = parser.matcher(res.getText());
-            if(matcher.find()) {
+            final Pair<String, String> nameAndIndex = getNameChapterFromResult(getItem(position));
+            if(nameAndIndex != null) {
                 // extract needed data
-                String chapterName = cachedChapters.get(matcher.group(2));
+                String chapterName = cachedChapters.get(nameAndIndex.second);
 
                 TextView command = (TextView) root.findViewById(R.id.command_name_label);
-                command.setText(matcher.group(1));
+                command.setText(nameAndIndex.first);
                 TextView chapter = (TextView) root.findViewById(R.id.command_chapter_label);
                 chapter.setText(chapterName);
                 final WebView description = (WebView) root.findViewById(R.id.description_text_web);
@@ -282,7 +302,7 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
                     public void onClick(View v) {
                         ImageView imageView = (ImageView) v;
                         imageView.setImageResource(R.drawable.rotating_wait);
-                        final String descriptionCommand = matcher.group(1) + "." + matcher.group(2);
+                        final String descriptionCommand = nameAndIndex.first + "." + nameAndIndex.second;
                         // run desc download in another thread...
                         Thread thr = new Thread(new Runnable() {
                             @Override

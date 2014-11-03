@@ -1,4 +1,4 @@
-package com.adonai.mansion.views;
+package com.adonai.manman.views;
 
 import android.app.Activity;
 import android.content.Context;
@@ -16,7 +16,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ProgressBar;
 
-import com.adonai.mansion.R;
+import com.adonai.manman.R;
 
 /**
  * This view is for showing progress bar under a actionbar

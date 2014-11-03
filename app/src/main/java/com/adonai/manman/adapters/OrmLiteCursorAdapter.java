@@ -1,4 +1,4 @@
-package com.adonai.mansion.adapters;
+package com.adonai.manman.adapters;
 
 import android.app.Activity;
 import android.database.Cursor;

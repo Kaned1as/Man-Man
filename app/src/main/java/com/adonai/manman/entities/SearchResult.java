@@ -1,4 +1,4 @@
-package com.adonai.mansion.entities;
+package com.adonai.manman.entities;
 
 /**
  * Object representing one of search results in corresponding API call

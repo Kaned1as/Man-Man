@@ -1,4 +1,4 @@
-package com.adonai.mansion;
+package com.adonai.manman;
 
 import android.app.Dialog;
 import android.os.Bundle;
@@ -15,6 +15,9 @@ import android.view.Window;
 import android.webkit.WebView;
 import android.widget.ViewFlipper;
 
+import com.adonai.manman.database.DbProvider;
+import com.adonai.manman.entities.ManPage;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -26,18 +29,21 @@ import java.io.IOException;
  */
 public class ManPageDialogFragment extends DialogFragment {
     private static final String PARAM_ADDRESS = "param.address";
+    private static final String PARAM_NAME = "param.name";
 
     private RetrieveManPageCallback manPageCallback = new RetrieveManPageCallback();
     private String mOriginalAddress;
+    private String mOriginalName;
 
     private ViewFlipper mFlipper;
     private WebView mContent;
 
     @NonNull
-    public static ManPageDialogFragment newInstance(String address) {
+    public static ManPageDialogFragment newInstance(String commandName, String address) {
         ManPageDialogFragment fragment = new ManPageDialogFragment();
         Bundle args = new Bundle();
         args.putString(PARAM_ADDRESS, address);
+        args.putString(PARAM_NAME, commandName);
         fragment.setArguments(args);
         return fragment;
     }
@@ -52,6 +58,7 @@ public class ManPageDialogFragment extends DialogFragment {
         setStyle(DialogFragment.STYLE_NORMAL, android.R.style.Theme_Translucent);
         if(getArguments() != null) {
             mOriginalAddress = getArguments().getString(PARAM_ADDRESS);
+            mOriginalName = getArguments().getString(PARAM_NAME);
             getLoaderManager().initLoader(MainPagerActivity.MAN_PAGE_RETRIEVER_LOADER, null, manPageCallback);
         }
     }
@@ -102,8 +109,16 @@ public class ManPageDialogFragment extends DialogFragment {
                         try {
                             Document root = Jsoup.connect(mOriginalAddress).timeout(10000).get();
                             Element man = root.select("div.man-page").first();
-                            if(man != null)
-                                return man.html();
+                            if(man != null) { // it's actually a man page
+                                String webContent = man.html();
+
+                                // save to DB for caching
+                                ManPage toCache = new ManPage(mOriginalName, mOriginalAddress);
+                                toCache.setWebContent(webContent);
+                                DbProvider.getHelper().getManPagesDao().createIfNotExists(toCache);
+
+                                return webContent;
+                            }
                         } catch (IOException e) {
                             e.printStackTrace();
                             // can't show a toast from a thread without looper

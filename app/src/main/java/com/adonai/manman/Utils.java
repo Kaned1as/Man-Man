@@ -1,4 +1,4 @@
-package com.adonai.mansion;
+package com.adonai.manman;
 
 import android.app.Activity;
 import android.content.Context;

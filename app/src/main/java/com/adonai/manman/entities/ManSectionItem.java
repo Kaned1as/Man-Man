@@ -1,4 +1,4 @@
-package com.adonai.mansion.entities;
+package com.adonai.manman.entities;
 
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
@@ -8,12 +8,8 @@ import com.j256.ormlite.table.DatabaseTable;
  *
  * It also serves as DB entity-mirroring class
  */
-@DatabaseTable(tableName = "man_pages")
+@DatabaseTable(tableName = "man_chapters")
 public class ManSectionItem {
-
-    // this is filled with parent chapter
-    @DatabaseField(index = true, canBeNull = false)
-    private String parentChapter;
 
     // these are filled by page
     @DatabaseField(id = true)
@@ -24,6 +20,10 @@ public class ManSectionItem {
 
     @DatabaseField
     private String description;
+
+    // this is filled with parent chapter
+    @DatabaseField(index = true, canBeNull = false)
+    private String parentChapter;
 
     public String getName() {
         return name;

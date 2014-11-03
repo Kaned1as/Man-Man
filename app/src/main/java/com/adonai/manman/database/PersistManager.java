@@ -1,11 +1,12 @@
-package com.adonai.mansion.database;
+package com.adonai.manman.database;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.adonai.mansion.entities.ManSectionItem;
+import com.adonai.manman.entities.ManPage;
+import com.adonai.manman.entities.ManSectionItem;
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.support.ConnectionSource;
@@ -24,7 +25,8 @@ public class PersistManager extends OrmLiteSqliteOpenHelper {
     private static final int DATABASE_VERSION = 1;
 
     //Dao fast access links
-    private RuntimeExceptionDao<ManSectionItem, String> manPagesDao;
+    private RuntimeExceptionDao<ManSectionItem, String> manChaptersDao;
+    private RuntimeExceptionDao<ManPage, String> manPagesDao;
 
     private final Context mContext;
 
@@ -50,9 +52,17 @@ public class PersistManager extends OrmLiteSqliteOpenHelper {
     }
 
     @NonNull
-    public RuntimeExceptionDao<ManSectionItem, String> getManPagesDao() {
+    public RuntimeExceptionDao<ManSectionItem, String> getManChaptersDao() {
+        if (manChaptersDao == null) {
+            manChaptersDao = getRuntimeExceptionDao(ManSectionItem.class);
+        }
+        return manChaptersDao;
+    }
+
+    @NonNull
+    public RuntimeExceptionDao<ManPage, String> getManPagesDao() {
         if (manPagesDao == null) {
-            manPagesDao = getRuntimeExceptionDao(ManSectionItem.class);
+            manPagesDao = getRuntimeExceptionDao(ManPage.class);
         }
         return manPagesDao;
     }

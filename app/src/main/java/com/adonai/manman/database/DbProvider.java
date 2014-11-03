@@ -1,4 +1,4 @@
-package com.adonai.mansion.database;
+package com.adonai.manman.database;
 
 import android.content.Context;
 

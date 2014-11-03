@@ -1,4 +1,4 @@
-package com.adonai.mansion;
+package com.adonai.manman;
 
 
 import android.content.Context;
@@ -19,10 +19,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.adonai.mansion.adapters.OrmLiteCursorAdapter;
-import com.adonai.mansion.database.DbProvider;
-import com.adonai.mansion.entities.ManSectionItem;
-import com.adonai.mansion.views.ProgressBarWrapper;
+import com.adonai.manman.adapters.OrmLiteCursorAdapter;
+import com.adonai.manman.database.DbProvider;
+import com.adonai.manman.entities.ManSectionItem;
+import com.adonai.manman.views.ProgressBarWrapper;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.misc.TransactionManager;
 import com.j256.ormlite.stmt.PreparedQuery;
@@ -70,7 +70,7 @@ public class ManPageContentsFragment extends Fragment {
      * <br/>
      * We don't have any headers at this point
      *
-     * @see com.adonai.mansion.ManPageContentsFragment.RetrieveContentsCallback
+     * @see com.adonai.manman.ManPageContentsFragment.RetrieveContentsCallback
      */
     private AdapterView.OnItemClickListener mChapterClickListener = new AdapterView.OnItemClickListener() {
 
@@ -90,7 +90,7 @@ public class ManPageContentsFragment extends Fragment {
     };
     /**
      * Click listener for selecting a command from the list.
-     * New instance of {@link com.adonai.mansion.ManPageDialogFragment} then created and shown
+     * New instance of {@link com.adonai.manman.ManPageDialogFragment} then created and shown
      * for loading ful command man page
      * <br/>
      * We have a header "To contents" so handle this case
@@ -106,7 +106,7 @@ public class ManPageContentsFragment extends Fragment {
                 mListView.setAdapter(mChaptersAdapter);
                 mListView.setOnItemClickListener(mChapterClickListener);
             } else {
-                ManPageDialogFragment.newInstance(item.getUrl()).show(getFragmentManager(), "manPage");
+                ManPageDialogFragment.newInstance(item.getName(), item.getUrl()).show(getFragmentManager(), "manPage");
             }
         }
     };
@@ -176,9 +176,9 @@ public class ManPageContentsFragment extends Fragment {
      * For example, General commands chapter has about 14900 ones
      * so we should load only a window of those
      * <br/>
-     * The data retrieval is done through {@link com.adonai.mansion.ManPageContentsFragment.RetrieveContentsCallback}
+     * The data retrieval is done through {@link com.adonai.manman.ManPageContentsFragment.RetrieveContentsCallback}
      *
-     * @see com.adonai.mansion.adapters.OrmLiteCursorAdapter
+     * @see com.adonai.manman.adapters.OrmLiteCursorAdapter
      */
     private class ChapterContentsCursorAdapter extends OrmLiteCursorAdapter<ManSectionItem> {
 
@@ -212,10 +212,10 @@ public class ManPageContentsFragment extends Fragment {
      * It's convenient whet all the data is retrieved via network,
      * so we have complete command list at hand
      * <br/>
-     * The data retrieval is done through {@link com.adonai.mansion.ManPageContentsFragment.RetrieveContentsCallback}
+     * The data retrieval is done through {@link com.adonai.manman.ManPageContentsFragment.RetrieveContentsCallback}
      *
      * @see android.widget.ArrayAdapter
-     * @see com.adonai.mansion.entities.ManSectionItem
+     * @see com.adonai.manman.entities.ManSectionItem
      */
     private class ChapterContentsArrayAdapter extends ArrayAdapter<ManSectionItem> {
 
@@ -244,7 +244,7 @@ public class ManPageContentsFragment extends Fragment {
      * <br/>
      * The data is retrieved from local database (if cached there) or from network (if not)
      *
-     * @see com.adonai.mansion.entities.ManSectionItem
+     * @see com.adonai.manman.entities.ManSectionItem
      */
     private class RetrieveContentsCallback implements LoaderManager.LoaderCallbacks<ManPageContentsResult> {
         @Override
@@ -272,9 +272,9 @@ public class ManPageContentsFragment extends Fragment {
 
                     // check the DB for cached pages first
                     try {
-                        PreparedQuery<ManSectionItem> query = DbProvider.getHelper().getManPagesDao().queryBuilder().where().eq("parentChapter", index).prepare();
-                        if(DbProvider.getHelper().getManPagesDao().queryForFirst(query) != null) // we have it in cache
-                        return new ManPageContentsResult(DbProvider.getHelper().getManPagesDao(), query);
+                        PreparedQuery<ManSectionItem> query = DbProvider.getHelper().getManChaptersDao().queryBuilder().where().eq("parentChapter", index).prepare();
+                        if(DbProvider.getHelper().getManChaptersDao().queryForFirst(query) != null) // we have it in cache
+                        return new ManPageContentsResult(DbProvider.getHelper().getManChaptersDao(), query);
                     } catch (SQLException e) {
                         e.printStackTrace();
                         Utils.showToastFromAnyThread(getActivity(), R.string.database_retrieve_error);
@@ -321,7 +321,7 @@ public class ManPageContentsFragment extends Fragment {
                             @Override
                             public Void call() throws Exception {
                                 for (ManSectionItem msi : msItems) {
-                                    DbProvider.getHelper().getManPagesDao().createOrUpdate(msi);
+                                    DbProvider.getHelper().getManChaptersDao().createOrUpdate(msi);
                                 }
                                 return null;
                             }

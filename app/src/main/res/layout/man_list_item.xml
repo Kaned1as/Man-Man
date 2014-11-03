@@ -41,7 +41,7 @@
         android:layout_alignParentEnd="true"
         android:layout_marginRight="15dp"/>
 
-    <com.adonai.mansion.views.NonClickableWebView
+    <com.adonai.manman.views.NonClickableWebView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"

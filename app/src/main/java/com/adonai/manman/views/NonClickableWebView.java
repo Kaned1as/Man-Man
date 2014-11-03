@@ -1,4 +1,4 @@
-package com.adonai.mansion.views;
+package com.adonai.manman.views;
 
 import android.annotation.TargetApi;
 import android.content.Context;
