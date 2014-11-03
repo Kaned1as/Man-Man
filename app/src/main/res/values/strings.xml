@@ -19,4 +19,5 @@
     <string name="database_save_error">Database saving error</string>
     <string name="long_load_warn">Initial fill can take some time, please be patient</string>
     <string name="database_retrieve_error">Cannot retrieve data from database</string>
+    <string name="cache_search">Filter cache...</string>
 </resources>

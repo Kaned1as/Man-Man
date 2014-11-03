@@ -25,6 +25,7 @@ public class MainPagerActivity extends FragmentActivity {
     final static int SEARCH_ONELINER_LOADER = 1;
     final static int MAN_PAGE_RETRIEVER_LOADER = 2;
     final static int CONTENTS_RETRIEVER_LOADER = 3;
+    final static int CACHE_RETRIEVER_LOADER = 4;
 
 
     private SharedPreferences mPrefs;
@@ -74,13 +75,15 @@ public class MainPagerActivity extends FragmentActivity {
                     return ManPageSearchFragment.newInstance();
                 case 1:
                     return ManChaptersFragment.newInstance();
+                case 2:
+                    return ManPageCacheFragment.newInstance();
             }
             throw new IllegalArgumentException(String.format("No such fragment, index was %d", i));
         }
 
         @Override
         public int getCount() {
-            return 2;
+            return 3;
         }
 
         @Override

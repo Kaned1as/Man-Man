@@ -23,11 +23,11 @@ public class ManPage {
     public ManPage() {
     }
 
-    @DatabaseField(canBeNull = false)
-    private String name;
-
     @DatabaseField(id = true)
     private String url;
+
+    @DatabaseField(canBeNull = false)
+    private String name;
 
     @DatabaseField(dataType = DataType.LONG_STRING)
     private String webContent;

@@ -76,7 +76,7 @@ public class ManPageDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Dialog dia = super.onCreateDialog(savedInstanceState);
         dia.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dia.getWindow().setWindowAnimations(android.R.style.Animation_Translucent);
+        dia.getWindow().setWindowAnimations(R.style.ManPageFadeAnimation);
         return dia;
     }
 
@@ -106,6 +106,17 @@ public class ManPageDialogFragment extends DialogFragment {
                 @Override
                 public String loadInBackground() {
                     if(mOriginalAddress != null) { // just searching for a command
+
+                        try { // query cache database for corresponding command
+                            ManPage cached = DbProvider.getHelper().getManPagesDao().queryForId(mOriginalAddress);
+                            if(cached != null) {
+                                return cached.getWebContent();
+                            }
+                        } catch (RuntimeException e) { // it's RuntimeExceptionDao, so catch runtime exceptions
+                            e.printStackTrace();
+                            Utils.showToastFromAnyThread(getActivity(), R.string.database_retrieve_error);
+                        }
+
                         try {
                             Document root = Jsoup.connect(mOriginalAddress).timeout(10000).get();
                             Element man = root.select("div.man-page").first();
