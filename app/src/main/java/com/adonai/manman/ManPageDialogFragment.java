@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.ViewFlipper;
 
 import com.adonai.manman.database.DbProvider;
@@ -26,7 +27,10 @@ import org.jsoup.nodes.Element;
 import java.io.IOException;
 
 /**
- * Created by adonai on 27.10.14.
+ * Dialog fragment for showing web page with man content
+ * Retrieves info from DB (if cached) or network (if not)
+ *
+ * @see com.adonai.manman.entities.ManPage
  */
 public class ManPageDialogFragment extends DialogFragment {
     private static final String PARAM_ADDRESS = "param.address";
@@ -69,6 +73,7 @@ public class ManPageDialogFragment extends DialogFragment {
         View root = inflater.inflate(R.layout.fragment_man_page_show, container, false);
         mFlipper = (ViewFlipper) root.findViewById(R.id.flipper);
         mContent = (WebView) root.findViewById(R.id.man_content_web);
+        mContent.setWebViewClient(new ManPageChromeClient());
         return root;
     }
 
@@ -154,6 +159,21 @@ public class ManPageDialogFragment extends DialogFragment {
         @Override
         public void onLoaderReset(Loader<String> loader) {
             // never used
+        }
+    }
+
+    private class ManPageChromeClient extends WebViewClient {
+
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            if (url.matches("https://www\\.mankier\\.com/.+/.+")) { // it's an address of the url
+                mFlipper.showPrevious();
+                mAddressUrl = url;
+                mCommandName = url.substring(url.lastIndexOf('/') + 1);
+                getLoaderManager().restartLoader(MainPagerActivity.MAN_PAGE_RETRIEVER_LOADER, null, manPageCallback);
+                return true;
+            }
+            return false;
         }
     }
 }

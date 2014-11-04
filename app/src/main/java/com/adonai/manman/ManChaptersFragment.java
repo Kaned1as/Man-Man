@@ -55,7 +55,7 @@ import java.util.zip.GZIPInputStream;
 public class ManChaptersFragment extends Fragment {
     private final static String CHAPTER_INDEX = "chapter.index";
 
-    private final static String CHAPTER_COMMANDS_PREFIX = "https://www.mankier.com/";
+    private final static String CHAPTER_COMMANDS_PREFIX = "https://www.mankier.com";
 
     private RetrieveContentsCallback mContentRetrieveCallback = new RetrieveContentsCallback();
     private ChaptersArrayAdapter mChaptersAdapter;
