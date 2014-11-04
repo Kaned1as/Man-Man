@@ -8,6 +8,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,14 +33,14 @@ public class ManPageDialogFragment extends DialogFragment {
     private static final String PARAM_NAME = "param.name";
 
     private RetrieveManPageCallback manPageCallback = new RetrieveManPageCallback();
-    private String mOriginalAddress;
-    private String mOriginalName;
+    private String mAddressUrl;
+    private String mCommandName;
 
     private ViewFlipper mFlipper;
     private WebView mContent;
 
     @NonNull
-    public static ManPageDialogFragment newInstance(String commandName, String address) {
+    public static ManPageDialogFragment newInstance(@NonNull String commandName, @NonNull String address) {
         ManPageDialogFragment fragment = new ManPageDialogFragment();
         Bundle args = new Bundle();
         args.putString(PARAM_ADDRESS, address);
@@ -57,8 +58,8 @@ public class ManPageDialogFragment extends DialogFragment {
         super.onCreate(savedInstanceState);
         setStyle(DialogFragment.STYLE_NORMAL, android.R.style.Theme_Translucent);
         if(getArguments() != null) {
-            mOriginalAddress = getArguments().getString(PARAM_ADDRESS);
-            mOriginalName = getArguments().getString(PARAM_NAME);
+            mAddressUrl = getArguments().getString(PARAM_ADDRESS);
+            mCommandName = getArguments().getString(PARAM_NAME);
             getLoaderManager().initLoader(MainPagerActivity.MAN_PAGE_RETRIEVER_LOADER, null, manPageCallback);
         }
     }
@@ -80,12 +81,6 @@ public class ManPageDialogFragment extends DialogFragment {
         return dia;
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        getLoaderManager().restartLoader(MainPagerActivity.MAN_PAGE_RETRIEVER_LOADER, null, manPageCallback);
-    }
-
     /**
      * Class for creating a loader that performs async loading of man page from www.mankier.com
      * On finish passes data to web content and makes it active
@@ -97,18 +92,23 @@ public class ManPageDialogFragment extends DialogFragment {
         @Override
         public Loader<String> onCreateLoader(int id, Bundle args) {
             return new AsyncTaskLoader<String>(getActivity()) {
+                private String oldAddress;
+
                 @Override
                 protected void onStartLoading() {
-                    forceLoad();
+                    if(!TextUtils.equals(oldAddress, mAddressUrl)) {
+                        oldAddress = mAddressUrl;
+                        forceLoad();
+                    }
                 }
 
                 @Nullable
                 @Override
                 public String loadInBackground() {
-                    if(mOriginalAddress != null) { // just searching for a command
+                    if(mAddressUrl != null) { // just searching for a command
 
                         try { // query cache database for corresponding command
-                            ManPage cached = DbProvider.getHelper().getManPagesDao().queryForId(mOriginalAddress);
+                            ManPage cached = DbProvider.getHelper().getManPagesDao().queryForId(mAddressUrl);
                             if(cached != null) {
                                 return cached.getWebContent();
                             }
@@ -118,13 +118,13 @@ public class ManPageDialogFragment extends DialogFragment {
                         }
 
                         try {
-                            Document root = Jsoup.connect(mOriginalAddress).timeout(10000).get();
+                            Document root = Jsoup.connect(mAddressUrl).timeout(10000).get();
                             Element man = root.select("div.man-page").first();
                             if(man != null) { // it's actually a man page
                                 String webContent = man.html();
 
                                 // save to DB for caching
-                                ManPage toCache = new ManPage(mOriginalName, mOriginalAddress);
+                                ManPage toCache = new ManPage(mCommandName, mAddressUrl);
                                 toCache.setWebContent(webContent);
                                 DbProvider.getHelper().getManPagesDao().createIfNotExists(toCache);
 
@@ -144,10 +144,10 @@ public class ManPageDialogFragment extends DialogFragment {
         @Override
         public void onLoadFinished(Loader<String> loader, String data) {
             if(data != null) {
-                mContent.loadDataWithBaseURL(mOriginalAddress, data, "text/html", "UTF-8", null);
+                mContent.loadDataWithBaseURL(mAddressUrl, data, "text/html", "UTF-8", null);
                 mFlipper.showNext();
             } else {
-                dismiss();
+                dismissAllowingStateLoss(); // can't perform transactions from onLoadFinished
             }
         }
 
