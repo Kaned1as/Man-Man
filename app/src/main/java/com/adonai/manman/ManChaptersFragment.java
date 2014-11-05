@@ -15,8 +15,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AlphabetIndexer;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.SectionIndexer;
 import android.widget.TextView;
 
 import com.adonai.manman.adapters.OrmLiteCursorAdapter;
@@ -175,10 +177,13 @@ public class ManChaptersFragment extends Fragment {
      *
      * @see com.adonai.manman.adapters.OrmLiteCursorAdapter
      */
-    private class ChapterContentsCursorAdapter extends OrmLiteCursorAdapter<ManSectionItem> {
+    private class ChapterContentsCursorAdapter extends OrmLiteCursorAdapter<ManSectionItem> implements SectionIndexer {
+
+        private AlphabetIndexer indexer;
 
         public ChapterContentsCursorAdapter(RuntimeExceptionDao<ManSectionItem, String> dao, PreparedQuery<ManSectionItem> query) {
             super(getActivity(), dao, query);
+            indexer = new AlphabetIndexer(getRawCursor(), getRawCursor().getColumnIndexOrThrow("name"), " 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ");
         }
 
         @Override
@@ -199,6 +204,21 @@ public class ManChaptersFragment extends Fragment {
             desc.setText(current.getDescription());
 
             return view;
+        }
+
+        @Override
+        public Object[] getSections() {
+            return indexer.getSections();
+        }
+
+        @Override
+        public int getPositionForSection(int sectionIndex) {
+            return indexer.getPositionForSection(sectionIndex);
+        }
+
+        @Override
+        public int getSectionForPosition(int position) {
+            return indexer.getSectionForPosition(position);
         }
     }
 

@@ -41,12 +41,16 @@ public abstract class OrmLiteCursorAdapter<T> extends BaseAdapter {
     @Override
     public T getItem(int position) {
         try {
-            Cursor cur = ((AndroidDatabaseResults) mCursor.getRawResults()).getRawCursor();
+            Cursor cur = getRawCursor();
             cur.moveToPosition(position);
             return mQuery.mapRow(new AndroidDatabaseResults(cur, mCursor.getRawResults().getObjectCache()));
         } catch (SQLException e) {
             return null;
         }
+    }
+
+    public Cursor getRawCursor() {
+        return ((AndroidDatabaseResults) mCursor.getRawResults()).getRawCursor();
     }
 
     @Override

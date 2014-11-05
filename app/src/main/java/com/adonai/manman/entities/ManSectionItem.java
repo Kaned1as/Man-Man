@@ -15,7 +15,7 @@ public class ManSectionItem {
     @DatabaseField(id = true)
     private String url;
 
-    @DatabaseField(canBeNull = false)
+    @DatabaseField(canBeNull = false, index = true)
     private String name;
 
     @DatabaseField
