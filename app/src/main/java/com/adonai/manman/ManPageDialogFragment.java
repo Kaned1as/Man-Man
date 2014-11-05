@@ -1,7 +1,10 @@
 package com.adonai.manman;
 
 import android.app.Dialog;
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
 import android.os.Bundle;
+import android.provider.Browser;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -9,6 +12,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +29,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 /**
  * Dialog fragment for showing web page with man content
@@ -166,14 +171,44 @@ public class ManPageDialogFragment extends DialogFragment {
 
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            if (url.matches("https://www\\.mankier\\.com/.+/.+")) { // it's an address of the url
+            if (url.matches("https://www\\.mankier\\.com/.+/.+")) { // it's an address of the command
                 mFlipper.showPrevious();
                 mAddressUrl = url;
                 mCommandName = url.substring(url.lastIndexOf('/') + 1);
                 getLoaderManager().restartLoader(MainPagerActivity.MAN_PAGE_RETRIEVER_LOADER, null, manPageCallback);
                 return true;
             }
-            return false;
+            return shouldOverrideUrlLoadingOld(view, url);
+        }
+
+        /**
+         * Copied from WebViewContentsClientAdapter (internal android class)
+         * to handle URLs in old way if it's not a man page
+         */
+        public boolean shouldOverrideUrlLoadingOld(WebView view, String url) {
+            Intent intent;
+            // Perform generic parsing of the URI to turn it into an Intent.
+            try {
+                intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME);
+            } catch (URISyntaxException ex) {
+                Log.w("WebViewCallback", "Bad URI " + url + ": " + ex.getMessage());
+                return false;
+            }
+            // Sanitize the Intent, ensuring web pages can not bypass browser
+            // security (only access to BROWSABLE activities).
+            intent.addCategory(Intent.CATEGORY_BROWSABLE);
+            intent.setComponent(null);
+
+            // Pass the package name as application ID so that the intent from the
+            // same application can be opened in the same tab.
+            intent.putExtra(Browser.EXTRA_APPLICATION_ID, view.getContext().getPackageName());
+            try {
+                view.getContext().startActivity(intent);
+            } catch (ActivityNotFoundException ex) {
+                Log.w("WebViewCallback", "No application can handle " + url);
+                return false;
+            }
+            return true;
         }
     }
 }
