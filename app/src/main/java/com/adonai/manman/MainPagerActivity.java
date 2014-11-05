@@ -13,7 +13,6 @@ import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
 
 import com.adonai.manman.database.DbProvider;
 import com.android.vending.util.IabHelper;
@@ -72,7 +71,6 @@ public class MainPagerActivity extends FragmentActivity {
 
     }
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
@@ -85,6 +83,9 @@ public class MainPagerActivity extends FragmentActivity {
         switch (item.getItemId()) {
             case R.id.about_menu_item:
                 showAbout();
+                return true;
+            case R.id.donate_menu_item:
+                purchaseGift();
                 return true;
         }
 
@@ -138,16 +139,12 @@ public class MainPagerActivity extends FragmentActivity {
         DbProvider.releaseHelper();
     }
 
+    /**
+     * Shows about dialog, with description, author and stuff
+     */
     private void showAbout() {
         // Inflate the about message contents
         View messageView = getLayoutInflater().inflate(R.layout.about_dialog, null, false);
-
-        // When linking text, force to always use default color. This works
-        // around a pressed color state bug.
-        TextView textView = (TextView) messageView.findViewById(R.id.about_credits);
-        int defaultColor = textView.getTextColors().getDefaultColor();
-        textView.setTextColor(defaultColor);
-
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setIcon(R.drawable.ic_launcher_small);
         builder.setTitle(R.string.app_name);
@@ -156,6 +153,7 @@ public class MainPagerActivity extends FragmentActivity {
         builder.show();
     }
 
+    // needed for vending
     private void purchaseGift() {
         if (mCanBuy) {
             mHelper.launchPurchaseFlow(MainPagerActivity.this, SKU_DONATE, 6666, new IabHelper.OnIabPurchaseFinishedListener() {
@@ -196,6 +194,7 @@ public class MainPagerActivity extends FragmentActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        // needed for vending
         if (mCanBuy)
             mHelper.dispose();
     }

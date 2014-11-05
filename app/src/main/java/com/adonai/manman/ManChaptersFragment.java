@@ -81,11 +81,6 @@ public class ManChaptersFragment extends Fragment {
             Bundle args = new Bundle();
             args.putString(CHAPTER_INDEX, item.getKey());
             getLoaderManager().restartLoader(MainPagerActivity.CONTENTS_RETRIEVER_LOADER, args, mContentRetrieveCallback);
-
-            // show progressbar under actionbar
-            mProgress.setIndeterminate(false);
-            mProgress.setProgress(0);
-            mProgress.show();
         }
     };
     /**
@@ -253,6 +248,11 @@ public class ManChaptersFragment extends Fragment {
                 @Override
                 protected void onStartLoading() {
                     if(args.containsKey(CHAPTER_INDEX)) {
+                        // show progressbar under actionbar
+                        mProgress.setIndeterminate(false);
+                        mProgress.setProgress(0);
+                        mProgress.show();
+
                         forceLoad();
                     }
                 }
@@ -359,6 +359,12 @@ public class ManChaptersFragment extends Fragment {
         public void onLoaderReset(Loader<ManPageContentsResult> loader) {
         }
 
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mProgress.hide(); // always hide progressbar to avoid window leakage
     }
 
     @Override

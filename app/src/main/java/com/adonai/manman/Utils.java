@@ -32,6 +32,9 @@ public class Utils {
 
     public static void showToastFromAnyThread(final Activity target, final int stringRes) {
         // can't show a toast from a thread without looper
+        if(target == null)
+            return;
+
         target.runOnUiThread(new Runnable() {
             @Override
             public void run() {
