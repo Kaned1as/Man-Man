@@ -1,6 +1,9 @@
 package com.adonai.manman;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -8,6 +11,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,13 +30,15 @@ import java.sql.SQLException;
 import java.util.List;
 
 /**
- * Created by adonai on 03.11.14.
+ * Fragment to show cached man pages list
+ * These pages can be viewed without touching the network
  */
 public class ManPageCacheFragment extends Fragment implements AdapterView.OnItemClickListener {
 
     private final static String SEARCH_QUERY = "search.query";
 
     private CacheBrowseCallback mCacheBrowseCallback = new CacheBrowseCallback();
+    private BroadcastReceiver mBroadcastHandler = new DbBroadcastReceiver();
 
     private SearchView mSearchCacheView;
     private ListView mCacheList;
@@ -54,6 +60,18 @@ public class ManPageCacheFragment extends Fragment implements AdapterView.OnItem
         Bundle defaultLoadAll = new Bundle();
         defaultLoadAll.putString(SEARCH_QUERY, "");
         getLoaderManager().initLoader(MainPagerActivity.CACHE_RETRIEVER_LOADER, defaultLoadAll, mCacheBrowseCallback);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mBroadcastHandler, new IntentFilter(MainPagerActivity.DB_CHANGE_NOTIFY));
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mBroadcastHandler);
     }
 
     @NonNull
@@ -175,6 +193,18 @@ public class ManPageCacheFragment extends Fragment implements AdapterView.OnItem
             final Bundle argsForLoader = new Bundle();
             argsForLoader.putString(SEARCH_QUERY, currentText);
             getLoaderManager().restartLoader(MainPagerActivity.SEARCH_COMMAND_LOADER, argsForLoader, mCacheBrowseCallback);
+        }
+    }
+
+    /**
+     * Handler to receive notifications for changes in database (to update cache list view)
+     */
+    private class DbBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle args = new Bundle();
+            args.putString(SEARCH_QUERY, mSearchCacheView.getQuery().toString());
+            getLoaderManager().restartLoader(MainPagerActivity.CACHE_RETRIEVER_LOADER, args, mCacheBrowseCallback);
         }
     }
 }

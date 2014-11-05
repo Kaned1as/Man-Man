@@ -11,6 +11,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -104,6 +105,13 @@ public class ManPageDialogFragment extends DialogFragment {
             return new AsyncTaskLoader<String>(getActivity()) {
                 private String oldAddress;
 
+                /**
+                 *  load only if page was changed
+                 * actually this can only happen if you clicked a link
+                 * and paused activity with a speed of light
+                 *
+                 * @see com.adonai.manman.ManPageDialogFragment.ManPageChromeClient
+                 */
                 @Override
                 protected void onStartLoading() {
                     if(!TextUtils.equals(oldAddress, mAddressUrl)) {
@@ -137,6 +145,7 @@ public class ManPageDialogFragment extends DialogFragment {
                                 ManPage toCache = new ManPage(mCommandName, mAddressUrl);
                                 toCache.setWebContent(webContent);
                                 DbProvider.getHelper().getManPagesDao().createIfNotExists(toCache);
+                                LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(new Intent(MainPagerActivity.DB_CHANGE_NOTIFY));
 
                                 return webContent;
                             }
@@ -167,6 +176,10 @@ public class ManPageDialogFragment extends DialogFragment {
         }
     }
 
+    /**
+     * Class to load URLs inside of already active webview
+     * Calls original browser intent for the URLs it can't handle
+     */
     private class ManPageChromeClient extends WebViewClient {
 
         @Override

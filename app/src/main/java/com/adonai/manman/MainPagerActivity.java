@@ -27,6 +27,8 @@ public class MainPagerActivity extends FragmentActivity {
     final static int CONTENTS_RETRIEVER_LOADER = 3;
     final static int CACHE_RETRIEVER_LOADER = 4;
 
+    final static String DB_CHANGE_NOTIFY = "database.updated";
+
 
     private SharedPreferences mPrefs;
     private ViewPager mPager;
