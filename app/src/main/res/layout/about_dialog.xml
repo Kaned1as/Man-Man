@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="20dip">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:text="@string/app_description" />
+
+    <TextView
+        android:id="@+id/about_author"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="20dip"
+        android:textSize="14sp"
+        android:autoLink="email|web"
+        android:textColorLink="@color/dark_link_color"
+        android:text="@string/app_author" />
+
+    <TextView
+        android:id="@+id/about_credits"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="5dip"
+        android:textSize="14sp"
+        android:autoLink="email|web"
+        android:textColorLink="@color/dark_link_color"
+        android:text="@string/app_credits"/>
+
+    <TextView
+        android:id="@+id/about_license"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="20dip"
+        android:textSize="12sp"
+        android:autoLink="web"
+        android:textColorLink="@color/dark_link_color"
+        android:text="@string/app_license" />
+
+</LinearLayout>

@@ -1,5 +1,7 @@
 package com.adonai.manman;
 
+import android.app.AlertDialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -10,9 +12,17 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 
 import com.adonai.manman.database.DbProvider;
+import com.android.vending.util.IabHelper;
+import com.android.vending.util.IabResult;
+import com.android.vending.util.Inventory;
+import com.android.vending.util.Purchase;
 import com.astuetz.PagerSlidingTabStrip;
+
+import java.util.Date;
 
 /**
  * Main activity where everything takes place
@@ -29,6 +39,11 @@ public class MainPagerActivity extends FragmentActivity {
 
     final static String DB_CHANGE_NOTIFY = "database.updated";
 
+    // helpers for donations (from android vending tutorial)
+    private static final String SKU_DONATE = "small";
+    private IabHelper mHelper;
+    private boolean mCanBuy = false;
+
 
     private SharedPreferences mPrefs;
     private ViewPager mPager;
@@ -43,22 +58,34 @@ public class MainPagerActivity extends FragmentActivity {
         mPager.setAdapter(new ManFragmentPagerAdapter(getSupportFragmentManager()));
         PagerSlidingTabStrip tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
         tabs.setViewPager(mPager);
+
+        // setting up vending
+        String base64EncodedPublicKey = "";
+        mHelper = new IabHelper(this, base64EncodedPublicKey);
+        mHelper.startSetup(new IabHelper.OnIabSetupFinishedListener() {
+            @Override
+            public void onIabSetupFinished(IabResult result) {
+                if (result.isSuccess())
+                    mCanBuy = true;
+            }
+        });
+
     }
 
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main_pager, menu);
+        super.onCreateOptionsMenu(menu);
+        getMenuInflater().inflate(R.menu.global_menu, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch (item.getItemId()) {
+            case R.id.about_menu_item:
+                showAbout();
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -111,5 +138,65 @@ public class MainPagerActivity extends FragmentActivity {
         DbProvider.releaseHelper();
     }
 
+    private void showAbout() {
+        // Inflate the about message contents
+        View messageView = getLayoutInflater().inflate(R.layout.about_dialog, null, false);
 
+        // When linking text, force to always use default color. This works
+        // around a pressed color state bug.
+        TextView textView = (TextView) messageView.findViewById(R.id.about_credits);
+        int defaultColor = textView.getTextColors().getDefaultColor();
+        textView.setTextColor(defaultColor);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setIcon(R.drawable.ic_launcher_small);
+        builder.setTitle(R.string.app_name);
+        builder.setView(messageView);
+        builder.create();
+        builder.show();
+    }
+
+    private void purchaseGift() {
+        if (mCanBuy) {
+            mHelper.launchPurchaseFlow(MainPagerActivity.this, SKU_DONATE, 6666, new IabHelper.OnIabPurchaseFinishedListener() {
+                @Override
+                public void onIabPurchaseFinished(IabResult result, Purchase info) {
+                    if (result.isSuccess()) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(MainPagerActivity.this);
+                        builder.setTitle(R.string.completed).setMessage(R.string.thanks_for_pledge);
+                        builder.setPositiveButton(android.R.string.ok, null);
+                        builder.create().show();
+                    }
+
+                    mHelper.queryInventoryAsync(false, new IabHelper.QueryInventoryFinishedListener() {
+                        @Override
+                        public void onQueryInventoryFinished(IabResult result, Inventory inv) {
+                            if (result.isSuccess()) {
+                                if (inv.getPurchase(SKU_DONATE) != null)
+                                    mHelper.consumeAsync(inv.getPurchase(SKU_DONATE), null);
+                            }
+                        }
+                    });
+                }
+            }, "ManManDonation " + new Date());
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Pass on the activity result to the helper for handling
+        if (!mHelper.handleActivityResult(requestCode, resultCode, data)) {
+            // not handled, so handle it ourselves (here's where you'd
+            // perform any handling of activity results not related to in-app
+            // billing...
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mCanBuy)
+            mHelper.dispose();
+    }
 }
