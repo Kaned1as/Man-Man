@@ -4,7 +4,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.widget.Toast;
 
+import com.adonai.manman.entities.ManSectionIndex;
+import com.adonai.manman.entities.ManSectionItem;
+
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -41,5 +46,20 @@ public class Utils {
                 Toast.makeText(target, stringRes, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    public static List<ManSectionIndex> createIndexer(List<ManSectionItem> items) {
+        List<ManSectionIndex> indexes = new ArrayList<>(26); // a guess
+        char lastLetter = 0; // EOF is never encountered
+        for (int i = 0; i < items.size(); ++i) {
+            ManSectionItem msi = items.get(i);
+            char newLetter = msi.getName().charAt(0); // no commands without name, don't check
+            if(newLetter != lastLetter) { // it's a start of new index
+                ManSectionIndex newIndex = new ManSectionIndex(newLetter, i, msi.getParentChapter());
+                indexes.add(newIndex);
+                lastLetter = newLetter;
+            }
+        }
+        return indexes;
     }
 }

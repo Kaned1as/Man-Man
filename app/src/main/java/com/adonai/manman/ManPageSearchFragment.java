@@ -131,6 +131,12 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
                 }
 
                 @Override
+                protected void onStopLoading() {
+                    super.onStopLoading();
+                    cancelLoad();
+                }
+
+                @Override
                 public SearchResultList loadInBackground() {
                     if(args.containsKey(SEARCH_COMMAND)) { // just searching for a command
                         final String command = args.getString(SEARCH_COMMAND);

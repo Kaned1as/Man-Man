@@ -64,6 +64,10 @@ public class ProgressBarWrapper {
     }
 
     public void show() {
+        if(isShowing) {
+            return;
+        }
+
         if(mActivity.getWindow().getDecorView().getWindowToken() != null) { // activity is created and running
             addProgressBarToActivity();
         } else { // activity is not yet finished initialization - wait for it and attach

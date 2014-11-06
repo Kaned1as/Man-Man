@@ -1,7 +1,6 @@
 package com.adonai.manman;
 
 
-import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -16,25 +15,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.SectionIndexer;
-import android.widget.TextView;
 
-import com.adonai.manman.adapters.OrmLiteCursorAdapter;
+import com.adonai.manman.adapters.ChapterContentsArrayAdapter;
+import com.adonai.manman.adapters.ChapterContentsCursorAdapter;
+import com.adonai.manman.adapters.ChaptersArrayAdapter;
 import com.adonai.manman.database.DbProvider;
 import com.adonai.manman.entities.ManSectionIndex;
 import com.adonai.manman.entities.ManSectionItem;
+import com.adonai.manman.misc.ManSectionExtractor;
 import com.adonai.manman.views.ProgressBarWrapper;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.misc.TransactionManager;
 import com.j256.ormlite.stmt.PreparedQuery;
 
 import org.ccil.cowan.tagsoup.Parser;
-import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
 
 import java.io.FilterInputStream;
 import java.io.IOException;
@@ -57,9 +53,9 @@ import java.util.zip.GZIPInputStream;
  * @author Adonai
  */
 public class ManChaptersFragment extends Fragment {
-    private final static String CHAPTER_INDEX = "chapter.index";
+    public final static String CHAPTER_INDEX = "chapter.index";
 
-    private final static String CHAPTER_COMMANDS_PREFIX = "https://www.mankier.com";
+    public final static String CHAPTER_COMMANDS_PREFIX = "https://www.mankier.com";
 
     private RetrieveContentsCallback mContentRetrieveCallback = new RetrieveContentsCallback();
     private ChaptersArrayAdapter mChaptersAdapter;
@@ -142,151 +138,6 @@ public class ManChaptersFragment extends Fragment {
         return root;
     }
 
-    /**
-     * This class represents an array adapter for showing man chapters
-     * There are only about ten constant chapters, so it was convenient to place it to the string-array
-     * <br/>
-     * The array is retrieved via {@link Utils#parseStringArray(android.content.Context, int)}
-     * and stored in {@link #mCachedChapters}
-     */
-    private class ChaptersArrayAdapter extends ArrayAdapter<Map.Entry<String, String>> {
-
-        public ChaptersArrayAdapter(Context context, int resource, int textViewResourceId, List<Map.Entry<String, String>> objects) {
-            super(context, resource, textViewResourceId, objects);
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            Map.Entry<String, String> current = getItem(position);
-            View root = super.getView(position, convertView, parent);
-
-            TextView index = (TextView) root.findViewById(R.id.chapter_index_label);
-            index.setText(current.getKey());
-
-            TextView name = (TextView) root.findViewById(R.id.chapter_name_label);
-            name.setText(current.getValue());
-
-            return root;
-        }
-    }
-
-    /**
-     * Cursor adapter for showing large lists of commands from DB
-     * For example, General commands chapter has about 14900 ones
-     * so we should load only a window of those
-     * <br/>
-     * The data retrieval is done through {@link ManChaptersFragment.RetrieveContentsCallback}
-     *
-     * @see com.adonai.manman.adapters.OrmLiteCursorAdapter
-     */
-    private class ChapterContentsCursorAdapter extends OrmLiteCursorAdapter<ManSectionItem> implements SectionIndexer {
-        private final List<ManSectionIndex> indexes;
-
-        public ChapterContentsCursorAdapter(RuntimeExceptionDao<ManSectionItem, String> dao, PreparedQuery<ManSectionItem> query, String chapter) {
-            super(getActivity(), dao, query);
-            indexes = DbProvider.getHelper().getManChapterIndexesDao().queryForEq("parentChapter", chapter);
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            ManSectionItem current = getItem(position);
-            final View view;
-            final LayoutInflater inflater = LayoutInflater.from(mContext);
-
-            if (convertView == null)
-                view = inflater.inflate(R.layout.chapter_command_list_item, parent, false);
-            else
-                view = convertView;
-
-            TextView command = (TextView) view.findViewById(R.id.command_name_label);
-            command.setText(current.getName());
-
-            TextView desc = (TextView) view.findViewById(R.id.command_description_label);
-            desc.setText(current.getDescription());
-
-            return view;
-        }
-
-        @Override
-        public Object[] getSections() {
-            Character[] chars = new Character[indexes.size()];
-            for(int i = 0; i < indexes.size(); ++i) {
-                chars[i] = indexes.get(i).getLetter();
-            }
-            return chars;
-        }
-
-        @Override
-        public int getPositionForSection(int sectionIndex) {
-            return indexes.get(sectionIndex).getIndex();
-        }
-
-        @Override
-        public int getSectionForPosition(int position) {
-            for(int i = 0; i < indexes.size(); ++i) {
-                if(indexes.get(i).getIndex() > position)
-                    return i - 1;
-            }
-            return 0;
-        }
-    }
-
-    /**
-     * Array adapter for showing commands with their description in ListView
-     * It's convenient whet all the data is retrieved via network,
-     * so we have complete command list at hand
-     * <br/>
-     * The data retrieval is done through {@link ManChaptersFragment.RetrieveContentsCallback}
-     *
-     * @see android.widget.ArrayAdapter
-     * @see com.adonai.manman.entities.ManSectionItem
-     */
-    private class ChapterContentsArrayAdapter extends ArrayAdapter<ManSectionItem> implements SectionIndexer {
-        private final List<ManSectionIndex> indexes;
-
-        public ChapterContentsArrayAdapter(Context context, int resource, int textViewResourceId, List<ManSectionItem> objects) {
-            super(context, resource, textViewResourceId, objects);
-            indexes = createIndexer(objects);
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            ManSectionItem current = getItem(position);
-            View root = super.getView(position, convertView, parent);
-
-            TextView command = (TextView) root.findViewById(R.id.command_name_label);
-            command.setText(current.getName());
-
-            TextView desc = (TextView) root.findViewById(R.id.command_description_label);
-            desc.setText(current.getDescription());
-
-            return root;
-        }
-
-        @Override
-        public Object[] getSections() {
-            Character[] chars = new Character[indexes.size()];
-            for(int i = 0; i < indexes.size(); ++i) {
-                chars[i] = indexes.get(i).getLetter();
-            }
-            return chars;
-        }
-
-        @Override
-        public int getPositionForSection(int sectionIndex) {
-            return indexes.get(sectionIndex).getIndex();
-        }
-
-        @Override
-        public int getSectionForPosition(int position) {
-            for(int i = 0; i < indexes.size(); ++i) {
-                if(indexes.get(i).getIndex() > position)
-                    return i - 1;
-            }
-            return 0;
-        }
-    }
-
 
     /**
      * Loader callback for async loading of clicked chapter's contents and showing them in ListView afterwards
@@ -298,100 +149,7 @@ public class ManChaptersFragment extends Fragment {
     private class RetrieveContentsCallback implements LoaderManager.LoaderCallbacks<ManPageContentsResult> {
         @Override
         public Loader<ManPageContentsResult> onCreateLoader(int id, @NonNull final Bundle args) {
-            return new AsyncTaskLoader<ManPageContentsResult>(getActivity()) {
-                @Override
-                protected void onStartLoading() {
-                    if(args.containsKey(CHAPTER_INDEX)) {
-                        // show progressbar under actionbar
-                        mProgress.setIndeterminate(false);
-                        mProgress.setProgress(0);
-                        mProgress.show();
-
-                        forceLoad();
-                    }
-                }
-
-                /**
-                 * Loads chapter page from DB or network asynchronously
-                 *
-                 * @return list of commands with their descriptions and urls
-                 * or null on error/no input provided
-                 */
-                @Nullable
-                @Override
-                public ManPageContentsResult loadInBackground() {
-                    // retrieve chapter content
-                    String index = args.getString(CHAPTER_INDEX);
-                    args.remove(CHAPTER_INDEX); // load only once
-
-                    // check the DB for cached pages first
-                    try {
-                        PreparedQuery<ManSectionItem> query = DbProvider.getHelper().getManChaptersDao().queryBuilder().orderBy("name", true).where().eq("parentChapter", index).prepare();
-                        if(DbProvider.getHelper().getManChaptersDao().queryForFirst(query) != null) // we have it in cache
-                        return new ManPageContentsResult(DbProvider.getHelper().getManChaptersDao(), query, index);
-                    } catch (SQLException e) {
-                        Log.e("Man Man", "Database", e);
-                        Utils.showToastFromAnyThread(getActivity(), R.string.database_retrieve_error);
-                    }
-
-                    // If we're here, nothing is in DB for now
-                    List<ManSectionItem> results = loadFromNetwork(index, CHAPTER_COMMANDS_PREFIX + "/" + index);
-                    if(results != null) {
-                        Collections.sort(results);
-                        saveToDb(results);
-                        return new ManPageContentsResult(results, index);
-                    }
-
-                    return null;
-                }
-
-                @Nullable
-                private List<ManSectionItem> loadFromNetwork(final String index, String link) {
-                    try {
-                        // load chapter page with command links
-                        URLConnection conn = new URL(link).openConnection();
-                        conn.setRequestProperty("Accept-Encoding", "gzip, deflate");
-                        conn.setReadTimeout(10000);
-                        conn.setConnectTimeout(5000);
-                        // count the bytes and show progress
-                        InputStream is = new GZIPInputStream(new CountingInputStream(conn.getInputStream(), conn.getContentLength()), conn.getContentLength());
-                        final Parser parser = new Parser();
-                        final List<ManSectionItem> msItems = new ArrayList<>(500);
-                        parser.setContentHandler(new ManSectionExtractor(index, msItems));
-                        parser.setFeature(Parser.namespacesFeature, false);
-                        parser.parse(new InputSource(is));
-                        return msItems;
-                    } catch (Exception e) {
-                        Log.e("Man Man", "Network", e);
-                        // can't show a toast from a thread without looper
-                        Utils.showToastFromAnyThread(getActivity(), R.string.connection_error);
-                    }
-                    return  null;
-                }
-
-                private void saveToDb(final List<ManSectionItem> items) {
-                    // save to DB for caching
-                    try {
-                        TransactionManager.callInTransaction(DbProvider.getHelper().getConnectionSource(), new Callable<Void>() {
-                            @Override
-                            public Void call() throws Exception {
-                                for (ManSectionItem msi : items) {
-                                    DbProvider.getHelper().getManChaptersDao().create(msi);
-                                }
-                                List<ManSectionIndex> indexes = createIndexer(items);
-                                for (ManSectionIndex index : indexes) {
-                                    DbProvider.getHelper().getManChapterIndexesDao().create(index);
-                                }
-                                return null;
-                            }
-                        });
-                    } catch (SQLException e) {
-                        Log.e("Man Man", "Database", e);
-                        // can't show a toast from a thread without looper
-                        Utils.showToastFromAnyThread(getActivity(), R.string.database_save_error);
-                    }
-                }
-            };
+            return new ChapterContentsAsyncTaskLoader(args);
         }
 
         @Override
@@ -406,7 +164,7 @@ public class ManChaptersFragment extends Fragment {
                 mListView.setAdapter(null);
                 mListView.addHeaderView(text);
                 if(data.choiceDbCache != null) {
-                    mListView.setAdapter(new ChapterContentsCursorAdapter(data.choiceDbCache.first, data.choiceDbCache.second, data.chapter));
+                    mListView.setAdapter(new ChapterContentsCursorAdapter(getActivity(), data.choiceDbCache.first, data.choiceDbCache.second, data.chapter));
                 } else {
                     mListView.setAdapter(new ChapterContentsArrayAdapter(getActivity(), R.layout.chapter_command_list_item, R.id.command_name_label, data.choiceList));
                 }
@@ -429,21 +187,6 @@ public class ManChaptersFragment extends Fragment {
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         mProgress.onOrientationChanged();
-    }
-
-    private List<ManSectionIndex> createIndexer(List<ManSectionItem> items) {
-        List<ManSectionIndex> indexes = new ArrayList<>(26); // a guess
-        char lastLetter = 0; // EOF is never encountered
-        for (int i = 0; i < items.size(); ++i) {
-            ManSectionItem msi = items.get(i);
-            char newLetter = msi.getName().charAt(0); // no commands without name, don't check
-            if(newLetter != lastLetter) { // it's a start of new index
-                ManSectionIndex newIndex = new ManSectionIndex(newLetter, i, msi.getParentChapter());
-                indexes.add(newIndex);
-                lastLetter = newLetter;
-            }
-        }
-        return indexes;
     }
 
     /**
@@ -519,80 +262,104 @@ public class ManChaptersFragment extends Fragment {
 
     }
 
-    /**
-     * SAX parser for chapter contents. The reason for creation of this class is
-     * the chapter pages being rather huge (around 6-7 Mbytes). Their parsing via Jsoup
-     * produces OutOfMemoryError for android phone heap sizes
-     * <br/>
-     * A nice benefit from that is that CountingInputStream counts page as it's being parsed
-     *
-     * @see org.ccil.cowan.tagsoup.Parser
-     *
-     */
-    private class ManSectionExtractor extends DefaultHandler {
-        private final String index;
-        private final List<ManSectionItem> msItems;
+    private class ChapterContentsAsyncTaskLoader extends AsyncTaskLoader<ManPageContentsResult> {
+        private final Bundle args;
 
-        private StringBuilder holder;
-        private boolean flagCommand;
-        private boolean flagLink;
-        private boolean flagDesc;
-
-        public ManSectionExtractor(String index, List<ManSectionItem> msItems) {
-            this.index = index;
-            this.msItems = msItems;
-            holder = new StringBuilder(50);
+        public ChapterContentsAsyncTaskLoader(Bundle args) {
+            super(getActivity());
+            this.args = args;
         }
 
         @Override
-        public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-            if (flagCommand) {
-                if ("a".equals(qName) && !flagDesc) { // first child of div.e -> href, link to a command page
-                    msItems.get(msItems.size() - 1).setUrl(CHAPTER_COMMANDS_PREFIX + attributes.getValue("href"));
-                    flagLink = true;
-                } else if ("span".equals(qName)) {
-                    flagDesc = true;
-                }
-            } else {
-                if ("div".equals(qName) && "e".equals(attributes.getValue("class"))) {
-                    ManSectionItem msi = new ManSectionItem();
-                    msi.setParentChapter(index);
-                    msItems.add(msi);
-                    flagCommand = true;
-                }
+        protected void onStartLoading() {
+            if(args.containsKey(CHAPTER_INDEX)) {
+                // show progressbar under actionbar
+                mProgress.setIndeterminate(false);
+                mProgress.setProgress(0);
+                mProgress.show();
+
+                forceLoad();
             }
         }
 
+        /**
+         * Loads chapter page from DB or network asynchronously
+         *
+         * @return list of commands with their descriptions and urls
+         * or null on error/no input provided
+         */
+        @Nullable
         @Override
-        public void characters(char[] ch, int start, int length) throws SAXException {
-            if(flagLink || flagDesc) {
-                holder.append(ch, start, length);
+        public ManPageContentsResult loadInBackground() {
+            // retrieve chapter content
+            String index = args.getString(CHAPTER_INDEX);
+            args.remove(CHAPTER_INDEX); // load only once
+
+            // check the DB for cached pages first
+            try {
+                PreparedQuery<ManSectionItem> query = DbProvider.getHelper().getManChaptersDao().queryBuilder().orderBy("name", true).where().eq("parentChapter", index).prepare();
+                if(DbProvider.getHelper().getManChaptersDao().queryForFirst(query) != null) // we have it in cache
+                return new ManPageContentsResult(DbProvider.getHelper().getManChaptersDao(), query, index);
+            } catch (SQLException e) {
+                Log.e("Man Man", "Database", e);
+                Utils.showToastFromAnyThread(getActivity(), R.string.database_retrieve_error);
             }
+
+            // If we're here, nothing is in DB for now
+            List<ManSectionItem> results = loadFromNetwork(index, CHAPTER_COMMANDS_PREFIX + "/" + index);
+            if(results != null) {
+                Collections.sort(results);
+                saveToDb(results);
+                return new ManPageContentsResult(results, index);
+            }
+
+            return null;
         }
 
-        @Override
-        public void endElement(String uri, String localName, String qName) throws SAXException {
-            if(flagCommand) {
-                switch (qName) {
-                    case "div":
-                        flagCommand = false;
-                        break;
-                    case "a":
-                        if (flagLink && !flagDesc) { // first child of div.e, name of a command
-                            ManSectionItem msi = msItems.get(msItems.size() - 1);
-                            msi.setName(holder.toString());
-                            holder.setLength(0);
+        @Nullable
+        private List<ManSectionItem> loadFromNetwork(final String index, String link) {
+            try {
+                // load chapter page with command links
+                URLConnection conn = new URL(link).openConnection();
+                conn.setRequestProperty("Accept-Encoding", "gzip, deflate");
+                conn.setReadTimeout(10000);
+                conn.setConnectTimeout(5000);
+                // count the bytes and show progress
+                InputStream is = new GZIPInputStream(new CountingInputStream(conn.getInputStream(), conn.getContentLength()), conn.getContentLength());
+                final Parser parser = new Parser();
+                final List<ManSectionItem> msItems = new ArrayList<>(500);
+                parser.setContentHandler(new ManSectionExtractor(index, msItems));
+                parser.setFeature(Parser.namespacesFeature, false);
+                parser.parse(new InputSource(is));
+                return msItems;
+            } catch (Exception e) {
+                Log.e("Man Man", "Network", e);
+                // can't show a toast from a thread without looper
+                Utils.showToastFromAnyThread(getActivity(), R.string.connection_error);
+            }
+            return  null;
+        }
+
+        private void saveToDb(final List<ManSectionItem> items) {
+            // save to DB for caching
+            try {
+                TransactionManager.callInTransaction(DbProvider.getHelper().getConnectionSource(), new Callable<Void>() {
+                    @Override
+                    public Void call() throws Exception {
+                        for (ManSectionItem msi : items) {
+                            DbProvider.getHelper().getManChaptersDao().create(msi);
                         }
-                        flagLink = false;
-                        break;
-                    case "span":
-                        if (flagDesc) {  // third child of div.e, description of a command
-                            msItems.get(msItems.size() - 1).setDescription(holder.toString());
-                            holder.setLength(0);
+                        List<ManSectionIndex> indexes = Utils.createIndexer(items);
+                        for (ManSectionIndex index : indexes) {
+                            DbProvider.getHelper().getManChapterIndexesDao().create(index);
                         }
-                        flagDesc = false;
-                        break;
-                }
+                        return null;
+                    }
+                });
+            } catch (SQLException e) {
+                Log.e("Man Man", "Database", e);
+                // can't show a toast from a thread without looper
+                Utils.showToastFromAnyThread(getActivity(), R.string.database_save_error);
             }
         }
     }
