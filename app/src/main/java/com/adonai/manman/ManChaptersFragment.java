@@ -80,6 +80,10 @@ public class ManChaptersFragment extends Fragment {
             Map.Entry<String, String> item = (Map.Entry<String, String>) parent.getItemAtPosition(position);
             Bundle args = new Bundle();
             args.putString(CHAPTER_INDEX, item.getKey());
+            // show progressbar under actionbar
+            mProgress.setIndeterminate(false);
+            mProgress.setProgress(0);
+            mProgress.show();
             getLoaderManager().restartLoader(MainPagerActivity.CONTENTS_RETRIEVER_LOADER, args, mContentRetrieveCallback);
         }
     };
@@ -149,7 +153,96 @@ public class ManChaptersFragment extends Fragment {
     private class RetrieveContentsCallback implements LoaderManager.LoaderCallbacks<ManPageContentsResult> {
         @Override
         public Loader<ManPageContentsResult> onCreateLoader(int id, @NonNull final Bundle args) {
-            return new ChapterContentsAsyncTaskLoader(args);
+            return new AsyncTaskLoader<ManPageContentsResult>(getActivity()) {
+
+                @Override
+                protected void onStartLoading() {
+                    if(args.containsKey(CHAPTER_INDEX)) {
+                        forceLoad();
+                    }
+                }
+
+                /**
+                 * Loads chapter page from DB or network asynchronously
+                 *
+                 * @return list of commands with their descriptions and urls
+                 * or null on error/no input provided
+                 */
+                @Nullable
+                @Override
+                public ManPageContentsResult loadInBackground() {
+                    // retrieve chapter content
+                    String index = args.getString(CHAPTER_INDEX);
+                    args.remove(CHAPTER_INDEX); // load only once
+
+                    // check the DB for cached pages first
+                    try {
+                        PreparedQuery<ManSectionItem> query = DbProvider.getHelper().getManChaptersDao().queryBuilder().orderBy("name", true).where().eq("parentChapter", index).prepare();
+                        if(DbProvider.getHelper().getManChaptersDao().queryForFirst(query) != null) // we have it in cache
+                            return new ManPageContentsResult(DbProvider.getHelper().getManChaptersDao(), query, index);
+                    } catch (SQLException e) {
+                        Log.e("Man Man", "Database", e);
+                        Utils.showToastFromAnyThread(getActivity(), R.string.database_retrieve_error);
+                    }
+
+                    // If we're here, nothing is in DB for now
+                    List<ManSectionItem> results = loadFromNetwork(index, CHAPTER_COMMANDS_PREFIX + "/" + index);
+                    if(results != null) {
+                        Collections.sort(results);
+                        saveToDb(results);
+                        return new ManPageContentsResult(results, index);
+                    }
+
+                    return null;
+                }
+
+                @Nullable
+                private List<ManSectionItem> loadFromNetwork(final String index, String link) {
+                    try {
+                        // load chapter page with command links
+                        URLConnection conn = new URL(link).openConnection();
+                        conn.setRequestProperty("Accept-Encoding", "gzip, deflate");
+                        conn.setReadTimeout(10000);
+                        conn.setConnectTimeout(5000);
+                        // count the bytes and show progress
+                        InputStream is = new GZIPInputStream(new CountingInputStream(conn.getInputStream(), conn.getContentLength()), conn.getContentLength());
+                        final Parser parser = new Parser();
+                        final List<ManSectionItem> msItems = new ArrayList<>(500);
+                        parser.setContentHandler(new ManSectionExtractor(index, msItems));
+                        parser.setFeature(Parser.namespacesFeature, false);
+                        parser.parse(new InputSource(is));
+                        return msItems;
+                    } catch (Exception e) {
+                        Log.e("Man Man", "Network", e);
+                        // can't show a toast from a thread without looper
+                        Utils.showToastFromAnyThread(getActivity(), R.string.connection_error);
+                    }
+                    return  null;
+                }
+
+            private void saveToDb(final List<ManSectionItem> items) {
+                // save to DB for caching
+                try {
+                    TransactionManager.callInTransaction(DbProvider.getHelper().getConnectionSource(), new Callable<Void>() {
+                        @Override
+                        public Void call() throws Exception {
+                            for (ManSectionItem msi : items) {
+                                DbProvider.getHelper().getManChaptersDao().create(msi);
+                            }
+                            List<ManSectionIndex> indexes = Utils.createIndexer(items);
+                            for (ManSectionIndex index : indexes) {
+                                DbProvider.getHelper().getManChapterIndexesDao().create(index);
+                            }
+                            return null;
+                        }
+                    });
+                } catch (SQLException e) {
+                    Log.e("Man Man", "Database", e);
+                    // can't show a toast from a thread without looper
+                    Utils.showToastFromAnyThread(getActivity(), R.string.database_save_error);
+                }
+            }
+            };
         }
 
         @Override
@@ -260,107 +353,5 @@ public class ManChaptersFragment extends Fragment {
             this.chapter = chapter;
         }
 
-    }
-
-    private class ChapterContentsAsyncTaskLoader extends AsyncTaskLoader<ManPageContentsResult> {
-        private final Bundle args;
-
-        public ChapterContentsAsyncTaskLoader(Bundle args) {
-            super(getActivity());
-            this.args = args;
-        }
-
-        @Override
-        protected void onStartLoading() {
-            if(args.containsKey(CHAPTER_INDEX)) {
-                // show progressbar under actionbar
-                mProgress.setIndeterminate(false);
-                mProgress.setProgress(0);
-                mProgress.show();
-
-                forceLoad();
-            }
-        }
-
-        /**
-         * Loads chapter page from DB or network asynchronously
-         *
-         * @return list of commands with their descriptions and urls
-         * or null on error/no input provided
-         */
-        @Nullable
-        @Override
-        public ManPageContentsResult loadInBackground() {
-            // retrieve chapter content
-            String index = args.getString(CHAPTER_INDEX);
-            args.remove(CHAPTER_INDEX); // load only once
-
-            // check the DB for cached pages first
-            try {
-                PreparedQuery<ManSectionItem> query = DbProvider.getHelper().getManChaptersDao().queryBuilder().orderBy("name", true).where().eq("parentChapter", index).prepare();
-                if(DbProvider.getHelper().getManChaptersDao().queryForFirst(query) != null) // we have it in cache
-                return new ManPageContentsResult(DbProvider.getHelper().getManChaptersDao(), query, index);
-            } catch (SQLException e) {
-                Log.e("Man Man", "Database", e);
-                Utils.showToastFromAnyThread(getActivity(), R.string.database_retrieve_error);
-            }
-
-            // If we're here, nothing is in DB for now
-            List<ManSectionItem> results = loadFromNetwork(index, CHAPTER_COMMANDS_PREFIX + "/" + index);
-            if(results != null) {
-                Collections.sort(results);
-                saveToDb(results);
-                return new ManPageContentsResult(results, index);
-            }
-
-            return null;
-        }
-
-        @Nullable
-        private List<ManSectionItem> loadFromNetwork(final String index, String link) {
-            try {
-                // load chapter page with command links
-                URLConnection conn = new URL(link).openConnection();
-                conn.setRequestProperty("Accept-Encoding", "gzip, deflate");
-                conn.setReadTimeout(10000);
-                conn.setConnectTimeout(5000);
-                // count the bytes and show progress
-                InputStream is = new GZIPInputStream(new CountingInputStream(conn.getInputStream(), conn.getContentLength()), conn.getContentLength());
-                final Parser parser = new Parser();
-                final List<ManSectionItem> msItems = new ArrayList<>(500);
-                parser.setContentHandler(new ManSectionExtractor(index, msItems));
-                parser.setFeature(Parser.namespacesFeature, false);
-                parser.parse(new InputSource(is));
-                return msItems;
-            } catch (Exception e) {
-                Log.e("Man Man", "Network", e);
-                // can't show a toast from a thread without looper
-                Utils.showToastFromAnyThread(getActivity(), R.string.connection_error);
-            }
-            return  null;
-        }
-
-        private void saveToDb(final List<ManSectionItem> items) {
-            // save to DB for caching
-            try {
-                TransactionManager.callInTransaction(DbProvider.getHelper().getConnectionSource(), new Callable<Void>() {
-                    @Override
-                    public Void call() throws Exception {
-                        for (ManSectionItem msi : items) {
-                            DbProvider.getHelper().getManChaptersDao().create(msi);
-                        }
-                        List<ManSectionIndex> indexes = Utils.createIndexer(items);
-                        for (ManSectionIndex index : indexes) {
-                            DbProvider.getHelper().getManChapterIndexesDao().create(index);
-                        }
-                        return null;
-                    }
-                });
-            } catch (SQLException e) {
-                Log.e("Man Man", "Database", e);
-                // can't show a toast from a thread without looper
-                Utils.showToastFromAnyThread(getActivity(), R.string.database_save_error);
-            }
-        }
     }
 }
