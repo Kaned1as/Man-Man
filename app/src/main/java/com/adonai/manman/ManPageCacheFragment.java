@@ -13,6 +13,7 @@ import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -120,7 +121,7 @@ public class ManPageCacheFragment extends Fragment implements AdapterView.OnItem
                         PreparedQuery<ManPage> query = DbProvider.getHelper().getManPagesDao().queryBuilder().where().like("name", "%" + queryString + "%").prepare();
                         return DbProvider.getHelper().getManPagesDao().query(query);
                     } catch (SQLException e) {
-                        e.printStackTrace();
+                        Log.e("Man Man", "Database", e);
                         Utils.showToastFromAnyThread(getActivity(), R.string.database_retrieve_error);
                     }
                     return null;

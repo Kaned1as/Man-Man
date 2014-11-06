@@ -11,6 +11,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -143,7 +144,7 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
                                 return mJsonConverter.fromJson(result, SearchResultList.class);
                             }
                         } catch (IOException e) {
-                            e.printStackTrace();
+                            Log.e("Man Man", "Network", e);
                             // can't show a toast from a thread without looper
                             Utils.showToastFromAnyThread(getActivity(), R.string.connection_error);
                         }
@@ -186,7 +187,7 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
                                 return EntityUtils.toString(response.getEntity());
                             }
                         } catch (IOException e) {
-                            e.printStackTrace();
+                            Log.e("Man Man", "Network", e);
                             // can't show a toast from a thread without looper
                             Utils.showToastFromAnyThread(getActivity(), R.string.connection_error);
                         }
@@ -325,7 +326,7 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
                                         });
                                     }
                                 } catch (IOException e) {
-                                    e.printStackTrace();
+                                    Log.e("Man Man", "Network", e);
                                     // can't show a toast from a thread without looper
                                     // show error and change drawable back to normal
                                     getActivity().runOnUiThread(new Runnable() {

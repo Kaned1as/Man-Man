@@ -5,7 +5,9 @@ import android.content.Context;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 
 /**
- * Created by adonai on 29.06.14.
+ * Helper class for retrieving database instance
+ *
+ * @author Adonai
  */
 public class DbProvider {
     private static PersistManager databaseHelper;

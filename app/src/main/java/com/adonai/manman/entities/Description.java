@@ -3,6 +3,7 @@ package com.adonai.manman.entities;
 /**
  * Object representing answer on description API-call
  *
+ * @see com.google.gson.Gson
  * @author Adonai
  */
 public class Description {

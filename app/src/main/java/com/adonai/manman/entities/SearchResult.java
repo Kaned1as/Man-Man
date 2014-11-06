@@ -3,6 +3,7 @@ package com.adonai.manman.entities;
 /**
  * Object representing one of search results in corresponding API call
  *
+ * @see com.google.gson.Gson
  * @author Adonai
  */
 public class SearchResult {

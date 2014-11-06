@@ -131,7 +131,7 @@ public class ManPageDialogFragment extends DialogFragment {
                                 return cached.getWebContent();
                             }
                         } catch (RuntimeException e) { // it's RuntimeExceptionDao, so catch runtime exceptions
-                            e.printStackTrace();
+                            Log.e("Man Man", "Database", e);
                             Utils.showToastFromAnyThread(getActivity(), R.string.database_retrieve_error);
                         }
 
@@ -150,7 +150,7 @@ public class ManPageDialogFragment extends DialogFragment {
                                 return webContent;
                             }
                         } catch (IOException e) {
-                            e.printStackTrace();
+                            Log.e("Man Man", "Database", e);
                             // can't show a toast from a thread without looper
                             Utils.showToastFromAnyThread(getActivity(), R.string.connection_error);
                         }

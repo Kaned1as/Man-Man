@@ -6,6 +6,7 @@ import java.util.List;
  * Object representing search result list in API call
  * Contains several search results or null if no results found
  *
+ * @see com.google.gson.Gson
  * @author Adonai
  */
 public class SearchResultList {

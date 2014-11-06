@@ -10,6 +10,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
+import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,10 +18,12 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.SectionIndexer;
 import android.widget.TextView;
 
 import com.adonai.manman.adapters.OrmLiteCursorAdapter;
 import com.adonai.manman.database.DbProvider;
+import com.adonai.manman.entities.ManSectionIndex;
 import com.adonai.manman.entities.ManSectionItem;
 import com.adonai.manman.views.ProgressBarWrapper;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
@@ -40,6 +43,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -175,9 +179,12 @@ public class ManChaptersFragment extends Fragment {
      *
      * @see com.adonai.manman.adapters.OrmLiteCursorAdapter
      */
-    private class ChapterContentsCursorAdapter extends OrmLiteCursorAdapter<ManSectionItem> {
-        public ChapterContentsCursorAdapter(RuntimeExceptionDao<ManSectionItem, String> dao, PreparedQuery<ManSectionItem> query) {
+    private class ChapterContentsCursorAdapter extends OrmLiteCursorAdapter<ManSectionItem> implements SectionIndexer {
+        private final List<ManSectionIndex> indexes;
+
+        public ChapterContentsCursorAdapter(RuntimeExceptionDao<ManSectionItem, String> dao, PreparedQuery<ManSectionItem> query, String chapter) {
             super(getActivity(), dao, query);
+            indexes = DbProvider.getHelper().getManChapterIndexesDao().queryForEq("parentChapter", chapter);
         }
 
         @Override
@@ -199,6 +206,29 @@ public class ManChaptersFragment extends Fragment {
 
             return view;
         }
+
+        @Override
+        public Object[] getSections() {
+            Character[] chars = new Character[indexes.size()];
+            for(int i = 0; i < indexes.size(); ++i) {
+                chars[i] = indexes.get(i).getLetter();
+            }
+            return chars;
+        }
+
+        @Override
+        public int getPositionForSection(int sectionIndex) {
+            return indexes.get(sectionIndex).getIndex();
+        }
+
+        @Override
+        public int getSectionForPosition(int position) {
+            for(int i = 0; i < indexes.size(); ++i) {
+                if(indexes.get(i).getIndex() > position)
+                    return i - 1;
+            }
+            return 0;
+        }
     }
 
     /**
@@ -211,10 +241,12 @@ public class ManChaptersFragment extends Fragment {
      * @see android.widget.ArrayAdapter
      * @see com.adonai.manman.entities.ManSectionItem
      */
-    private class ChapterContentsArrayAdapter extends ArrayAdapter<ManSectionItem> {
+    private class ChapterContentsArrayAdapter extends ArrayAdapter<ManSectionItem> implements SectionIndexer {
+        private final List<ManSectionIndex> indexes;
 
         public ChapterContentsArrayAdapter(Context context, int resource, int textViewResourceId, List<ManSectionItem> objects) {
             super(context, resource, textViewResourceId, objects);
+            indexes = createIndexer(objects);
         }
 
         @Override
@@ -229,6 +261,29 @@ public class ManChaptersFragment extends Fragment {
             desc.setText(current.getDescription());
 
             return root;
+        }
+
+        @Override
+        public Object[] getSections() {
+            Character[] chars = new Character[indexes.size()];
+            for(int i = 0; i < indexes.size(); ++i) {
+                chars[i] = indexes.get(i).getLetter();
+            }
+            return chars;
+        }
+
+        @Override
+        public int getPositionForSection(int sectionIndex) {
+            return indexes.get(sectionIndex).getIndex();
+        }
+
+        @Override
+        public int getSectionForPosition(int position) {
+            for(int i = 0; i < indexes.size(); ++i) {
+                if(indexes.get(i).getIndex() > position)
+                    return i - 1;
+            }
+            return 0;
         }
     }
 
@@ -271,19 +326,20 @@ public class ManChaptersFragment extends Fragment {
 
                     // check the DB for cached pages first
                     try {
-                        PreparedQuery<ManSectionItem> query = DbProvider.getHelper().getManChaptersDao().queryBuilder().where().eq("parentChapter", index).prepare();
+                        PreparedQuery<ManSectionItem> query = DbProvider.getHelper().getManChaptersDao().queryBuilder().orderBy("name", true).where().eq("parentChapter", index).prepare();
                         if(DbProvider.getHelper().getManChaptersDao().queryForFirst(query) != null) // we have it in cache
-                        return new ManPageContentsResult(DbProvider.getHelper().getManChaptersDao(), query);
+                        return new ManPageContentsResult(DbProvider.getHelper().getManChaptersDao(), query, index);
                     } catch (SQLException e) {
-                        e.printStackTrace();
+                        Log.e("Man Man", "Database", e);
                         Utils.showToastFromAnyThread(getActivity(), R.string.database_retrieve_error);
                     }
 
                     // If we're here, nothing is in DB for now
                     List<ManSectionItem> results = loadFromNetwork(index, CHAPTER_COMMANDS_PREFIX + "/" + index);
                     if(results != null) {
+                        Collections.sort(results);
                         saveToDb(results);
-                        return new ManPageContentsResult(results);
+                        return new ManPageContentsResult(results, index);
                     }
 
                     return null;
@@ -306,27 +362,31 @@ public class ManChaptersFragment extends Fragment {
                         parser.parse(new InputSource(is));
                         return msItems;
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Log.e("Man Man", "Network", e);
                         // can't show a toast from a thread without looper
                         Utils.showToastFromAnyThread(getActivity(), R.string.connection_error);
                     }
                     return  null;
                 }
 
-                private void saveToDb(final List<ManSectionItem> msItems) {
+                private void saveToDb(final List<ManSectionItem> items) {
                     // save to DB for caching
                     try {
                         TransactionManager.callInTransaction(DbProvider.getHelper().getConnectionSource(), new Callable<Void>() {
                             @Override
                             public Void call() throws Exception {
-                                for (ManSectionItem msi : msItems) {
-                                    DbProvider.getHelper().getManChaptersDao().createOrUpdate(msi);
+                                for (ManSectionItem msi : items) {
+                                    DbProvider.getHelper().getManChaptersDao().create(msi);
+                                }
+                                List<ManSectionIndex> indexes = createIndexer(items);
+                                for (ManSectionIndex index : indexes) {
+                                    DbProvider.getHelper().getManChapterIndexesDao().create(index);
                                 }
                                 return null;
                             }
                         });
                     } catch (SQLException e) {
-                        e.printStackTrace();
+                        Log.e("Man Man", "Database", e);
                         // can't show a toast from a thread without looper
                         Utils.showToastFromAnyThread(getActivity(), R.string.database_save_error);
                     }
@@ -346,7 +406,7 @@ public class ManChaptersFragment extends Fragment {
                 mListView.setAdapter(null);
                 mListView.addHeaderView(text);
                 if(data.choiceDbCache != null) {
-                    mListView.setAdapter(new ChapterContentsCursorAdapter(data.choiceDbCache.first, data.choiceDbCache.second));
+                    mListView.setAdapter(new ChapterContentsCursorAdapter(data.choiceDbCache.first, data.choiceDbCache.second, data.chapter));
                 } else {
                     mListView.setAdapter(new ChapterContentsArrayAdapter(getActivity(), R.layout.chapter_command_list_item, R.id.command_name_label, data.choiceList));
                 }
@@ -369,6 +429,21 @@ public class ManChaptersFragment extends Fragment {
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         mProgress.onOrientationChanged();
+    }
+
+    private List<ManSectionIndex> createIndexer(List<ManSectionItem> items) {
+        List<ManSectionIndex> indexes = new ArrayList<>(26); // a guess
+        char lastLetter = 0; // EOF is never encountered
+        for (int i = 0; i < items.size(); ++i) {
+            ManSectionItem msi = items.get(i);
+            char newLetter = msi.getName().charAt(0); // no commands without name, don't check
+            if(newLetter != lastLetter) { // it's a start of new index
+                ManSectionIndex newIndex = new ManSectionIndex(newLetter, i, msi.getParentChapter());
+                indexes.add(newIndex);
+                lastLetter = newLetter;
+            }
+        }
+        return indexes;
     }
 
     /**
@@ -401,17 +476,19 @@ public class ManChaptersFragment extends Fragment {
 
             if(shouldCount) {
                 transferred += res;
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        int progress = transferred * 100 / length;
-                        mProgress.setProgress(progress);
-                        if (progress == 100) {
-                            mProgress.setIndeterminate(true);
-                            shouldCount = false; // don't count further, it's pointless
+                if(getActivity() != null) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            int progress = transferred * 100 / length;
+                            mProgress.setProgress(progress);
+                            if (progress == 100) {
+                                mProgress.setIndeterminate(true);
+                                shouldCount = false; // don't count further, it's pointless
+                            }
                         }
-                    }
-                });
+                    });
+                }
             }
             return res;
         }
@@ -424,19 +501,22 @@ public class ManChaptersFragment extends Fragment {
      *
      */
     private static class ManPageContentsResult {
-
-        private ManPageContentsResult(@NonNull List<ManSectionItem> choiceList) {
-            this.choiceList = choiceList;
-            choiceDbCache = null;
-        }
-
-        private ManPageContentsResult(@NonNull RuntimeExceptionDao<ManSectionItem, String> dao, @NonNull PreparedQuery<ManSectionItem> query) {
-            this.choiceDbCache = Pair.create(dao, query);
-            choiceList = null;
-        }
-
         private final List<ManSectionItem> choiceList; // from network
         private final Pair<RuntimeExceptionDao<ManSectionItem, String>, PreparedQuery<ManSectionItem>> choiceDbCache; // from DB
+        private final String chapter;
+
+        private ManPageContentsResult(@NonNull List<ManSectionItem> choiceList, @NonNull String chapter) {
+            this.choiceList = choiceList;
+            this.choiceDbCache = null;
+            this.chapter = chapter;
+        }
+
+        private ManPageContentsResult(@NonNull RuntimeExceptionDao<ManSectionItem, String> dao, @NonNull PreparedQuery<ManSectionItem> query, @NonNull String chapter) {
+            this.choiceDbCache = Pair.create(dao, query);
+            this.choiceList = null;
+            this.chapter = chapter;
+        }
+
     }
 
     /**
@@ -467,7 +547,7 @@ public class ManChaptersFragment extends Fragment {
         @Override
         public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
             if (flagCommand) {
-                if ("a".equals(qName)) { // first child of div.e -> href, link to a command page
+                if ("a".equals(qName) && !flagDesc) { // first child of div.e -> href, link to a command page
                     msItems.get(msItems.size() - 1).setUrl(CHAPTER_COMMANDS_PREFIX + attributes.getValue("href"));
                     flagLink = true;
                 } else if ("span".equals(qName)) {

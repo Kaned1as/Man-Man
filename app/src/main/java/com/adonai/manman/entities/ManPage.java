@@ -10,6 +10,9 @@ import com.j256.ormlite.table.DatabaseTable;
  *
  * The fields "url" and "name" are not foreign for {@link com.adonai.manman.entities.ManSectionItem}
  * as they can be retrieved from search page, not contents
+ *
+ * @see com.adonai.manman.ManPageDialogFragment
+ * @see com.adonai.manman.ManPageCacheFragment
  */
 @DatabaseTable(tableName = "man_pages")
 public class ManPage {

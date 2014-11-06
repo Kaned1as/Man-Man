@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.adonai.manman.entities.ManPage;
+import com.adonai.manman.entities.ManSectionIndex;
 import com.adonai.manman.entities.ManSectionItem;
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
@@ -15,7 +16,9 @@ import com.j256.ormlite.table.TableUtils;
 import java.sql.SQLException;
 
 /**
- * Created by adonai on 29.06.14.
+ * Helper class for managing OrmLite database and DAOs
+ *
+ * @author Adonai
  */
 public class PersistManager extends OrmLiteSqliteOpenHelper {
     private static final String TAG = PersistManager.class.getSimpleName();
@@ -26,6 +29,7 @@ public class PersistManager extends OrmLiteSqliteOpenHelper {
 
     //Dao fast access links
     private RuntimeExceptionDao<ManSectionItem, String> manChaptersDao;
+    private RuntimeExceptionDao<ManSectionIndex, String> manChapterIndexesDao;
     private RuntimeExceptionDao<ManPage, String> manPagesDao;
 
     private final Context mContext;
@@ -35,11 +39,11 @@ public class PersistManager extends OrmLiteSqliteOpenHelper {
         mContext = context;
     }
 
-    //Выполняется, когда файл с БД не найден на устройстве
     @Override
     public void onCreate(SQLiteDatabase db, ConnectionSource connectionSource) {
         try {
             TableUtils.createTable(connectionSource, ManSectionItem.class);
+            TableUtils.createTable(connectionSource, ManSectionIndex.class);
             TableUtils.createTable(connectionSource, ManPage.class);
         } catch (SQLException e) {
             Log.e(TAG, "error creating DB " + DATABASE_NAME);
@@ -66,6 +70,14 @@ public class PersistManager extends OrmLiteSqliteOpenHelper {
             manPagesDao = getRuntimeExceptionDao(ManPage.class);
         }
         return manPagesDao;
+    }
+
+    @NonNull
+    public RuntimeExceptionDao<ManSectionIndex, String> getManChapterIndexesDao() {
+        if (manChapterIndexesDao == null) {
+            manChapterIndexesDao = getRuntimeExceptionDao(ManSectionIndex.class);
+        }
+        return manChapterIndexesDao;
     }
 
     @Override

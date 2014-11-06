@@ -1,5 +1,7 @@
 package com.adonai.manman.entities;
 
+import android.support.annotation.NonNull;
+
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
@@ -9,7 +11,7 @@ import com.j256.ormlite.table.DatabaseTable;
  * It also serves as DB entity-mirroring class
  */
 @DatabaseTable(tableName = "man_chapters")
-public class ManSectionItem {
+public class ManSectionItem implements Comparable<ManSectionItem> {
 
     // these are filled by page
     @DatabaseField(id = true)
@@ -21,7 +23,7 @@ public class ManSectionItem {
     @DatabaseField
     private String description;
 
-    // this is filled with parent chapter
+    // this is filled with constant parent chapter from resources
     @DatabaseField(index = true, canBeNull = false)
     private String parentChapter;
 
@@ -55,5 +57,10 @@ public class ManSectionItem {
 
     public void setParentChapter(String parentChapter) {
         this.parentChapter = parentChapter;
+    }
+
+    @Override
+    public int compareTo(@NonNull ManSectionItem another) {
+        return Character.compare(name.charAt(0), another.name.charAt(0));
     }
 }
