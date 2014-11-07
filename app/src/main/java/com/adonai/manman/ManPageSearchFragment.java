@@ -8,7 +8,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
-import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.text.TextUtils;
 import android.util.Log;
@@ -28,6 +27,7 @@ import android.widget.Toast;
 import com.adonai.manman.entities.Description;
 import com.adonai.manman.entities.SearchResult;
 import com.adonai.manman.entities.SearchResultList;
+import com.adonai.manman.misc.AbstractNetworkAsyncLoader;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -52,9 +52,6 @@ import java.util.regex.Pattern;
  * @author Adonai
  */
 public class ManPageSearchFragment extends Fragment implements AdapterView.OnItemClickListener {
-    private final static String SEARCH_COMMAND = "search.command";
-    private final static String SEARCH_ONELINER = "search.oneliner";
-
     private final static int MESSAGE_LOAD_DELAYED = 0;
 
     private final static String SEARCH_COMMAND_PREFIX = "https://www.mankier.com/api/mans/?q=";
@@ -63,6 +60,7 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
 
     private final SearchLoaderCallback mSearchCommandCallback = new SearchLoaderCallback();
     private final SearchOnelinerLoaderCallback mSearchOnelinerCallback = new SearchOnelinerLoaderCallback();
+    private final SearchQueryTextListener mSearchQueryListener = new SearchQueryTextListener();
     private final Gson mJsonConverter = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
 
     private SearchView mSearchView;
@@ -89,8 +87,8 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getLoaderManager().initLoader(MainPagerActivity.SEARCH_COMMAND_LOADER, Bundle.EMPTY, mSearchCommandCallback);
-        getLoaderManager().initLoader(MainPagerActivity.SEARCH_ONELINER_LOADER, Bundle.EMPTY, mSearchOnelinerCallback);
+        getLoaderManager().initLoader(MainPagerActivity.SEARCH_COMMAND_LOADER, null, mSearchCommandCallback);
+        getLoaderManager().initLoader(MainPagerActivity.SEARCH_ONELINER_LOADER, null, mSearchOnelinerCallback);
     }
 
     @NonNull
@@ -101,7 +99,7 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_man_page_search, container, false);
         mSearchView = (SearchView) root.findViewById(R.id.query_edit);
-        mSearchView.setOnQueryTextListener(new SearchQueryTextListener());
+        mSearchView.setOnQueryTextListener(mSearchQueryListener);
         mSearchImage = (ImageView) mSearchView.findViewById(Resources.getSystem().getIdentifier("search_mag_icon", "id", "android"));
         mSearchDefaultDrawable = mSearchImage.getDrawable();
         mSearchList = (ListView) root.findViewById(R.id.search_results_list);
@@ -124,36 +122,29 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
 
         @Override
         public Loader<SearchResultList> onCreateLoader(int id, @NonNull final Bundle args) {
-            return new AsyncTaskLoader<SearchResultList>(getActivity()) {
-                @Override
-                protected void onStartLoading() {
-                    forceLoad();
-                }
+            return new AbstractNetworkAsyncLoader<SearchResultList>(getActivity()) {
 
                 @Override
-                protected void onStopLoading() {
-                    super.onStopLoading();
-                    cancelLoad();
+                protected void onStartLoading() {
+                    if(!TextUtils.isEmpty(mSearchQueryListener.currentText)) {
+                        super.onStartLoading();
+                    }
                 }
 
                 @Override
                 public SearchResultList loadInBackground() {
-                    if(args.containsKey(SEARCH_COMMAND)) { // just searching for a command
-                        final String command = args.getString(SEARCH_COMMAND);
-                        args.remove(SEARCH_COMMAND); // load only once
-                        try {
-                            DefaultHttpClient httpClient = new DefaultHttpClient();
-                            HttpUriRequest post = new HttpGet(SEARCH_COMMAND_PREFIX + command);
-                            HttpResponse response = httpClient.execute(post);
-                            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                                String result = EntityUtils.toString(response.getEntity());
-                                return mJsonConverter.fromJson(result, SearchResultList.class);
-                            }
-                        } catch (IOException e) {
-                            Log.e("Man Man", "Network", e);
-                            // can't show a toast from a thread without looper
-                            Utils.showToastFromAnyThread(getActivity(), R.string.connection_error);
+                    try {
+                        DefaultHttpClient httpClient = new DefaultHttpClient();
+                        HttpUriRequest post = new HttpGet(SEARCH_COMMAND_PREFIX + mSearchQueryListener.currentText);
+                        HttpResponse response = httpClient.execute(post);
+                        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                            String result = EntityUtils.toString(response.getEntity());
+                            return mJsonConverter.fromJson(result, SearchResultList.class);
                         }
+                    } catch (IOException e) {
+                        Log.e("Man Man", "Network", e);
+                        // can't show a toast from a thread without looper
+                        Utils.showToastFromAnyThread(getActivity(), R.string.connection_error);
                     }
                     return null;
                 }
@@ -179,24 +170,21 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
     private class SearchOnelinerLoaderCallback implements LoaderManager.LoaderCallbacks<String> {
         @Override
         public Loader<String> onCreateLoader(int id, @NonNull final Bundle args) {
-            return new AsyncTaskLoader<String>(getActivity()) {
+            return new AbstractNetworkAsyncLoader<String>(getActivity()) {
+
                 @Override
                 public String loadInBackground() {
-                    if(args.containsKey(SEARCH_ONELINER)) { // just searching for a command
-                        final String script = args.getString(SEARCH_ONELINER);
-                        args.remove(SEARCH_ONELINER); // load only once
-                        try {
-                            DefaultHttpClient httpClient = new DefaultHttpClient();
-                            HttpUriRequest post = new HttpGet(SEARCH_ONELINER_PREFIX + script);
-                            HttpResponse response = httpClient.execute(post);
-                            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                                return EntityUtils.toString(response.getEntity());
-                            }
-                        } catch (IOException e) {
-                            Log.e("Man Man", "Network", e);
-                            // can't show a toast from a thread without looper
-                            Utils.showToastFromAnyThread(getActivity(), R.string.connection_error);
+                    try {
+                        DefaultHttpClient httpClient = new DefaultHttpClient(Utils.defaultHttpParams);
+                        HttpUriRequest post = new HttpGet(SEARCH_ONELINER_PREFIX + mSearchQueryListener.currentText);
+                        HttpResponse response = httpClient.execute(post);
+                        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                            return EntityUtils.toString(response.getEntity());
                         }
+                    } catch (IOException e) {
+                        Log.e("Man Man", "Network", e);
+                        // can't show a toast from a thread without looper
+                        Utils.showToastFromAnyThread(getActivity(), R.string.connection_error);
                     }
                     return null;
                 }
@@ -228,7 +216,6 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
         public boolean onQueryTextChange(String newText) {
             if(TextUtils.isEmpty(newText)) {
                 currentText = newText;
-                getLoaderManager().restartLoader(MainPagerActivity.SEARCH_COMMAND_LOADER, Bundle.EMPTY, mSearchCommandCallback);
                 return true;
             }
 
@@ -242,18 +229,15 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
 
         // make a delay for not spamming requests to server so fast
         private void fireLoader(boolean immediate) {
-            final Bundle argsForLoader = new Bundle();
-            mUiHandler.removeMessages(MESSAGE_LOAD_DELAYED);
+            mUiHandler.removeCallbacksAndMessages(null);
             mUiHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     mSearchImage.setImageResource(R.drawable.rotating_wait);
                     if(!currentText.contains(" ")) { // this is a single command query, just search
-                        argsForLoader.putString(SEARCH_COMMAND, currentText);
-                        getLoaderManager().restartLoader(MainPagerActivity.SEARCH_COMMAND_LOADER, argsForLoader, mSearchCommandCallback);
+                        getLoaderManager().getLoader(MainPagerActivity.SEARCH_COMMAND_LOADER).onContentChanged();
                     } else { // this is oneliner with arguments/other commands
-                        argsForLoader.putString(SEARCH_ONELINER, currentText);
-                        getLoaderManager().restartLoader(MainPagerActivity.SEARCH_ONELINER_LOADER, argsForLoader, mSearchOnelinerCallback);
+                        getLoaderManager().getLoader(MainPagerActivity.SEARCH_ONELINER_LOADER).onContentChanged();
                     }
                 }
             }, immediate ? 0 : 800);

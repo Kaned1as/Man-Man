@@ -9,10 +9,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.LoaderManager;
-import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,6 +22,7 @@ import android.widget.ViewFlipper;
 
 import com.adonai.manman.database.DbProvider;
 import com.adonai.manman.entities.ManPage;
+import com.adonai.manman.misc.AbstractNetworkAsyncLoader;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -102,58 +101,39 @@ public class ManPageDialogFragment extends DialogFragment {
         @NonNull
         @Override
         public Loader<String> onCreateLoader(int id, Bundle args) {
-            return new AsyncTaskLoader<String>(getActivity()) {
-                private String oldAddress;
-
-                /**
-                 *  load only if page was changed
-                 * actually this can only happen if you clicked a link
-                 * and paused activity with a speed of light
-                 *
-                 * @see com.adonai.manman.ManPageDialogFragment.ManPageChromeClient
-                 */
-                @Override
-                protected void onStartLoading() {
-                    if(!TextUtils.equals(oldAddress, mAddressUrl)) {
-                        oldAddress = mAddressUrl;
-                        forceLoad();
-                    }
-                }
+            return new AbstractNetworkAsyncLoader<String>(getActivity()) {
 
                 @Nullable
                 @Override
                 public String loadInBackground() {
-                    if(mAddressUrl != null) { // just searching for a command
-
-                        try { // query cache database for corresponding command
-                            ManPage cached = DbProvider.getHelper().getManPagesDao().queryForId(mAddressUrl);
-                            if(cached != null) {
-                                return cached.getWebContent();
-                            }
-                        } catch (RuntimeException e) { // it's RuntimeExceptionDao, so catch runtime exceptions
-                            Log.e("Man Man", "Database", e);
-                            Utils.showToastFromAnyThread(getActivity(), R.string.database_retrieve_error);
+                    try { // query cache database for corresponding command
+                        ManPage cached = DbProvider.getHelper().getManPagesDao().queryForId(mAddressUrl);
+                        if(cached != null) {
+                            return cached.getWebContent();
                         }
+                    } catch (RuntimeException e) { // it's RuntimeExceptionDao, so catch runtime exceptions
+                        Log.e("Man Man", "Database", e);
+                        Utils.showToastFromAnyThread(getActivity(), R.string.database_retrieve_error);
+                    }
 
-                        try {
-                            Document root = Jsoup.connect(mAddressUrl).timeout(10000).get();
-                            Element man = root.select("div.man-page").first();
-                            if(man != null) { // it's actually a man page
-                                String webContent = man.html();
+                    try {
+                        Document root = Jsoup.connect(mAddressUrl).timeout(10000).get();
+                        Element man = root.select("div.man-page").first();
+                        if(man != null) { // it's actually a man page
+                            String webContent = man.html();
 
-                                // save to DB for caching
-                                ManPage toCache = new ManPage(mCommandName, mAddressUrl);
-                                toCache.setWebContent(webContent);
-                                DbProvider.getHelper().getManPagesDao().createIfNotExists(toCache);
-                                LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(new Intent(MainPagerActivity.DB_CHANGE_NOTIFY));
+                            // save to DB for caching
+                            ManPage toCache = new ManPage(mCommandName, mAddressUrl);
+                            toCache.setWebContent(webContent);
+                            DbProvider.getHelper().getManPagesDao().createIfNotExists(toCache);
+                            LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(new Intent(MainPagerActivity.DB_CHANGE_NOTIFY));
 
-                                return webContent;
-                            }
-                        } catch (IOException e) {
-                            Log.e("Man Man", "Database", e);
-                            // can't show a toast from a thread without looper
-                            Utils.showToastFromAnyThread(getActivity(), R.string.connection_error);
+                            return webContent;
                         }
+                    } catch (IOException e) {
+                        Log.e("Man Man", "Database", e);
+                        // can't show a toast from a thread without looper
+                        Utils.showToastFromAnyThread(getActivity(), R.string.connection_error);
                     }
                     return null;
                 }
@@ -188,7 +168,7 @@ public class ManPageDialogFragment extends DialogFragment {
                 mFlipper.showPrevious();
                 mAddressUrl = url;
                 mCommandName = url.substring(url.lastIndexOf('/') + 1);
-                getLoaderManager().restartLoader(MainPagerActivity.MAN_PAGE_RETRIEVER_LOADER, null, manPageCallback);
+                getLoaderManager().getLoader(MainPagerActivity.MAN_PAGE_RETRIEVER_LOADER).onContentChanged();
                 return true;
             }
             return shouldOverrideUrlLoadingOld(view, url);

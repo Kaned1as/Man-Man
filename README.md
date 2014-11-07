@@ -3,6 +3,9 @@ Man-Man
 
 Android client for accessing API and content of www.mankier.com site
 
+Basically this means that this is a convenient tool for any Linux enthusiast familiar with
+man pages. It provides a fast way to search, browse and save man pages on your android device.
+
 Features
 --------
 
