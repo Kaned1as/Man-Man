@@ -17,9 +17,32 @@
         android:layout_gravity="center"
         android:contentDescription="@string/loading" />
 
-    <WebView
-        android:layerType="software"
+    <android.support.v4.widget.SlidingPaneLayout
+        android:id="@+id/sliding_pane"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/man_content_web" />
+        android:layout_height="match_parent">
+
+        <ScrollView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:background="@color/light_background"
+            android:padding="5dp">
+
+            <LinearLayout
+                android:id="@+id/link_list"
+                android:orientation="vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:dividerPadding="10dp"
+                android:showDividers="middle">
+
+                </LinearLayout>
+        </ScrollView>
+
+        <WebView
+            android:layerType="software"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/man_content_web" />
+    </android.support.v4.widget.SlidingPaneLayout>
 </ViewFlipper>

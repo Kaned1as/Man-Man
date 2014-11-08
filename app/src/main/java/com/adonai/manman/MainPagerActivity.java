@@ -3,9 +3,7 @@ package com.adonai.manman;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -45,15 +43,12 @@ public class MainPagerActivity extends FragmentActivity {
     private IabHelper mHelper;
     private boolean mCanBuy = false;
 
-
-    private SharedPreferences mPrefs;
     private ViewPager mPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_pager);
-        mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         mPager = (ViewPager) findViewById(R.id.page_holder);
         mPager.setAdapter(new ManFragmentPagerAdapter(getSupportFragmentManager()));

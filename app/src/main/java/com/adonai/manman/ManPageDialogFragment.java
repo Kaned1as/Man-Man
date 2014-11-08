@@ -1,9 +1,12 @@
 package com.adonai.manman;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.Browser;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -11,6 +14,8 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.widget.SlidingPaneLayout;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +23,8 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.ViewFlipper;
 
 import com.adonai.manman.database.DbProvider;
@@ -27,9 +34,12 @@ import com.adonai.manman.misc.AbstractNetworkAsyncLoader;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Dialog fragment for showing web page with man content
@@ -38,6 +48,8 @@ import java.net.URISyntaxException;
  * @see com.adonai.manman.entities.ManPage
  */
 public class ManPageDialogFragment extends DialogFragment {
+    private static final String USER_LEARNED_SLIDER = "user.learned.slider";
+
     private static final String PARAM_ADDRESS = "param.address";
     private static final String PARAM_NAME = "param.name";
 
@@ -45,6 +57,8 @@ public class ManPageDialogFragment extends DialogFragment {
     private String mAddressUrl;
     private String mCommandName;
 
+    private LinearLayout mLinkContainer;
+    private SlidingPaneLayout mSlider;
     private ViewFlipper mFlipper;
     private WebView mContent;
 
@@ -72,12 +86,16 @@ public class ManPageDialogFragment extends DialogFragment {
         }
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_man_page_show, container, false);
+        mLinkContainer = (LinearLayout) root.findViewById(R.id.link_list);
+        mSlider = (SlidingPaneLayout) root.findViewById(R.id.sliding_pane);
         mFlipper = (ViewFlipper) root.findViewById(R.id.flipper);
         mContent = (WebView) root.findViewById(R.id.man_content_web);
         mContent.setWebViewClient(new ManPageChromeClient());
+        mContent.getSettings().setJavaScriptEnabled(true);
         getLoaderManager().initLoader(MainPagerActivity.MAN_PAGE_RETRIEVER_LOADER, null, manPageCallback);
         return root;
     }
@@ -97,19 +115,19 @@ public class ManPageDialogFragment extends DialogFragment {
      * On fail dismisses parent dialog
      *
      */
-    private class RetrieveManPageCallback implements LoaderManager.LoaderCallbacks<String> {
+    private class RetrieveManPageCallback implements LoaderManager.LoaderCallbacks<ManPage> {
         @NonNull
         @Override
-        public Loader<String> onCreateLoader(int id, Bundle args) {
-            return new AbstractNetworkAsyncLoader<String>(getActivity()) {
+        public Loader<ManPage> onCreateLoader(int id, Bundle args) {
+            return new AbstractNetworkAsyncLoader<ManPage>(getActivity()) {
 
                 @Nullable
                 @Override
-                public String loadInBackground() {
+                public ManPage loadInBackground() {
                     try { // query cache database for corresponding command
                         ManPage cached = DbProvider.getHelper().getManPagesDao().queryForId(mAddressUrl);
                         if(cached != null) {
-                            return cached.getWebContent();
+                            return cached;
                         }
                     } catch (RuntimeException e) { // it's RuntimeExceptionDao, so catch runtime exceptions
                         Log.e("Man Man", "Database", e);
@@ -121,14 +139,23 @@ public class ManPageDialogFragment extends DialogFragment {
                         Element man = root.select("div.man-page").first();
                         if(man != null) { // it's actually a man page
                             String webContent = man.html();
+                            // retrieve links
+                            Elements links = man.select("a[href*=#]");
+                            TreeSet<String> linkContainer = new TreeSet<>();
+                            for(Element link : links) {
+                                if(!TextUtils.isEmpty(link.text()) && link.attr("href").contains("#" + link.text())) { // it's like <a href="http:/ex.com/#a">-x</a>
+                                    linkContainer.add(link.text());
+                                }
+                            }
 
                             // save to DB for caching
                             ManPage toCache = new ManPage(mCommandName, mAddressUrl);
+                            toCache.setLinks(linkContainer);
                             toCache.setWebContent(webContent);
                             DbProvider.getHelper().getManPagesDao().createIfNotExists(toCache);
                             LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(new Intent(MainPagerActivity.DB_CHANGE_NOTIFY));
 
-                            return webContent;
+                            return toCache;
                         }
                     } catch (IOException e) {
                         Log.e("Man Man", "Database", e);
@@ -141,18 +168,69 @@ public class ManPageDialogFragment extends DialogFragment {
         }
 
         @Override
-        public void onLoadFinished(Loader<String> loader, String data) {
+        public void onLoadFinished(Loader<ManPage> loader, ManPage data) {
             if(data != null) {
-                mContent.loadDataWithBaseURL(mAddressUrl, data, "text/html", "UTF-8", null);
+                mContent.loadDataWithBaseURL(mAddressUrl, data.getWebContent(), "text/html", "UTF-8", null);
+                fillLinkPane(data.getLinks());
                 mFlipper.showNext();
+                shakeSlider();
             } else {
                 dismissAllowingStateLoss(); // can't perform transactions from onLoadFinished
             }
         }
 
         @Override
-        public void onLoaderReset(Loader<String> loader) {
+        public void onLoaderReset(Loader<ManPage> loader) {
             // never used
+        }
+    }
+
+    private void shakeSlider() {
+        if(mLinkContainer.getChildCount() == 0) // nothing to show in the links pane
+            return;
+
+        SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        if(mPrefs.contains(USER_LEARNED_SLIDER))
+            return;
+
+        mSlider.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mSlider.openPane();
+            }
+        }, 1000);
+        mSlider.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mSlider.closePane();
+            }
+        }, 2000);
+        mPrefs.edit().putBoolean(USER_LEARNED_SLIDER, true).apply();
+    }
+
+    private void fillLinkPane(Set<String> links) {
+        mLinkContainer.removeAllViews();
+
+        if(links == null || links.isEmpty())
+            return;
+
+        for (final String link : links) {
+            // hack  for https://code.google.com/p/android/issues/detail?id=36660 - place inside of FrameLayout
+            View root = LayoutInflater.from(getActivity()).inflate(R.layout.link_text_item, mLinkContainer, false);
+            TextView linkLabel = (TextView) root.findViewById(R.id.link_text);
+            linkLabel.setText(link);
+            root.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mContent.loadUrl("javascript:(function(){" +
+                            "l=document.querySelector('a[href$=\"#" + link + "\"]');" +
+                            "e=document.createEvent('HTMLEvents');" +
+                            "e.initEvent('click',true,true);" +
+                            "l.dispatchEvent(e);" +
+                            "})()");
+                }
+            });
+            mLinkContainer.addView(root);
         }
     }
 

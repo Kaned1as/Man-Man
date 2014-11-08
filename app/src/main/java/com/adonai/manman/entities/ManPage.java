@@ -4,6 +4,8 @@ import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
+import java.util.TreeSet;
+
 /**
  * Holder for caching man-page contents to DB
  * Represents man page contents and provides relation to chapter page with description if possible
@@ -36,6 +38,9 @@ public class ManPage {
     @DatabaseField(dataType = DataType.LONG_STRING)
     private String webContent;
 
+    @DatabaseField(dataType = DataType.SERIALIZABLE)
+    private TreeSet<String> links;
+
 
     public String getName() {
         return name;
@@ -59,5 +64,13 @@ public class ManPage {
 
     public void setWebContent(String webContent) {
         this.webContent = webContent;
+    }
+
+    public TreeSet<String> getLinks() {
+        return links;
+    }
+
+    public void setLinks(TreeSet<String> links) {
+        this.links = links;
     }
 }
