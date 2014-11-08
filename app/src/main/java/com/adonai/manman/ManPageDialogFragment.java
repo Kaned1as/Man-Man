@@ -69,7 +69,6 @@ public class ManPageDialogFragment extends DialogFragment {
         if(getArguments() != null) {
             mAddressUrl = getArguments().getString(PARAM_ADDRESS);
             mCommandName = getArguments().getString(PARAM_NAME);
-            getLoaderManager().initLoader(MainPagerActivity.MAN_PAGE_RETRIEVER_LOADER, null, manPageCallback);
         }
     }
 
@@ -79,6 +78,7 @@ public class ManPageDialogFragment extends DialogFragment {
         mFlipper = (ViewFlipper) root.findViewById(R.id.flipper);
         mContent = (WebView) root.findViewById(R.id.man_content_web);
         mContent.setWebViewClient(new ManPageChromeClient());
+        getLoaderManager().initLoader(MainPagerActivity.MAN_PAGE_RETRIEVER_LOADER, null, manPageCallback);
         return root;
     }
 

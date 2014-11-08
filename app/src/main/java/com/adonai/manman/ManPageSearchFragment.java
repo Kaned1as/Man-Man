@@ -60,7 +60,6 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
 
     private final SearchLoaderCallback mSearchCommandCallback = new SearchLoaderCallback();
     private final SearchOnelinerLoaderCallback mSearchOnelinerCallback = new SearchOnelinerLoaderCallback();
-    private final SearchQueryTextListener mSearchQueryListener = new SearchQueryTextListener();
     private final Gson mJsonConverter = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
 
     private SearchView mSearchView;
@@ -84,13 +83,6 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
         // Required empty public constructor
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        getLoaderManager().initLoader(MainPagerActivity.SEARCH_COMMAND_LOADER, null, mSearchCommandCallback);
-        getLoaderManager().initLoader(MainPagerActivity.SEARCH_ONELINER_LOADER, null, mSearchOnelinerCallback);
-    }
-
     @NonNull
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -99,13 +91,15 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_man_page_search, container, false);
         mSearchView = (SearchView) root.findViewById(R.id.query_edit);
-        mSearchView.setOnQueryTextListener(mSearchQueryListener);
+        mSearchView.setOnQueryTextListener(new SearchQueryTextListener());
         mSearchImage = (ImageView) mSearchView.findViewById(Resources.getSystem().getIdentifier("search_mag_icon", "id", "android"));
         mSearchDefaultDrawable = mSearchImage.getDrawable();
         mSearchList = (ListView) root.findViewById(R.id.search_results_list);
         mSearchList.setOnItemClickListener(this);
 
         mUiHandler = new Handler();
+        getLoaderManager().initLoader(MainPagerActivity.SEARCH_COMMAND_LOADER, null, mSearchCommandCallback);
+        getLoaderManager().initLoader(MainPagerActivity.SEARCH_ONELINER_LOADER, null, mSearchOnelinerCallback);
         return root;
     }
 
@@ -121,12 +115,12 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
     private class SearchLoaderCallback implements LoaderManager.LoaderCallbacks<SearchResultList> {
 
         @Override
-        public Loader<SearchResultList> onCreateLoader(int id, @NonNull final Bundle args) {
+        public Loader<SearchResultList> onCreateLoader(int id, final Bundle args) {
             return new AbstractNetworkAsyncLoader<SearchResultList>(getActivity()) {
 
                 @Override
                 protected void onStartLoading() {
-                    if(!TextUtils.isEmpty(mSearchQueryListener.currentText)) {
+                    if(!TextUtils.isEmpty(mSearchView.getQuery().toString())) {
                         super.onStartLoading();
                     }
                 }
@@ -135,7 +129,7 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
                 public SearchResultList loadInBackground() {
                     try {
                         DefaultHttpClient httpClient = new DefaultHttpClient();
-                        HttpUriRequest post = new HttpGet(SEARCH_COMMAND_PREFIX + mSearchQueryListener.currentText);
+                        HttpUriRequest post = new HttpGet(SEARCH_COMMAND_PREFIX + mSearchView.getQuery().toString());
                         HttpResponse response = httpClient.execute(post);
                         if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                             String result = EntityUtils.toString(response.getEntity());
@@ -169,14 +163,14 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
 
     private class SearchOnelinerLoaderCallback implements LoaderManager.LoaderCallbacks<String> {
         @Override
-        public Loader<String> onCreateLoader(int id, @NonNull final Bundle args) {
+        public Loader<String> onCreateLoader(int id, final Bundle args) {
             return new AbstractNetworkAsyncLoader<String>(getActivity()) {
 
                 @Override
                 public String loadInBackground() {
                     try {
                         DefaultHttpClient httpClient = new DefaultHttpClient(Utils.defaultHttpParams);
-                        HttpUriRequest post = new HttpGet(SEARCH_ONELINER_PREFIX + mSearchQueryListener.currentText);
+                        HttpUriRequest post = new HttpGet(SEARCH_ONELINER_PREFIX + mSearchView.getQuery().toString());
                         HttpResponse response = httpClient.execute(post);
                         if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                             return EntityUtils.toString(response.getEntity());
@@ -216,6 +210,7 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
         public boolean onQueryTextChange(String newText) {
             if(TextUtils.isEmpty(newText)) {
                 currentText = newText;
+                mUiHandler.removeCallbacksAndMessages(null);
                 return true;
             }
 

@@ -48,4 +48,10 @@ public abstract class AbstractNetworkAsyncLoader<D> extends AsyncTaskLoader<D> {
             super.deliverResult(data);
         }
     }
+
+    @Override
+    protected void onReset() {
+        super.onReset();
+        mData = null;
+    }
 }

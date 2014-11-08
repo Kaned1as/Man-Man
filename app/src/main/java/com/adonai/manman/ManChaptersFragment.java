@@ -7,7 +7,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
-import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.util.Log;
 import android.util.Pair;
@@ -23,6 +22,7 @@ import com.adonai.manman.adapters.ChaptersArrayAdapter;
 import com.adonai.manman.database.DbProvider;
 import com.adonai.manman.entities.ManSectionIndex;
 import com.adonai.manman.entities.ManSectionItem;
+import com.adonai.manman.misc.AbstractNetworkAsyncLoader;
 import com.adonai.manman.misc.ManSectionExtractor;
 import com.adonai.manman.views.ProgressBarWrapper;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
@@ -122,12 +122,6 @@ public class ManChaptersFragment extends Fragment {
         // Required empty public constructor
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        getLoaderManager().initLoader(MainPagerActivity.CONTENTS_RETRIEVER_LOADER, Bundle.EMPTY, mContentRetrieveCallback);
-    }
-
     @NonNull
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -139,6 +133,7 @@ public class ManChaptersFragment extends Fragment {
         mListView.setAdapter(mChaptersAdapter);
         mListView.setOnItemClickListener(mChapterClickListener);
         mProgress = new ProgressBarWrapper(getActivity());
+        getLoaderManager().initLoader(MainPagerActivity.CONTENTS_RETRIEVER_LOADER, Bundle.EMPTY, mContentRetrieveCallback);
         return root;
     }
 
@@ -153,12 +148,12 @@ public class ManChaptersFragment extends Fragment {
     private class RetrieveContentsCallback implements LoaderManager.LoaderCallbacks<ManPageContentsResult> {
         @Override
         public Loader<ManPageContentsResult> onCreateLoader(int id, @NonNull final Bundle args) {
-            return new AsyncTaskLoader<ManPageContentsResult>(getActivity()) {
+            return new AbstractNetworkAsyncLoader<ManPageContentsResult>(getActivity()) {
 
                 @Override
                 protected void onStartLoading() {
                     if(args.containsKey(CHAPTER_INDEX)) {
-                        forceLoad();
+                        super.onStartLoading();
                     }
                 }
 
@@ -173,7 +168,6 @@ public class ManChaptersFragment extends Fragment {
                 public ManPageContentsResult loadInBackground() {
                     // retrieve chapter content
                     String index = args.getString(CHAPTER_INDEX);
-                    args.remove(CHAPTER_INDEX); // load only once
 
                     // check the DB for cached pages first
                     try {

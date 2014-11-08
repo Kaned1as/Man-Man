@@ -129,8 +129,8 @@ public class MainPagerActivity extends FragmentActivity {
 
     @Override
     protected void onStart() {
-        super.onStart();
         DbProvider.setHelper(this);
+        super.onStart();
     }
 
     @Override
