@@ -49,7 +49,7 @@ public class Utils {
 
     public static void showToastFromAnyThread(final Activity target, final int stringRes) {
         // can't show a toast from a thread without looper
-        if(target == null)
+        if(target == null) // probably called from detached fragment (app hidden)
             return;
 
         target.runOnUiThread(new Runnable() {

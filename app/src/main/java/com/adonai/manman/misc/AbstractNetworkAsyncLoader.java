@@ -18,17 +18,25 @@ public abstract class AbstractNetworkAsyncLoader<D> extends AsyncTaskLoader<D> {
 
     @Override
     protected void onStopLoading() {
-        super.onStopLoading();
         cancelLoad();
     }
 
     @Override
     protected void onStartLoading() {
-        super.onStartLoading();
+        if (mData != null) {
+            // Deliver any previously loaded data immediately.
+            deliverResult(mData);
+        }
 
         if (takeContentChanged() || mData == null) {
             forceLoad();
         }
+    }
+
+    @Override
+    protected D onLoadInBackground() {
+        mData = loadInBackground();
+        return mData;
     }
 
     @Override
@@ -37,10 +45,6 @@ public abstract class AbstractNetworkAsyncLoader<D> extends AsyncTaskLoader<D> {
             // The Loader has been reset; ignore the result and invalidate the data.
             return;
         }
-
-        // Hold a reference to the old data so it doesn't get garbage collected.
-        // We must protect it until the new data has been delivered.
-        mData = data;
 
         if (isStarted()) {
             // If the Loader is in a started state, deliver the results to the
@@ -51,7 +55,6 @@ public abstract class AbstractNetworkAsyncLoader<D> extends AsyncTaskLoader<D> {
 
     @Override
     protected void onReset() {
-        super.onReset();
         mData = null;
     }
 }

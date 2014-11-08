@@ -168,6 +168,8 @@ public class ManChaptersFragment extends Fragment {
                 public ManPageContentsResult loadInBackground() {
                     // retrieve chapter content
                     String index = args.getString(CHAPTER_INDEX);
+                    if(!isStarted()) // task was cancelled
+                        return null;
 
                     // check the DB for cached pages first
                     try {
@@ -178,6 +180,9 @@ public class ManChaptersFragment extends Fragment {
                         Log.e("Man Man", "Database", e);
                         Utils.showToastFromAnyThread(getActivity(), R.string.database_retrieve_error);
                     }
+
+                    if(!isStarted()) // task was cancelled
+                        return null;
 
                     // If we're here, nothing is in DB for now
                     List<ManSectionItem> results = loadFromNetwork(index, CHAPTER_COMMANDS_PREFIX + "/" + index);
@@ -214,28 +219,31 @@ public class ManChaptersFragment extends Fragment {
                     return  null;
                 }
 
-            private void saveToDb(final List<ManSectionItem> items) {
-                // save to DB for caching
-                try {
-                    TransactionManager.callInTransaction(DbProvider.getHelper().getConnectionSource(), new Callable<Void>() {
-                        @Override
-                        public Void call() throws Exception {
-                            for (ManSectionItem msi : items) {
-                                DbProvider.getHelper().getManChaptersDao().create(msi);
+                private void saveToDb(final List<ManSectionItem> items) {
+                    if(!isStarted()) // task was cancelled
+                        return;
+
+                    // save to DB for caching
+                    try {
+                        TransactionManager.callInTransaction(DbProvider.getHelper().getConnectionSource(), new Callable<Void>() {
+                            @Override
+                            public Void call() throws Exception {
+                                for (ManSectionItem msi : items) {
+                                    DbProvider.getHelper().getManChaptersDao().create(msi);
+                                }
+                                List<ManSectionIndex> indexes = Utils.createIndexer(items);
+                                for (ManSectionIndex index : indexes) {
+                                    DbProvider.getHelper().getManChapterIndexesDao().create(index);
+                                }
+                                return null;
                             }
-                            List<ManSectionIndex> indexes = Utils.createIndexer(items);
-                            for (ManSectionIndex index : indexes) {
-                                DbProvider.getHelper().getManChapterIndexesDao().create(index);
-                            }
-                            return null;
-                        }
-                    });
-                } catch (SQLException e) {
-                    Log.e("Man Man", "Database", e);
-                    // can't show a toast from a thread without looper
-                    Utils.showToastFromAnyThread(getActivity(), R.string.database_save_error);
+                        });
+                    } catch (SQLException e) {
+                        Log.e("Man Man", "Database", e);
+                        // can't show a toast from a thread without looper
+                        Utils.showToastFromAnyThread(getActivity(), R.string.database_save_error);
+                    }
                 }
-            }
             };
         }
 
