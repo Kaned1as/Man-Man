@@ -11,6 +11,7 @@ import com.j256.ormlite.table.DatabaseTable;
  * It also serves as DB entity-mirroring class
  */
 @DatabaseTable(tableName = "man_chapters")
+@SuppressWarnings("UnusedDeclaration") // reflection in Gson
 public class ManSectionItem implements Comparable<ManSectionItem> {
 
     // these are filled by page
@@ -61,6 +62,6 @@ public class ManSectionItem implements Comparable<ManSectionItem> {
 
     @Override
     public int compareTo(@NonNull ManSectionItem another) {
-        return Character.compare(name.charAt(0), another.name.charAt(0));
+        return name.charAt(0) - another.name.charAt(0);
     }
 }

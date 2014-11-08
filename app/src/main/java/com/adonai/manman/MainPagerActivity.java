@@ -1,5 +1,6 @@
 package com.adonai.manman;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -28,6 +29,7 @@ import java.util.Date;
  *
  * @author Adonai
  */
+@SuppressWarnings("FieldCanBeLocal")
 public class MainPagerActivity extends FragmentActivity {
 
     final static int SEARCH_COMMAND_LOADER = 0;
@@ -142,6 +144,7 @@ public class MainPagerActivity extends FragmentActivity {
     /**
      * Shows about dialog, with description, author and stuff
      */
+    @SuppressLint("InflateParams")
     private void showAbout() {
         // Inflate the about message contents
         View messageView = getLayoutInflater().inflate(R.layout.about_dialog, null, false);

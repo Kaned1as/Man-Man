@@ -9,6 +9,7 @@ import java.util.List;
  * @see com.google.gson.Gson
  * @author Adonai
  */
+@SuppressWarnings("UnusedDeclaration") // reflection in Gson
 public class SearchResultList {
     private String query;
     private boolean truncated;

@@ -2,7 +2,6 @@ package com.adonai.manman.adapters;
 
 import android.app.Activity;
 import android.database.Cursor;
-import android.support.annotation.NonNull;
 import android.widget.BaseAdapter;
 
 import com.j256.ormlite.android.AndroidDatabaseResults;
@@ -58,11 +57,6 @@ public abstract class OrmLiteCursorAdapter<T> extends BaseAdapter {
     @Override
     public long getItemId(int position) {
         return position;
-    }
-
-    public void setQuery(@NonNull PreparedQuery<T> query) {
-        mQuery = query;
-        updateQuery();
     }
 
     private void updateQuery() {

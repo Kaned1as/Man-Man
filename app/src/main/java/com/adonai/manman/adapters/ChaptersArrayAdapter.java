@@ -16,7 +16,7 @@ import java.util.Map;
  * There are only about ten constant chapters, so it was convenient to place it to the string-array
  * <br/>
  * The array is retrieved via {@link com.adonai.manman.Utils#parseStringArray(android.content.Context, int)}
- * and stored in {@link #mCachedChapters}
+ * and stored in {@link com.adonai.manman.ManChaptersFragment#mCachedChapters}
  */
 public class ChaptersArrayAdapter extends ArrayAdapter<Map.Entry<String, String>> {
 

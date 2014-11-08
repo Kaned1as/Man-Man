@@ -32,11 +32,8 @@ public class PersistManager extends OrmLiteSqliteOpenHelper {
     private RuntimeExceptionDao<ManSectionIndex, String> manChapterIndexesDao;
     private RuntimeExceptionDao<ManPage, String> manPagesDao;
 
-    private final Context mContext;
-
-    public PersistManager(Context context){
+    public PersistManager(Context context) {
         super(context,DATABASE_NAME, null, DATABASE_VERSION);
-        mContext = context;
     }
 
     @Override

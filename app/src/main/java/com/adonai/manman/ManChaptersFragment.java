@@ -52,6 +52,7 @@ import java.util.zip.GZIPInputStream;
  *
  * @author Adonai
  */
+@SuppressWarnings("FieldCanBeLocal")
 public class ManChaptersFragment extends Fragment {
     public final static String CHAPTER_INDEX = "chapter.index";
 

@@ -6,6 +6,7 @@ package com.adonai.manman.entities;
  * @see com.google.gson.Gson
  * @author Adonai
  */
+@SuppressWarnings("UnusedDeclaration") // reflection in Gson
 public class Description {
     private String name;
     private String num;

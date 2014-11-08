@@ -53,14 +53,13 @@ import java.util.regex.Pattern;
  * @author Adonai
  */
 public class ManPageSearchFragment extends Fragment {
-    private final static int MESSAGE_LOAD_DELAYED = 0;
 
     private final static String SEARCH_COMMAND_PREFIX = "https://www.mankier.com/api/mans/?q=";
-    private final static String SEARCH_ONELINER_PREFIX = "https://www.mankier.com/api/explain/?cols=80&q=";
+    private final static String SEARCH_ONE_LINER_PREFIX = "https://www.mankier.com/api/explain/?cols=80&q=";
     private final static String SEARCH_DESCRIPTION_PREFIX = "https://www.mankier.com/api/mans/";
 
     private final SearchLoaderCallback mSearchCommandCallback = new SearchLoaderCallback();
-    private final SearchOnelinerLoaderCallback mSearchOnelinerCallback = new SearchOnelinerLoaderCallback();
+    private final SearchOneLinerLoaderCallback mSearchOneLinerCallback = new SearchOneLinerLoaderCallback();
     private final Gson mJsonConverter = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
 
     private SearchView mSearchView;
@@ -114,7 +113,7 @@ public class ManPageSearchFragment extends Fragment {
 
         mUiHandler = new Handler();
         getLoaderManager().initLoader(MainPagerActivity.SEARCH_COMMAND_LOADER, null, mSearchCommandCallback);
-        getLoaderManager().initLoader(MainPagerActivity.SEARCH_ONELINER_LOADER, null, mSearchOnelinerCallback);
+        getLoaderManager().initLoader(MainPagerActivity.SEARCH_ONELINER_LOADER, null, mSearchOneLinerCallback);
         return root;
     }
 
@@ -169,7 +168,7 @@ public class ManPageSearchFragment extends Fragment {
 
     }
 
-    private class SearchOnelinerLoaderCallback implements LoaderManager.LoaderCallbacks<String> {
+    private class SearchOneLinerLoaderCallback implements LoaderManager.LoaderCallbacks<String> {
         @Override
         public Loader<String> onCreateLoader(int id, final Bundle args) {
             return new AbstractNetworkAsyncLoader<String>(getActivity()) {
@@ -186,7 +185,7 @@ public class ManPageSearchFragment extends Fragment {
                     try {
                         DefaultHttpClient httpClient = new DefaultHttpClient(Utils.defaultHttpParams);
                         String request = URLEncoder.encode(mSearchView.getQuery().toString(), "UTF-8");
-                        HttpUriRequest post = new HttpGet(SEARCH_ONELINER_PREFIX + request);
+                        HttpUriRequest post = new HttpGet(SEARCH_ONE_LINER_PREFIX + request);
                         HttpResponse response = httpClient.execute(post);
                         if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                             return EntityUtils.toString(response.getEntity());

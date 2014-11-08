@@ -12,6 +12,7 @@ import com.j256.ormlite.table.DatabaseTable;
  * @see com.adonai.manman.ManChaptersFragment
  */
 @DatabaseTable(tableName = "man_chapter_indexer")
+@SuppressWarnings("UnusedDeclaration") // reflection in Gson
 public class ManSectionIndex {
 
     public ManSectionIndex(char letter, int index, String parentChapter) {

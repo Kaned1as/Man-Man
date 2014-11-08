@@ -15,6 +15,7 @@ import com.j256.ormlite.table.DatabaseTable;
  * @see com.adonai.manman.ManPageCacheFragment
  */
 @DatabaseTable(tableName = "man_pages")
+@SuppressWarnings("UnusedDeclaration") // reflection in Gson
 public class ManPage {
 
     public ManPage(String name, String url) {

@@ -5,8 +5,6 @@
     tools:context="com.adonai.manman.ManPageSearchFragment"
     android:orientation="vertical">
 
-    <!-- TODO: Update blank fragment layout -->
-
     <SearchView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
