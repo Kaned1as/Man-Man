@@ -175,7 +175,8 @@ public class ManPageSearchFragment extends Fragment {
 
                 @Override
                 protected void onStartLoading() {
-                    if(!TextUtils.isEmpty(mSearchView.getQuery().toString())) {
+                    String query = mSearchView.getQuery().toString();
+                    if(!TextUtils.isEmpty(query) && query.contains(" ")) {
                         super.onStartLoading();
                     }
                 }
