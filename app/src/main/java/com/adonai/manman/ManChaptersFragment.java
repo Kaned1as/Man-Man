@@ -66,6 +66,7 @@ public class ManChaptersFragment extends Fragment {
     private ProgressBarWrapper mProgress;
     /**
      * Click listener for selecting a chapter from the list.
+     * Usable only when list view shows list of chapters
      * The request is then sent to the loader to load chapter data asynchronously
      * <br/>
      * We don't have any headers at this point
@@ -89,6 +90,7 @@ public class ManChaptersFragment extends Fragment {
     };
     /**
      * Click listener for selecting a command from the list.
+     * Usable only when list view shows list of commands
      * New instance of {@link com.adonai.manman.ManPageDialogFragment} then created and shown
      * for loading ful command man page
      * <br/>

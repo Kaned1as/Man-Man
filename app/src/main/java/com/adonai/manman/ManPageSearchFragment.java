@@ -40,6 +40,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -51,7 +52,7 @@ import java.util.regex.Pattern;
  *
  * @author Adonai
  */
-public class ManPageSearchFragment extends Fragment implements AdapterView.OnItemClickListener {
+public class ManPageSearchFragment extends Fragment {
     private final static int MESSAGE_LOAD_DELAYED = 0;
 
     private final static String SEARCH_COMMAND_PREFIX = "https://www.mankier.com/api/mans/?q=";
@@ -70,6 +71,21 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
     private Handler mUiHandler;
 
     private Map<String, String> cachedChapters;
+
+    /**
+     * Click listener for loading man-page of the clicked command
+     * Usable only when list view shows list of commands
+     */
+    private AdapterView.OnItemClickListener mCommandClickListener = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            SearchResult sr = (SearchResult) parent.getItemAtPosition(position);
+            Pair<String, String> nameChapter = getNameChapterFromResult(sr);
+            if (nameChapter != null) {
+                ManPageDialogFragment.newInstance(nameChapter.first, sr.getUrl()).show(getFragmentManager(), "manPage");
+            }
+        }
+    };
 
     @NonNull
     public static ManPageSearchFragment newInstance() {
@@ -95,21 +111,11 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
         mSearchImage = (ImageView) mSearchView.findViewById(Resources.getSystem().getIdentifier("search_mag_icon", "id", "android"));
         mSearchDefaultDrawable = mSearchImage.getDrawable();
         mSearchList = (ListView) root.findViewById(R.id.search_results_list);
-        mSearchList.setOnItemClickListener(this);
 
         mUiHandler = new Handler();
         getLoaderManager().initLoader(MainPagerActivity.SEARCH_COMMAND_LOADER, null, mSearchCommandCallback);
         getLoaderManager().initLoader(MainPagerActivity.SEARCH_ONELINER_LOADER, null, mSearchOnelinerCallback);
         return root;
-    }
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        SearchResult sr = (SearchResult) parent.getItemAtPosition(position);
-        Pair<String, String> nameChapter = getNameChapterFromResult(sr);
-        if(nameChapter != null) {
-            ManPageDialogFragment.newInstance(nameChapter.first, sr.getUrl()).show(getFragmentManager(), "manPage");
-        }
     }
 
     private class SearchLoaderCallback implements LoaderManager.LoaderCallbacks<SearchResultList> {
@@ -129,7 +135,8 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
                 public SearchResultList loadInBackground() {
                     try {
                         DefaultHttpClient httpClient = new DefaultHttpClient();
-                        HttpUriRequest post = new HttpGet(SEARCH_COMMAND_PREFIX + mSearchView.getQuery().toString());
+                        String request = URLEncoder.encode(mSearchView.getQuery().toString(), "UTF-8");
+                        HttpUriRequest post = new HttpGet(SEARCH_COMMAND_PREFIX + request);
                         HttpResponse response = httpClient.execute(post);
                         if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                             String result = EntityUtils.toString(response.getEntity());
@@ -151,6 +158,7 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
             if(data != null && data.getResults() != null) {
                 ArrayAdapter<SearchResult> adapter = new SearchResultArrayAdapter(data);
                 mSearchList.setAdapter(adapter);
+                mSearchList.setOnItemClickListener(mCommandClickListener);
             }
         }
 
@@ -167,10 +175,18 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
             return new AbstractNetworkAsyncLoader<String>(getActivity()) {
 
                 @Override
+                protected void onStartLoading() {
+                    if(!TextUtils.isEmpty(mSearchView.getQuery().toString())) {
+                        super.onStartLoading();
+                    }
+                }
+
+                @Override
                 public String loadInBackground() {
                     try {
                         DefaultHttpClient httpClient = new DefaultHttpClient(Utils.defaultHttpParams);
-                        HttpUriRequest post = new HttpGet(SEARCH_ONELINER_PREFIX + mSearchView.getQuery().toString());
+                        String request = URLEncoder.encode(mSearchView.getQuery().toString(), "UTF-8");
+                        HttpUriRequest post = new HttpGet(SEARCH_ONELINER_PREFIX + request);
                         HttpResponse response = httpClient.execute(post);
                         if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                             return EntityUtils.toString(response.getEntity());
@@ -188,6 +204,11 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
         @Override
         public void onLoadFinished(Loader<String> loader, String data) {
             mSearchImage.setImageDrawable(mSearchDefaultDrawable); // finish animation
+            if(!TextUtils.isEmpty(data)) {
+                String[] elements = data.split("\\n\\n");
+                mSearchList.setAdapter(new OnelinerArrayAdapter(elements));
+                mSearchList.setOnItemClickListener(null);
+            }
         }
 
         @Override
@@ -258,6 +279,30 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
         return null;
     }
 
+    private class OnelinerArrayAdapter extends ArrayAdapter<String> {
+
+        public OnelinerArrayAdapter(String[] objects) {
+            super(getActivity(), R.layout.man_list_item, R.id.command_name_label, objects);
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            final View root = super.getView(position, convertView, parent);
+            String paragraph = getItem(position);
+
+            TextView command = (TextView) root.findViewById(R.id.command_name_label);
+            command.setVisibility(View.GONE);
+            final ImageView descriptionRequest = (ImageView) root.findViewById(R.id.request_description_button);
+            descriptionRequest.setVisibility(View.GONE);
+
+            TextView chapter = (TextView) root.findViewById(R.id.command_chapter_label);
+            chapter.setText(paragraph);
+
+            return root;
+        }
+
+    }
+
     private class SearchResultArrayAdapter extends ArrayAdapter<SearchResult> {
         public SearchResultArrayAdapter(SearchResultList data) {
             super(getActivity(), R.layout.man_list_item, R.id.command_name_label, data.getResults());
@@ -295,7 +340,8 @@ public class ManPageSearchFragment extends Fragment implements AdapterView.OnIte
                             public void run() {
                                 try {
                                     DefaultHttpClient httpClient = new DefaultHttpClient();
-                                    HttpUriRequest post = new HttpGet(SEARCH_DESCRIPTION_PREFIX + descriptionCommand);
+                                    String request = URLEncoder.encode(descriptionCommand, "UTF-8");
+                                    HttpUriRequest post = new HttpGet(SEARCH_DESCRIPTION_PREFIX + request);
                                     HttpResponse response = httpClient.execute(post);
                                     if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                                         String result = EntityUtils.toString(response.getEntity());

@@ -23,7 +23,7 @@ import java.sql.SQLException;
 public class PersistManager extends OrmLiteSqliteOpenHelper {
     private static final String TAG = PersistManager.class.getSimpleName();
 
-    private static final String DATABASE_NAME ="mansion.db";
+    private static final String DATABASE_NAME ="manman.db";
 
     private static final int DATABASE_VERSION = 1;
 

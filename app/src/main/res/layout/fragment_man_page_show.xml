@@ -14,7 +14,8 @@
         android:src="@drawable/rotating_wait"
         android:scaleX="2.0"
         android:scaleY="2.0"
-        android:layout_gravity="center" />
+        android:layout_gravity="center"
+        android:contentDescription="@string/loading" />
 
     <WebView
         android:layerType="software"
