@@ -1,5 +1,9 @@
 package com.adonai.manman;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -13,6 +17,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
@@ -20,6 +25,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.PopupMenu;
 import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -292,8 +298,6 @@ public class ManPageSearchFragment extends Fragment {
 
             TextView command = (TextView) root.findViewById(R.id.command_name_label);
             command.setVisibility(View.GONE);
-            final ImageView descriptionRequest = (ImageView) root.findViewById(R.id.request_description_button);
-            descriptionRequest.setVisibility(View.GONE);
 
             TextView chapter = (TextView) root.findViewById(R.id.command_chapter_label);
             chapter.setText(paragraph);
@@ -309,9 +313,10 @@ public class ManPageSearchFragment extends Fragment {
         }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        public View getView(final int position, View convertView, ViewGroup parent) {
             final View root = super.getView(position, convertView, parent);
-            final Pair<String, String> nameAndIndex = getNameChapterFromResult(getItem(position));
+            final SearchResult searchRes = getItem(position);
+            final Pair<String, String> nameAndIndex = getNameChapterFromResult(searchRes);
             if(nameAndIndex != null) {
                 // extract needed data
                 String chapterName = cachedChapters.get(nameAndIndex.second);
@@ -323,54 +328,77 @@ public class ManPageSearchFragment extends Fragment {
                 final WebView description = (WebView) root.findViewById(R.id.description_text_web);
                 description.setBackgroundColor(0);
                 description.setVisibility(View.GONE);
-                final ImageView descriptionRequest = (ImageView) root.findViewById(R.id.request_description_button);
-                descriptionRequest.setImageResource(android.R.drawable.ic_menu_help);
+                final ImageView descriptionRequest = (ImageView) root.findViewById(R.id.popup_menu);
                 descriptionRequest.setVisibility(View.VISIBLE);
 
                 // download a description on question mark click
                 descriptionRequest.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void onClick(View v) {
-                        ImageView imageView = (ImageView) v;
-                        imageView.setImageResource(R.drawable.rotating_wait);
-                        final String descriptionCommand = nameAndIndex.first + "." + nameAndIndex.second;
-                        // run desc download in another thread...
-                        Thread thr = new Thread(new Runnable() {
+                    public void onClick(final View v) {
+                        PopupMenu pm = new PopupMenu(getActivity(), v);
+                        pm.inflate(R.menu.search_item_popup);
+                        pm.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                             @Override
-                            public void run() {
-                                try {
-                                    DefaultHttpClient httpClient = new DefaultHttpClient();
-                                    String request = URLEncoder.encode(descriptionCommand, "UTF-8");
-                                    HttpUriRequest post = new HttpGet(SEARCH_DESCRIPTION_PREFIX + request);
-                                    HttpResponse response = httpClient.execute(post);
-                                    if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                                        String result = EntityUtils.toString(response.getEntity());
-                                        final Description descAnswer = mJsonConverter.fromJson(result, Description.class);
-                                        // load description back into listview
-                                        getActivity().runOnUiThread(new Runnable() {
+                            public boolean onMenuItemClick(MenuItem item) {
+                                switch (item.getItemId()) {
+                                    case R.id.load_description_popup_menu_item:
+                                        descriptionRequest.setImageResource(R.drawable.rotating_wait);
+                                        final String descriptionCommand = nameAndIndex.first + "." + nameAndIndex.second;
+                                        // run desc download in another thread...
+                                        Thread thr = new Thread(new Runnable() {
                                             @Override
                                             public void run() {
-                                                description.loadData(descAnswer.getHtmlDescription(), "text/html", "UTF-8");
-                                                description.setVisibility(View.VISIBLE);
-                                                descriptionRequest.setVisibility(View.GONE);
+                                                try {
+                                                    DefaultHttpClient httpClient = new DefaultHttpClient();
+                                                    String request = URLEncoder.encode(descriptionCommand, "UTF-8");
+                                                    HttpUriRequest post = new HttpGet(SEARCH_DESCRIPTION_PREFIX + request);
+                                                    HttpResponse response = httpClient.execute(post);
+                                                    if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                                                        String result = EntityUtils.toString(response.getEntity());
+                                                        final Description descAnswer = mJsonConverter.fromJson(result, Description.class);
+                                                        // load description back into listview
+                                                        getActivity().runOnUiThread(new Runnable() {
+                                                            @Override
+                                                            public void run() {
+                                                                descriptionRequest.setImageResource(R.drawable.ic_menu_moreoverflow_normal_holo_light);
+                                                                description.loadData(descAnswer.getHtmlDescription(), "text/html", "UTF-8");
+                                                                description.setVisibility(View.VISIBLE);
+                                                            }
+                                                        });
+                                                    }
+                                                } catch (IOException e) {
+                                                    Log.e("Man Man", "Network", e);
+                                                    // can't show a toast from a thread without looper
+                                                    // show error and change drawable back to normal
+                                                    getActivity().runOnUiThread(new Runnable() {
+                                                        @Override
+                                                        public void run() {
+                                                            Toast.makeText(getActivity(), R.string.connection_error, Toast.LENGTH_SHORT).show();
+                                                            descriptionRequest.setImageResource(R.drawable.ic_menu_moreoverflow_normal_holo_light);
+                                                        }
+                                                    });
+                                                }
                                             }
                                         });
-                                    }
-                                } catch (IOException e) {
-                                    Log.e("Man Man", "Network", e);
-                                    // can't show a toast from a thread without looper
-                                    // show error and change drawable back to normal
-                                    getActivity().runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            Toast.makeText(getActivity(), R.string.connection_error, Toast.LENGTH_SHORT).show();
-                                            descriptionRequest.setImageResource(android.R.drawable.ic_menu_help);
-                                        }
-                                    });
+                                        thr.start();
+                                        return true;
+                                    case R.id.share_link_popup_menu_item:
+                                        Intent sendIntent = new Intent(Intent.ACTION_SEND);
+                                        sendIntent.setType("text/plain");
+                                        sendIntent.putExtra(Intent.EXTRA_TITLE, nameAndIndex.first);
+                                        sendIntent.putExtra(Intent.EXTRA_TEXT, searchRes.getUrl());
+                                        startActivity(Intent.createChooser(sendIntent, getString(R.string.share_link)));
+                                        return true;
+                                    case R.id.copy_link_popup_menu_item:
+                                        ClipboardManager clipboard = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
+                                        Toast.makeText(getActivity().getApplicationContext(), getString(R.string.copied) + " " + searchRes.getUrl(), Toast.LENGTH_SHORT).show();
+                                        clipboard.setPrimaryClip(ClipData.newPlainText(nameAndIndex.first, searchRes.getUrl()));
+                                        return true;
                                 }
+                                return false;
                             }
                         });
-                        thr.start();
+                        pm.show();
                     }
                 });
             }

@@ -8,15 +8,15 @@
     android:padding="10dp">
 
     <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/request_description_button"
-        android:src="@android:drawable/ic_menu_help"
-        android:contentDescription="@string/request_description"
-        android:layout_centerVertical="true"
-        android:layout_alignParentRight="true"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:id="@+id/popup_menu"
+        android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
-        android:layout_marginRight="15dp" />
+        android:layout_alignParentRight="true"
+        android:src="@drawable/ic_menu_moreoverflow_normal_holo_light"
+        android:scaleType="fitXY"
+        android:contentDescription="@string/popup_menu"/>
 
     <TextView
         android:layout_width="wrap_content"
@@ -27,8 +27,8 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:maxEms="15"
-        android:layout_toStartOf="@id/request_description_button"
-        android:layout_toLeftOf="@id/request_description_button" />
+        android:layout_toStartOf="@id/popup_menu"
+        android:layout_toLeftOf="@id/popup_menu" />
 
     <TextView
         android:layout_width="match_parent"
@@ -42,8 +42,8 @@
         android:layout_alignParentStart="true"
         android:layout_marginTop="5dp"
         android:maxEms="15"
-        android:layout_toStartOf="@id/request_description_button"
-        android:layout_toLeftOf="@id/request_description_button" />
+        android:layout_toStartOf="@id/popup_menu"
+        android:layout_toLeftOf="@id/popup_menu" />
 
     <com.adonai.manman.views.NonClickableWebView
         android:layout_width="wrap_content"
@@ -55,6 +55,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_marginTop="5dp"
-        android:visibility="gone"/>
+        android:visibility="gone"
+        android:scaleType="center"/>
 
 </RelativeLayout>
