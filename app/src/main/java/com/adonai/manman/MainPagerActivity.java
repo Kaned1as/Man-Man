@@ -14,6 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.adonai.manman.database.DbProvider;
+import com.adonai.manman.preferences.PreferencesActivity;
 import com.android.vending.util.IabHelper;
 import com.android.vending.util.IabResult;
 import com.android.vending.util.Inventory;
@@ -36,7 +37,7 @@ public class MainPagerActivity extends FragmentActivity {
     final static int CONTENTS_RETRIEVER_LOADER = 3;
     final static int CACHE_RETRIEVER_LOADER = 4;
 
-    final static String DB_CHANGE_NOTIFY = "database.updated";
+    public final static String DB_CHANGE_NOTIFY = "database.updated";
 
     // helpers for donations (from android vending tutorial)
     private static final String SKU_DONATE = "small";
@@ -83,6 +84,9 @@ public class MainPagerActivity extends FragmentActivity {
                 return true;
             case R.id.donate_menu_item:
                 purchaseGift();
+                return true;
+            case R.id.settings_menu_item:
+                startActivity(new Intent(this, PreferencesActivity.class));
                 return true;
         }
 

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <Preference
+        android:icon="@android:drawable/ic_menu_delete"
+        android:key="clear.cache"
+        android:title="@string/clear_cache"
+        android:summary="@string/clear_cache_sum"/>
+
+</PreferenceScreen>

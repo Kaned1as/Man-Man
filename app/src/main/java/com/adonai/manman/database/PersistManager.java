@@ -33,7 +33,7 @@ public class PersistManager extends OrmLiteSqliteOpenHelper {
     private RuntimeExceptionDao<ManPage, String> manPagesDao;
 
     public PersistManager(Context context) {
-        super(context,DATABASE_NAME, null, DATABASE_VERSION);
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     @Override
@@ -75,6 +75,16 @@ public class PersistManager extends OrmLiteSqliteOpenHelper {
             manChapterIndexesDao = getRuntimeExceptionDao(ManSectionIndex.class);
         }
         return manChapterIndexesDao;
+    }
+
+    public void clearAllTables() {
+        try {
+            TableUtils.clearTable(DbProvider.getHelper().getConnectionSource(), ManSectionItem.class);
+            TableUtils.clearTable(DbProvider.getHelper().getConnectionSource(), ManSectionIndex.class);
+            TableUtils.clearTable(DbProvider.getHelper().getConnectionSource(), ManPage.class);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

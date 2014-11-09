@@ -52,18 +52,6 @@ public class ManPageCacheFragment extends Fragment implements AdapterView.OnItem
     public ManPageCacheFragment() {
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mBroadcastHandler, new IntentFilter(MainPagerActivity.DB_CHANGE_NOTIFY));
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mBroadcastHandler);
-    }
-
     @NonNull
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -74,7 +62,14 @@ public class ManPageCacheFragment extends Fragment implements AdapterView.OnItem
         mCacheList = (ListView) root.findViewById(R.id.cached_pages_list);
         mCacheList.setOnItemClickListener(this);
         getLoaderManager().initLoader(MainPagerActivity.CACHE_RETRIEVER_LOADER, null, mCacheBrowseCallback);
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mBroadcastHandler, new IntentFilter(MainPagerActivity.DB_CHANGE_NOTIFY));
         return root;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mBroadcastHandler);
     }
 
     @Override

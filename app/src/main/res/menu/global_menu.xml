@@ -9,4 +9,9 @@
         android:id="@+id/donate_menu_item"
         android:title="@string/donate"
         android:icon="@android:drawable/ic_menu_myplaces"/>
+
+    <item
+        android:id="@+id/settings_menu_item"
+        android:title="@string/settings"
+        android:icon="@android:drawable/ic_menu_preferences"/>
 </menu>

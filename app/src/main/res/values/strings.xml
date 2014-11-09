@@ -29,4 +29,10 @@
     <string name="completed">Completed!</string>
     <string name="thanks_for_pledge">Thanks for your pledge!</string>
     <string name="loading">Loading…</string>
+    <string name="general_settings">General settings</string>
+    <string name="clear_cache">Clear cache</string>
+    <string name="clear_cache_sum">Clears all cached pages and chapters. It helps to decrease application data usage</string>
+    <string name="confirm_action">Confirn action</string>
+    <string name="clear_cache_question">Are you sure? This will delete all the cached data including pages and chapters!</string>
+    <string name="settings">Settings</string>
 </resources>
