@@ -154,12 +154,17 @@ public class ManPageSearchFragment extends Fragment {
                     }
                     return null;
                 }
+
+                @Override
+                public void deliverResult(SearchResultList data) {
+                    mSearchImage.setImageDrawable(mSearchDefaultDrawable); // finish animation
+                    super.deliverResult(data);
+                }
             };
         }
 
         @Override
         public void onLoadFinished(Loader<SearchResultList> loader, SearchResultList data) {
-            mSearchImage.setImageDrawable(mSearchDefaultDrawable); // finish animation
             if(data != null && data.getResults() != null) {
                 ArrayAdapter<SearchResult> adapter = new SearchResultArrayAdapter(data);
                 mSearchList.setAdapter(adapter);
@@ -204,12 +209,17 @@ public class ManPageSearchFragment extends Fragment {
                     }
                     return null;
                 }
+
+                @Override
+                public void deliverResult(String data) {
+                    mSearchImage.setImageDrawable(mSearchDefaultDrawable); // finish animation
+                    super.deliverResult(data);
+                }
             };
         }
 
         @Override
         public void onLoadFinished(Loader<String> loader, String data) {
-            mSearchImage.setImageDrawable(mSearchDefaultDrawable); // finish animation
             if(!TextUtils.isEmpty(data)) {
                 String[] elements = data.split("\\n\\n");
                 mSearchList.setAdapter(new OnelinerArrayAdapter(elements));
@@ -301,6 +311,9 @@ public class ManPageSearchFragment extends Fragment {
 
             TextView chapter = (TextView) root.findViewById(R.id.command_chapter_label);
             chapter.setText(paragraph);
+
+            final ImageView moreActions = (ImageView) root.findViewById(R.id.popup_menu);
+            moreActions.setVisibility(View.GONE);
 
             return root;
         }

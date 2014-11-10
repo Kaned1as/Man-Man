@@ -247,12 +247,17 @@ public class ManChaptersFragment extends Fragment {
                         Utils.showToastFromAnyThread(getActivity(), R.string.database_save_error);
                     }
                 }
+
+                @Override
+                public void deliverResult(ManPageContentsResult data) {
+                    mProgress.hide();
+                    super.deliverResult(data);
+                }
             };
         }
 
         @Override
         public void onLoadFinished(Loader<ManPageContentsResult> loader, ManPageContentsResult data) {
-            mProgress.hide();
             if(data != null) { // if no error happened
                 View text = View.inflate(getActivity(), R.layout.back_header, null);
                 if(mListView.getAdapter() instanceof ChapterContentsCursorAdapter) {
