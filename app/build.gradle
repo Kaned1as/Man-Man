@@ -9,16 +9,29 @@ android {
         minSdkVersion 14
         targetSdkVersion 21
         versionCode 1
-        versionName "1.0"
+        versionName "1.0 Beta"
     }
+
+    signingConfigs {
+        release {
+            storeFile file("/home/adonai/devel/keystore/Adonai")
+            storePassword "release"
+            keyAlias "adonai"
+            keyPassword "release"
+        }
+    }
+
     buildTypes {
         debug {
-//            minifyEnabled true
-//            shrinkResources true
-//            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
 
         release {
+            debuggable false
+            jniDebugBuild false
+            signingConfig signingConfigs.release
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'

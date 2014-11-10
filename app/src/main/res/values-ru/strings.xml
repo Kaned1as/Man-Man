@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <string name="action_settings">Настройки</string>
+    <string name="search">Поиск</string>
+    <string name="explain">Объяснить</string>
+    <string name="enter_query">Введите запрос…</string>
+    <string name="content">Содержимое</string>
+    <string name="connection_error">Ошибка соединения</string>
+    <string name="placeholder_text">Пример текста</string>
+    <string name="request_description">Запрос описания</string>
+    <string name="contents">Главы</string>
+    <string name="cached">В кэше</string>
+    <string name="to_contents">К содержанию</string>
+    <string name="back_icon">назад</string>
+    <string name="database_save_error">Не могу сохранить данные в БД</string>
+    <string name="long_load_warn">Первоначальное заполнение может занять время, пожалуйста, подождите.</string>
+    <string name="database_retrieve_error">Не могу загрузить данные из БД!</string>
+    <string name="cache_search">Фильтр кэша…</string>
+    <string name="app_description">Man Man это свободная утилита для поиска, загрузки и просмотра мануалов команд Linux</string>
+    <string name="app_author"><![CDATA[Автор: Адонай <algonkvel@gmail.com>]]></string>
+    <string name="app_credits"><![CDATA[Инфо: Весь контент загружается с сайта www.mankier.com, автор Jackson Pauls <jackson@mankier.com>]]></string>
+    <string name="app_license"><![CDATA[Copyright © 2014 Adonai\nTЭто свободная программа: вы можете перераспространять ее и/или изменять ее на условиях Стандартной общественной лицензии GNU в том виде, в каком она была опубликована Фондом свободного программного обеспечения; либо версии 3 лицензии, либо (по вашему выбору) любой более поздней версии. \n Эта программа распространяется в надежде, что она будет полезной, но БЕЗО ВСЯКИХ ГАРАНТИЙ; даже без неявной гарантии ТОВАРНОГО ВИДА или ПРИГОДНОСТИ ДЛЯ ОПРЕДЕЛЕННЫХ ЦЕЛЕЙ. Подробнее см. в Стандартной общественной лицензии GNU. \n Вы должны были получить копию Стандартной общественной лицензии GNU вместе с этой программой. Если это не так, см. <http://www.gnu.org/licenses/>.]]></string>
+    <string name="about">О программе</string>
+    <string name="donate">Помочь проекту…</string>
+    <string name="completed">Завершено!</string>
+    <string name="thanks_for_pledge">Спасибо за ваш вклад!</string>
+    <string name="loading">Загрузка…</string>
+    <string name="general_settings">Общие настройки</string>
+    <string name="clear_cache">Очистить кэш</string>
+    <string name="clear_cache_sum">Удаляет все кэшированные страницы и содержимое глав. Уменьшает количество потребляемой приложением внутренней памяти</string>
+    <string name="confirm_action">Подтвердите действие</string>
+    <string name="clear_cache_question">Вы уверены? Продолжение повлечет за собой удаление всей кэшированной информации!</string>
+    <string name="settings">Настройки</string>
+    <string name="popup_menu">Всплывающее меню</string>
+    <string name="load_description">Загрузить описание</string>
+    <string name="copy_link">Копировать ссылку</string>
+    <string name="share_link">Поделиться…</string>
+    <string name="copied">Скопировано:</string>
+    <string name="delete">Удалить</string>
+</resources>
