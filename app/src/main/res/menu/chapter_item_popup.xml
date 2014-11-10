@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/copy_link_popup_menu_item"
+        android:title="@string/copy_link"/>
+
+    <item
+        android:id="@+id/share_link_popup_menu_item"
+        android:title="@string/share_link"/>
+
+</menu>

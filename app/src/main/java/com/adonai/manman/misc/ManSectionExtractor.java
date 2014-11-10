@@ -18,6 +18,7 @@ import java.util.List;
  *
  * @see org.ccil.cowan.tagsoup.Parser
  *
+ * @author Adonai
  */
 public class ManSectionExtractor extends DefaultHandler {
     private final String index;

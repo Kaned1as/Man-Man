@@ -46,6 +46,7 @@ import java.util.TreeSet;
  * Retrieves info from DB (if cached) or network (if not)
  *
  * @see com.adonai.manman.entities.ManPage
+ * @author Adonai
  */
 public class ManPageDialogFragment extends DialogFragment {
     private static final String USER_LEARNED_SLIDER = "user.learned.slider";

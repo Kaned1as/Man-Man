@@ -10,6 +10,7 @@ import com.j256.ormlite.table.DatabaseTable;
  * about 15000 items, so we use this class for retrieving indexes once and for all
  *
  * @see com.adonai.manman.ManChaptersFragment
+ * @author Adonai
  */
 @DatabaseTable(tableName = "man_chapter_indexer")
 @SuppressWarnings("UnusedDeclaration") // reflection in Gson

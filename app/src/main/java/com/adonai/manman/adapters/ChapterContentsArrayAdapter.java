@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.SectionIndexer;
 import android.widget.TextView;
 
@@ -11,6 +12,7 @@ import com.adonai.manman.R;
 import com.adonai.manman.Utils;
 import com.adonai.manman.entities.ManSectionIndex;
 import com.adonai.manman.entities.ManSectionItem;
+import com.adonai.manman.misc.ManChapterItemOnClickListener;
 
 import java.util.List;
 
@@ -23,6 +25,7 @@ import java.util.List;
  *
  * @see android.widget.ArrayAdapter
  * @see com.adonai.manman.entities.ManSectionItem
+ * @author Adonai
  */
 public class ChapterContentsArrayAdapter extends ArrayAdapter<ManSectionItem> implements SectionIndexer {
     private final List<ManSectionIndex> indexes;
@@ -42,6 +45,9 @@ public class ChapterContentsArrayAdapter extends ArrayAdapter<ManSectionItem> im
 
         TextView desc = (TextView) root.findViewById(R.id.command_description_label);
         desc.setText(current.getDescription());
+
+        final ImageView moreActions = (ImageView) root.findViewById(R.id.popup_menu);
+        moreActions.setOnClickListener(new ManChapterItemOnClickListener(getContext(), current));
 
         return root;
     }

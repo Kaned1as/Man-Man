@@ -12,6 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:src="@android:drawable/ic_menu_revert"
+        android:tint="@android:color/darker_gray"
         android:contentDescription="@string/back_icon"/>
 
     <TextView

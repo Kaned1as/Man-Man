@@ -15,6 +15,7 @@ import java.util.TreeSet;
  *
  * @see com.adonai.manman.ManPageDialogFragment
  * @see com.adonai.manman.ManPageCacheFragment
+ * @author Adonai
  */
 @DatabaseTable(tableName = "man_pages")
 @SuppressWarnings("UnusedDeclaration") // reflection in Gson

@@ -276,7 +276,7 @@ public class ManPageSearchFragment extends Fragment {
      */
     @Nullable
     private Pair<String, String> getNameChapterFromResult(SearchResult sr) {
-        String regex = "(\\w+)\\((.+)\\)";
+        String regex = "(.+)\\((.+)\\)";
         Pattern parser = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
         final Matcher matcher = parser.matcher(sr.getText());
         if(matcher.find()) {
@@ -288,7 +288,7 @@ public class ManPageSearchFragment extends Fragment {
     private class OnelinerArrayAdapter extends ArrayAdapter<String> {
 
         public OnelinerArrayAdapter(String[] objects) {
-            super(getActivity(), R.layout.man_list_item, R.id.command_name_label, objects);
+            super(getActivity(), R.layout.search_list_item, R.id.command_name_label, objects);
         }
 
         @Override
@@ -309,7 +309,7 @@ public class ManPageSearchFragment extends Fragment {
 
     private class SearchResultArrayAdapter extends ArrayAdapter<SearchResult> {
         public SearchResultArrayAdapter(SearchResultList data) {
-            super(getActivity(), R.layout.man_list_item, R.id.command_name_label, data.getResults());
+            super(getActivity(), R.layout.search_list_item, R.id.command_name_label, data.getResults());
         }
 
         @Override
@@ -329,7 +329,6 @@ public class ManPageSearchFragment extends Fragment {
                 description.setBackgroundColor(0);
                 description.setVisibility(View.GONE);
                 final ImageView descriptionRequest = (ImageView) root.findViewById(R.id.popup_menu);
-                descriptionRequest.setVisibility(View.VISIBLE);
 
                 // download a description on question mark click
                 descriptionRequest.setOnClickListener(new View.OnClickListener() {

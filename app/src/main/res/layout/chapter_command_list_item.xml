@@ -7,6 +7,17 @@
     android:descendantFocusability="blocksDescendants"
     android:padding="10dp">
 
+    <ImageView
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:id="@+id/popup_menu"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:src="@drawable/ic_menu_moreoverflow_normal_holo_light"
+        android:scaleType="fitXY"
+        android:contentDescription="@string/popup_menu"/>
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -15,6 +26,8 @@
         android:id="@+id/command_name_label"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
+        android:layout_toStartOf="@id/popup_menu"
+        android:layout_toLeftOf="@id/popup_menu"
         android:maxEms="15"/>
 
     <TextView
@@ -27,6 +40,7 @@
         android:layout_below="@+id/command_name_label"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
+
         android:layout_marginTop="5dp"/>
 
 </RelativeLayout>
