@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="man_page_chapters">
+    <string-array name="man_page_chapters" translatable="false">
         <item>1|General commands</item>
         <item>2|System calls</item>
         <item>3|Library functions</item>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <string name="app_name" tools:ignore="Typos">Man Man</string>
+    <string name="app_name" tools:ignore="Typos" translatable="false">Man Man</string>
     <string name="action_settings">Settings</string>
     <string name="search">Search</string>
     <string name="explain">Explain</string>

@@ -17,7 +17,7 @@
         android:layout_gravity="center"
         android:contentDescription="@string/loading" />
 
-    <android.support.v4.widget.SlidingPaneLayout
+    <com.adonai.manman.views.PassiveSlidingPane
         android:id="@+id/sliding_pane"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -44,5 +44,5 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/man_content_web" />
-    </android.support.v4.widget.SlidingPaneLayout>
+    </com.adonai.manman.views.PassiveSlidingPane>
 </ViewFlipper>
