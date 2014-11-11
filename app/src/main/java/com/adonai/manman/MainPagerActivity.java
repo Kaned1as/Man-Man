@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -13,6 +14,7 @@ import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.adonai.manman.database.DbProvider;
 import com.adonai.manman.preferences.PreferencesActivity;
@@ -96,6 +98,7 @@ public class MainPagerActivity extends FragmentActivity {
     }
 
     private class ManFragmentPagerAdapter extends FragmentPagerAdapter {
+        private Fragment oldPrimary;
 
         public ManFragmentPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -127,6 +130,26 @@ public class MainPagerActivity extends FragmentActivity {
                 case 2: return getString(R.string.cached);
                 default: return null;
             }
+        }
+
+        /**
+         * A way to notify fragments when they become visible to user in this pager
+         */
+        @Override
+        public void setPrimaryItem(ViewGroup container, int position, @NonNull Object object) {
+            Fragment newPrimary = (Fragment) object;
+            if(oldPrimary != newPrimary) {
+                if(oldPrimary != null) {
+                    oldPrimary.setUserVisibleHint(false);
+                    oldPrimary.onPause();
+                }
+
+                newPrimary.setUserVisibleHint(true);
+                newPrimary.onResume();
+
+                oldPrimary = newPrimary;
+            }
+            super.setPrimaryItem(container, position, object);
         }
     }
 

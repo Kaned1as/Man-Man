@@ -289,6 +289,24 @@ public class ManChaptersFragment extends Fragment {
         mProgress.onOrientationChanged();
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        // if we're pausing this fragment and have active listener, we should no longer receive back button feedback
+        if(!getUserVisibleHint() && mListView.getOnItemClickListener() == mCommandClickListener) {
+            LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mBroadcastHandler);
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // if we're resuming this fragment while in command list, we re-register to receive back button feedback
+        if(getUserVisibleHint() && mListView.getOnItemClickListener() == mCommandClickListener) {
+            LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mBroadcastHandler, new IntentFilter(MainPagerActivity.BACK_BUTTON_NOTIFY));
+        }
+    }
+
     /**
      * Convenience class for counting progress in cases we have
      * exact length of what we want to receive
