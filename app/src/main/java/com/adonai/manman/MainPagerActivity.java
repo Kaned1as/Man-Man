@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -38,6 +39,7 @@ public class MainPagerActivity extends FragmentActivity {
     final static int CACHE_RETRIEVER_LOADER = 4;
 
     public final static String DB_CHANGE_NOTIFY = "database.updated";
+    public final static String BACK_BUTTON_NOTIFY = "back.button.pressed";
 
     // helpers for donations (from android vending tutorial)
     private static final String SKU_DONATE = "small";
@@ -190,6 +192,13 @@ public class MainPagerActivity extends FragmentActivity {
             // perform any handling of activity results not related to in-app
             // billing...
             super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(!LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BACK_BUTTON_NOTIFY))) {
+            super.onBackPressed();
         }
     }
 

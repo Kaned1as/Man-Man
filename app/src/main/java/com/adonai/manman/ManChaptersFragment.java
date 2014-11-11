@@ -1,6 +1,10 @@
 package com.adonai.manman;
 
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -8,6 +12,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -59,6 +64,7 @@ public class ManChaptersFragment extends Fragment {
     public final static String CHAPTER_COMMANDS_PREFIX = "https://www.mankier.com";
 
     private RetrieveContentsCallback mContentRetrieveCallback = new RetrieveContentsCallback();
+    private BroadcastReceiver mBroadcastHandler = new BackButtonBroadcastReceiver();
     private ChaptersArrayAdapter mChaptersAdapter;
 
     private Map<String, String> mCachedChapters;
@@ -70,7 +76,6 @@ public class ManChaptersFragment extends Fragment {
      * Usable only when list view shows list of chapters
      * The request is then sent to the loader to load chapter data asynchronously
      * <br/>
-     * We don't have any headers at this point
      *
      * @see ManChaptersFragment.RetrieveContentsCallback
      */
@@ -95,7 +100,6 @@ public class ManChaptersFragment extends Fragment {
      * New instance of {@link com.adonai.manman.ManPageDialogFragment} then created and shown
      * for loading ful command man page
      * <br/>
-     * We have a header "To contents" so handle this case
      *
      */
     private AdapterView.OnItemClickListener mCommandClickListener = new AdapterView.OnItemClickListener() {
@@ -103,13 +107,7 @@ public class ManChaptersFragment extends Fragment {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             ManSectionItem item = (ManSectionItem) parent.getItemAtPosition(position);
-            if(item == null) { // header
-                mListView.removeHeaderView(view);
-                mListView.setAdapter(mChaptersAdapter);
-                mListView.setOnItemClickListener(mChapterClickListener);
-            } else {
-                ManPageDialogFragment.newInstance(item.getName(), item.getUrl()).show(getFragmentManager(), "manPage");
-            }
+            ManPageDialogFragment.newInstance(item.getName(), item.getUrl()).show(getFragmentManager(), "manPage");
         }
     };
 
@@ -259,19 +257,18 @@ public class ManChaptersFragment extends Fragment {
         @Override
         public void onLoadFinished(Loader<ManPageContentsResult> loader, ManPageContentsResult data) {
             if(data != null) { // if no error happened
-                View text = View.inflate(getActivity(), R.layout.back_header, null);
                 if(mListView.getAdapter() instanceof ChapterContentsCursorAdapter) {
                     // close opened cursor prior to adapter change
                     ((ChapterContentsCursorAdapter) mListView.getAdapter()).closeCursor();
                 }
                 mListView.setAdapter(null);
-                mListView.addHeaderView(text);
                 if(data.choiceDbCache != null) {
                     mListView.setAdapter(new ChapterContentsCursorAdapter(getActivity(), data.choiceDbCache.first, data.choiceDbCache.second, data.chapter));
                 } else {
                     mListView.setAdapter(new ChapterContentsArrayAdapter(getActivity(), R.layout.chapter_command_list_item, R.id.command_name_label, data.choiceList));
                 }
                 mListView.setOnItemClickListener(mCommandClickListener);
+                LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mBroadcastHandler, new IntentFilter(MainPagerActivity.BACK_BUTTON_NOTIFY));
             }
         }
 
@@ -363,5 +360,17 @@ public class ManChaptersFragment extends Fragment {
             this.chapter = chapter;
         }
 
+    }
+
+    /**
+     * Handler to receive notifications for back button press (to return list view to chapter show)
+     */
+    private class BackButtonBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            mListView.setAdapter(mChaptersAdapter);
+            mListView.setOnItemClickListener(mChapterClickListener);
+            LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(this);
+        }
     }
 }
