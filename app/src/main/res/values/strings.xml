@@ -39,4 +39,6 @@
     <string name="share_link">Share link…</string>
     <string name="copied">Copied:</string>
     <string name="delete">Delete</string>
+    <string name="filter_local_storage">Filter local storage…</string>
+    <string name="no_folders_in_local_storage">You\'ve not added any folder to search path</string>
 </resources>

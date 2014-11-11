@@ -38,4 +38,6 @@
     <string name="share_link">Поделиться…</string>
     <string name="copied">Скопировано:</string>
     <string name="delete">Удалить</string>
+    <string name="filter_local_storage">Фильтр локальных манов…</string>
+    <string name="no_folders_in_local_storage">Нет ни одной папки в списке</string>
 </resources>
