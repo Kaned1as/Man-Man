@@ -265,7 +265,7 @@ public class ManPageSearchFragment extends Fragment {
             mUiHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    mSearchImage.setImageResource(R.drawable.rotating_wait);
+                    mSearchImage.setImageResource(Utils.getThemedResource(getActivity(), R.attr.loading_icon_resource));
                     if(!currentText.contains(" ")) { // this is a single command query, just search
                         getLoaderManager().getLoader(MainPagerActivity.SEARCH_COMMAND_LOADER).onContentChanged();
                     } else { // this is oneliner with arguments/other commands
@@ -354,7 +354,7 @@ public class ManPageSearchFragment extends Fragment {
                             public boolean onMenuItemClick(MenuItem item) {
                                 switch (item.getItemId()) {
                                     case R.id.load_description_popup_menu_item:
-                                        descriptionRequest.setImageResource(R.drawable.rotating_wait);
+                                        descriptionRequest.setImageResource(Utils.getThemedResource(getActivity(), R.attr.loading_icon_resource));
                                         final String descriptionCommand = nameAndIndex.first + "." + nameAndIndex.second;
                                         // run desc download in another thread...
                                         Thread thr = new Thread(new Runnable() {
@@ -372,7 +372,7 @@ public class ManPageSearchFragment extends Fragment {
                                                         getActivity().runOnUiThread(new Runnable() {
                                                             @Override
                                                             public void run() {
-                                                                descriptionRequest.setImageResource(R.drawable.ic_menu_moreoverflow_normal_holo_light);
+                                                                descriptionRequest.setImageResource(R.drawable.ic_menu_moreoverflow_normal_holo);
                                                                 description.loadData(descAnswer.getHtmlDescription(), "text/html", "UTF-8");
                                                                 description.setVisibility(View.VISIBLE);
                                                             }
@@ -386,7 +386,7 @@ public class ManPageSearchFragment extends Fragment {
                                                         @Override
                                                         public void run() {
                                                             Toast.makeText(getActivity(), R.string.connection_error, Toast.LENGTH_SHORT).show();
-                                                            descriptionRequest.setImageResource(R.drawable.ic_menu_moreoverflow_normal_holo_light);
+                                                            descriptionRequest.setImageResource(R.drawable.ic_menu_moreoverflow_normal_holo);
                                                         }
                                                     });
                                                 }

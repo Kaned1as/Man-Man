@@ -33,6 +33,7 @@ button,html,input,select,textarea{
 
 body{
 	margin:0
+	
 }
 
 a:focus{
@@ -1504,13 +1505,13 @@ https://github.com/yui/pure/blob/master/LICENSE.md
 
 body{
 	min-height:100%;
-	background-color:#f7f7f7
+	background-color:#070707
 }
 
-.pure-g [class*="pure-u"],body{
+.pure-g [class*="pure-u"], body{
 	font-family:Corbel,HelveticaNeue-Light,"Helvetica Neue Light","Helvetica Neue",Helvetica,Arial,"Lucida Grande",sans-serif;
 	font-weight:300;
-	color:#333
+	color:#ccc
 }
 
 body.pattern{
@@ -1526,7 +1527,8 @@ h1,h2,h3{
 }
 
 a{
-	text-decoration:none
+	text-decoration:none;
+	color:aqua
 }
 
 ul.no-bull{
@@ -1534,7 +1536,7 @@ ul.no-bull{
 }
 
 .in-doc{
-	color:#345f12
+	color:#648f42
 }
 
 .man-page dt,code,pre{

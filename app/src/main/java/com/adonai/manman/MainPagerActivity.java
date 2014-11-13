@@ -50,16 +50,14 @@ public class MainPagerActivity extends FragmentActivity {
     private IabHelper mHelper;
     private boolean mCanBuy = false;
 
-    protected SharedPreferences mPreferences;
-
     private ViewPager mPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        final String theme = mPreferences.getString("app.theme", "light");
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        final String theme = prefs.getString("app.theme", "light");
         setTheme(theme.equals("light") ? R.style.Light : R.style.Dark);
 
         setContentView(R.layout.activity_main_pager);

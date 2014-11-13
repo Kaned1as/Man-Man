@@ -14,7 +14,8 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:src="@drawable/ic_menu_moreoverflow_normal_holo_light"
+        android:tint="?attr/mask_color"
+        android:src="@drawable/ic_menu_moreoverflow_normal_holo"
         android:scaleType="fitXY"
         android:contentDescription="@string/popup_menu"/>
 

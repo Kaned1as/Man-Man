@@ -2,6 +2,8 @@ package com.adonai.manman;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
+import android.util.TypedValue;
 import android.widget.Toast;
 
 import com.adonai.manman.entities.ManSectionIndex;
@@ -73,5 +75,19 @@ public class Utils {
             }
         }
         return indexes;
+    }
+
+    public static int getThemedValue(Context context, int resource) {
+        TypedValue typedValue = new TypedValue();
+        Resources.Theme theme = context.getTheme();
+        theme.resolveAttribute(resource, typedValue, true);
+        return typedValue.data;
+    }
+
+    public static int getThemedResource(Context context, int resource) {
+        TypedValue typedValue = new TypedValue();
+        Resources.Theme theme = context.getTheme();
+        theme.resolveAttribute(resource, typedValue, true);
+        return typedValue.resourceId;
     }
 }

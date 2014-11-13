@@ -8,6 +8,7 @@
         android:summary="@string/clear_cache_sum"/>
 
     <ListPreference
+        android:icon="@android:drawable/ic_menu_gallery"
         android:key="app.theme"
         android:title="@string/app_theme"
         android:summary="@string/app_theme_summary"
