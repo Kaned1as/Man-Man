@@ -7,4 +7,11 @@
         android:title="@string/clear_cache"
         android:summary="@string/clear_cache_sum"/>
 
+    <ListPreference
+        android:key="app.theme"
+        android:title="@string/app_theme"
+        android:summary="@string/app_theme_summary"
+        android:entries="@array/preference_themes_titles"
+        android:entryValues="@array/preference_themes_values" />
+
 </PreferenceScreen>

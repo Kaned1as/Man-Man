@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="light_background">#ffe0e0e0</color>
-    <color name="dark_text_color">#ff333333</color>
-    <color name="dark_link_color">#ff000055</color>
+    <color name="background_light">#ffe0e0e0</color>
+    <color name="background_dark">#ff101010</color>
+
+    <color name="alt_text_color_dark">#ff333333</color>
+    <color name="alt_text_color_light">#ffc0c0c0</color>
+
+    <color name="link_color_dark">#ff000055</color>
+    <color name="link_color_light">#ff9999ff</color>
+
     <color name="semi_transparent">#33000000</color>
 </resources>

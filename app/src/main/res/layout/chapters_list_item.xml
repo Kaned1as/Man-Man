@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
-    android:background="@drawable/list_item_background"
+    android:background="?attr/item_background_resource"
     android:descendantFocusability="blocksDescendants"
     android:padding="10dp"
     android:divider="@drawable/vertical_divider"
@@ -15,7 +15,7 @@
         android:layout_height="match_parent"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="@string/placeholder_text"
-        android:textColor="@color/dark_text_color"
+        android:textColor="?attr/text_color"
         android:id="@+id/chapter_index_label"
         android:gravity="center"
         android:layout_weight="1"/>

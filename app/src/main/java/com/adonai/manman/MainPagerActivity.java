@@ -3,7 +3,9 @@ package com.adonai.manman;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -48,11 +50,18 @@ public class MainPagerActivity extends FragmentActivity {
     private IabHelper mHelper;
     private boolean mCanBuy = false;
 
+    protected SharedPreferences mPreferences;
+
     private ViewPager mPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        final String theme = mPreferences.getString("app.theme", "light");
+        setTheme(theme.equals("light") ? R.style.Light : R.style.Dark);
+
         setContentView(R.layout.activity_main_pager);
 
         mPager = (ViewPager) findViewById(R.id.page_holder);

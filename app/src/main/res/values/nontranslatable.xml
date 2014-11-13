@@ -14,4 +14,13 @@
         <item>3p|POSIX functions</item>
         <item>n|Tcl/Tk keywords</item>
     </string-array>
+
+    <string-array name="preference_themes_titles" translatable="false">
+        <item>@string/light_theme</item>
+        <item>@string/dark_theme</item>
+    </string-array>
+    <string-array name="preference_themes_values" translatable="false">
+        <item>light</item> <!--item>@android:style/Theme.Holo.Light</item-->
+        <item>dark</item> <!--item>@android:style/Theme.Holo</item-->
+    </string-array>
 </resources>

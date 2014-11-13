@@ -41,4 +41,8 @@
     <string name="delete">Delete</string>
     <string name="filter_local_storage">Filter local storage…</string>
     <string name="no_folders_in_local_storage">You\'ve not added any folder to search path</string>
+    <string name="app_theme">Theme</string>
+    <string name="app_theme_summary">Theme applies after application restart</string>
+    <string name="light_theme">Light</string>
+    <string name="dark_theme">Dark</string>
 </resources>

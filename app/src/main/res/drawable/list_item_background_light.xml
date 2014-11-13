@@ -2,7 +2,7 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_pressed="true">
         <layer-list>
-            <item android:drawable="@drawable/shadowed_box"/>
+            <item android:drawable="@drawable/shadowed_box_light"/>
             <item>
                 <shape>
                     <solid android:color="@android:color/darker_gray" />
@@ -11,5 +11,5 @@
             </item>
         </layer-list>
     </item>
-    <item android:drawable="@drawable/shadowed_box"/>
+    <item android:drawable="@drawable/shadowed_box_light"/>
 </selector>
