@@ -40,4 +40,8 @@
     <string name="delete">Удалить</string>
     <string name="filter_local_storage">Фильтр локальных манов…</string>
     <string name="no_folders_in_local_storage">Нет ни одной папки в списке</string>
+    <string name="app_theme">Тема оформления</string>
+    <string name="app_theme_summary">Применяется после перезагрузки приложения</string>
+    <string name="dark_theme">Темная</string>
+    <string name="light_theme">Светлая</string>
 </resources>
