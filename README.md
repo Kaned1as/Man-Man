@@ -1,4 +1,4 @@
-Man-Man
+Man-Man [![Flattr this git repo](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=Antic1tizen&url=https://github.com/Adonai/Man-Man&title=Man-Man&language=Java&tags=github&category=software)
 =======
 
 Android client for accessing API and content of www.mankier.com site
