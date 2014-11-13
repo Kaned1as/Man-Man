@@ -20,6 +20,7 @@
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:layout_gravity="center_horizontal"
-        android:src="@drawable/gear_icon"
+        android:src="@drawable/ic_settings"
+        android:tint="?android:attr/textColorPrimary"
         android:contentDescription="@string/settings"/>
 </LinearLayout>
