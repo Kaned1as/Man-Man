@@ -45,4 +45,5 @@
     <string name="app_theme_summary">Theme applies after application restart</string>
     <string name="light_theme">Light</string>
     <string name="dark_theme">Dark</string>
+    <string name="local_storage">Local</string>
 </resources>

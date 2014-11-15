@@ -40,7 +40,7 @@ public class ManPageCacheFragment extends Fragment implements AdapterView.OnItem
     private CacheBrowseCallback mCacheBrowseCallback = new CacheBrowseCallback();
     private BroadcastReceiver mBroadcastHandler = new DbBroadcastReceiver();
 
-    private SearchView mSearchCacheView;
+    private SearchView mSearchCache;
     private ListView mCacheList;
 
     @NonNull
@@ -59,8 +59,8 @@ public class ManPageCacheFragment extends Fragment implements AdapterView.OnItem
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_cache_browse, container, false);
 
-        mSearchCacheView = (SearchView) root.findViewById(R.id.cache_search_edit);
-        mSearchCacheView.setOnQueryTextListener(new SearchInCacheListener());
+        mSearchCache = (SearchView) root.findViewById(R.id.cache_search_edit);
+        mSearchCache.setOnQueryTextListener(new SearchInCacheListener());
         mCacheList = (ListView) root.findViewById(R.id.cached_pages_list);
         mCacheList.setOnItemClickListener(this);
         getLoaderManager().initLoader(MainPagerActivity.CACHE_RETRIEVER_LOADER, null, mCacheBrowseCallback);
@@ -94,7 +94,7 @@ public class ManPageCacheFragment extends Fragment implements AdapterView.OnItem
                 public List<ManPage> loadInBackground() {
                     // check the DB for cached pages
                     try {
-                        PreparedQuery<ManPage> query = DbProvider.getHelper().getManPagesDao().queryBuilder().where().like("name", "%" + mSearchCacheView.getQuery().toString() + "%").prepare();
+                        PreparedQuery<ManPage> query = DbProvider.getHelper().getManPagesDao().queryBuilder().where().like("name", "%" + mSearchCache.getQuery().toString() + "%").prepare();
                         return DbProvider.getHelper().getManPagesDao().query(query);
                     } catch (SQLException e) {
                         Log.e("Man Man", "Database", e);

@@ -36,11 +36,14 @@ import java.util.Date;
 @SuppressWarnings("FieldCanBeLocal")
 public class MainPagerActivity extends FragmentActivity {
 
-    final static int SEARCH_COMMAND_LOADER = 0;
-    final static int SEARCH_ONELINER_LOADER = 1;
-    final static int MAN_PAGE_RETRIEVER_LOADER = 2;
-    final static int CONTENTS_RETRIEVER_LOADER = 3;
-    final static int CACHE_RETRIEVER_LOADER = 4;
+    public static String FOLDER_LIST_KEY = "folder.list";
+
+    final static int SEARCH_COMMAND_LOADER          = 0;
+    final static int SEARCH_ONELINER_LOADER         = 1;
+    final static int MAN_PAGE_RETRIEVER_LOADER      = 2;
+    final static int CONTENTS_RETRIEVER_LOADER      = 3;
+    final static int CACHE_RETRIEVER_LOADER         = 4;
+    final static int LOCAL_PACKAGE_LOADER           = 5;
 
     public final static String DB_CHANGE_NOTIFY = "database.updated";
     public final static String BACK_BUTTON_NOTIFY = "back.button.pressed";
@@ -120,13 +123,15 @@ public class MainPagerActivity extends FragmentActivity {
                     return ManChaptersFragment.newInstance();
                 case 2:
                     return ManPageCacheFragment.newInstance();
+                case 3:
+                    return ManLocalArchiveFragment.newInstance();
             }
             throw new IllegalArgumentException(String.format("No such fragment, index was %d", i));
         }
 
         @Override
         public int getCount() {
-            return 3;
+            return 4;
         }
 
         @Override
@@ -135,6 +140,7 @@ public class MainPagerActivity extends FragmentActivity {
                 case 0: return getString(R.string.search);
                 case 1: return getString(R.string.contents);
                 case 2: return getString(R.string.cached);
+                case 3: return getString(R.string.local_storage);
                 default: return null;
             }
         }

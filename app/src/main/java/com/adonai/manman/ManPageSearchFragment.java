@@ -327,7 +327,7 @@ public class ManPageSearchFragment extends Fragment {
 
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
-            final View root = super.getView(position, convertView, parent);
+            View root = super.getView(position, convertView, parent);
             final SearchResult searchRes = getItem(position);
             final Pair<String, String> nameAndIndex = getNameChapterFromResult(searchRes);
             if(nameAndIndex != null) {
@@ -374,7 +374,8 @@ public class ManPageSearchFragment extends Fragment {
                                                             public void run() {
                                                                 descriptionRequest.setImageResource(R.drawable.ic_menu_moreoverflow_normal_holo);
                                                                 description.getSettings().setJavaScriptEnabled(true);
-                                                                description.loadDataWithBaseURL(descAnswer.getUrl(), Utils.getWebWithCss(getActivity(), descAnswer.getUrl(), descAnswer.getHtmlDescription()), "text/html", "UTF-8", descAnswer.getUrl());
+                                                                String styledHtml = Utils.getWebWithCss(getActivity(), descAnswer.getUrl(), descAnswer.getHtmlDescription());
+                                                                description.loadDataWithBaseURL(descAnswer.getUrl(), styledHtml, "text/html", "UTF-8", descAnswer.getUrl());
                                                                 description.setVisibility(View.VISIBLE);
                                                             }
                                                         });

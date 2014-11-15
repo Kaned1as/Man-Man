@@ -21,6 +21,6 @@
         android:layout_height="64dp"
         android:layout_gravity="center_horizontal"
         android:src="@drawable/ic_settings"
-        android:tint="?android:attr/textColorPrimary"
+        android:tint="?attr/text_color"
         android:contentDescription="@string/settings"/>
 </LinearLayout>
