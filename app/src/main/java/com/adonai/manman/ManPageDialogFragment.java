@@ -171,7 +171,7 @@ public class ManPageDialogFragment extends DialogFragment {
         @Override
         public void onLoadFinished(Loader<ManPage> loader, ManPage data) {
             if(data != null) {
-                mContent.loadDataWithBaseURL(mAddressUrl, getWebWithCss(data), "text/html", "UTF-8", null);
+                mContent.loadDataWithBaseURL(mAddressUrl, Utils.getWebWithCss(getActivity(), data.getUrl(), data.getWebContent()), "text/html", "UTF-8", null);
                 mContent.setBackgroundColor(Utils.getThemedValue(getActivity(), R.attr.fill_color)); // prevent flickering
                 fillLinkPane(data.getLinks());
                 mFlipper.showNext();
@@ -179,22 +179,6 @@ public class ManPageDialogFragment extends DialogFragment {
             } else {
                 dismissAllowingStateLoss(); // can't perform transactions from onLoadFinished
             }
-        }
-
-        /**
-         * Loads CSS from assets folder according to selected theme.
-         * Fragment should be in attached state for this
-         *
-         * @param man manpage with content to splatter color on...
-         * @return html string
-         */
-        private String getWebWithCss(ManPage man) {
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-            final String theme = prefs.getString("app.theme", "light");
-
-            Document doc = Document.createShell(man.getUrl());
-            doc.head().append("<link rel=\"stylesheet\" href=\"file:///android_asset/css/" + theme + ".css\" type=\"text/css\" media=\"all\" title=\"Standard\"/>");
-            return doc.html().replace("<body>", "<body>" + man.getWebContent()); // ugly hack, huh? Well, why don't you come up with something?
         }
 
         @Override

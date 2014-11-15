@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:inAnimation="@android:anim/slide_in_left"
     android:outAnimation="@android:anim/slide_out_right"
-    android:background="@color/semi_transparent"
+    android:background="?attr/semi_transparent_divider_color"
     android:id="@+id/flipper">
 
     <ImageView

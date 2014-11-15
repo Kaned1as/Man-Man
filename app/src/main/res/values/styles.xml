@@ -6,6 +6,8 @@
     <attr name="loading_icon_resource" format="reference"/>
     <attr name="mask_color" format="reference"/>
     <attr name="fill_color" format="reference"/>
+    <attr name="vertical_divider_resource" format="reference"/>
+    <attr name="semi_transparent_divider_color" format="reference"/>
 
     <!-- Base application theme. -->
     <style name="Light" parent="android:Theme.Holo.Light.DarkActionBar">
@@ -14,8 +16,10 @@
         <item name="background_color">@color/background_light</item>
         <item name="item_background_resource">@drawable/list_item_background_light</item>
         <item name="loading_icon_resource">@drawable/rotating_wait_dark</item>
+        <item name="vertical_divider_resource">@drawable/vertical_divider_dark</item>
         <item name="mask_color">@android:color/black</item>
         <item name="fill_color">@android:color/white</item>
+        <item name="semi_transparent_divider_color">@color/semi_transparent_dark</item>
     </style>
 
     <style name="Dark" parent="android:Theme.Holo">
@@ -24,8 +28,10 @@
         <item name="background_color">@color/background_dark</item>
         <item name="item_background_resource">@drawable/list_item_background_dark</item>
         <item name="loading_icon_resource">@drawable/rotating_wait_light</item>
+        <item name="vertical_divider_resource">@drawable/vertical_divider_light</item>
         <item name="mask_color">@android:color/white</item>
         <item name="fill_color">@android:color/black</item>
+        <item name="semi_transparent_divider_color">@color/semi_transparent_light</item>
     </style>
 
     <style name="ManPageFadeAnimation">

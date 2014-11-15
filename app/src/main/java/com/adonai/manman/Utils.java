@@ -2,7 +2,11 @@ package com.adonai.manman;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.TypedValue;
 import android.widget.Toast;
 
@@ -12,6 +16,7 @@ import com.adonai.manman.entities.ManSectionItem;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
+import org.jsoup.nodes.Document;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -89,5 +94,23 @@ public class Utils {
         Resources.Theme theme = context.getTheme();
         theme.resolveAttribute(resource, typedValue, true);
         return typedValue.resourceId;
+    }
+
+    /**
+     * Loads CSS from assets folder according to selected theme.
+     * Fragment should be in attached state for this
+     *
+     * @param context context to retrieve theme properties from
+     * @param url base url of page
+     * @param htmlContent page with content to splatter color on...
+     * @return html string
+     */
+    public static String getWebWithCss(@NonNull Context context, @NonNull String url, @Nullable String htmlContent) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        final String theme = prefs.getString("app.theme", "light");
+
+        Document doc = Document.createShell(url);
+        doc.head().append("<link rel=\"stylesheet\" href=\"file:///android_asset/css/" + theme + ".css\" type=\"text/css\" media=\"all\" title=\"Standard\"/>");
+        return doc.html().replace("<body>", "<body>" + htmlContent); // ugly hack, huh? Well, why don't you come up with something?
     }
 }

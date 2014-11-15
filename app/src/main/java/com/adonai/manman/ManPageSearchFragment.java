@@ -373,7 +373,8 @@ public class ManPageSearchFragment extends Fragment {
                                                             @Override
                                                             public void run() {
                                                                 descriptionRequest.setImageResource(R.drawable.ic_menu_moreoverflow_normal_holo);
-                                                                description.loadData(descAnswer.getHtmlDescription(), "text/html", "UTF-8");
+                                                                description.getSettings().setJavaScriptEnabled(true);
+                                                                description.loadDataWithBaseURL(descAnswer.getUrl(), Utils.getWebWithCss(getActivity(), descAnswer.getUrl(), descAnswer.getHtmlDescription()), "text/html", "UTF-8", descAnswer.getUrl());
                                                                 description.setVisibility(View.VISIBLE);
                                                             }
                                                         });
@@ -391,7 +392,7 @@ public class ManPageSearchFragment extends Fragment {
                                                     });
                                                 }
                                             }
-                                        });
+                                        }, "DescriptionAsyncRetrieve");
                                         thr.start();
                                         return true;
                                     case R.id.share_link_popup_menu_item:
