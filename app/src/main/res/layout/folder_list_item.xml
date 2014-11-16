@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/folder_item_title"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:text="@string/placeholder_text"
+    android:drawableLeft="@drawable/ic_folder"
+    android:drawablePadding="5dp"
+    android:gravity="center_vertical"
+    android:maxLines="1"
+    android:fadingEdge="horizontal"
+    android:fadingEdgeLength="10dip" />

@@ -8,6 +8,9 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
@@ -53,8 +56,30 @@ public class ManLocalArchiveFragment extends Fragment {
         mSearchLocalPage.setOnQueryTextListener(null);
 
         getLoaderManager().initLoader(MainPagerActivity.LOCAL_PACKAGE_LOADER, null, mLocalArchiveParseCallback);
+        setHasOptionsMenu(true);
 
         return root;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.local_archive_fragment_menu, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.folder_settings:
+                showFolderSettingsDialog();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void showFolderSettingsDialog() {
+        new FolderChooseFragment().show(getFragmentManager(), "FolderListFragment");
+        getLoaderManager().restartLoader(MainPagerActivity.LOCAL_PACKAGE_LOADER, null, mLocalArchiveParseCallback);
     }
 
     private class LocalArchiveParserCallback implements LoaderManager.LoaderCallbacks<List<File>> {
@@ -98,6 +123,9 @@ public class ManLocalArchiveFragment extends Fragment {
 
         @Override
         public void onLoadFinished(Loader<List<File>> loader, List<File> manPageFiles) {
+            if(mLocalPageList.getHeaderViewsCount() > 0) {
+                mLocalPageList.removeHeaderView(mLocalPageList.getChildAt(0));
+            }
             mLocalPageList.setAdapter(new LocalArchiveArrayAdapter(getActivity(), R.layout.chapter_command_list_item, R.id.command_name_label, manPageFiles));
             if(manPageFiles.isEmpty()) {
                 View header = View.inflate(getActivity(), R.layout.add_folder_header, null);
