@@ -13,9 +13,6 @@ import android.widget.Toast;
 import com.adonai.manman.entities.ManSectionIndex;
 import com.adonai.manman.entities.ManSectionItem;
 
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
 import org.jsoup.nodes.Document;
 
 import java.util.ArrayList;
@@ -29,14 +26,6 @@ import java.util.Map;
  * @author Adonai
  */
 public class Utils {
-
-    public static HttpParams defaultHttpParams;
-
-    static {
-        defaultHttpParams = new BasicHttpParams();
-        HttpConnectionParams.setConnectionTimeout(defaultHttpParams, 3000);
-        HttpConnectionParams.setSoTimeout(defaultHttpParams, 10000);
-    }
 
     /**
      * Converts |-delimited string array from resources to hash map

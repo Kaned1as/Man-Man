@@ -131,7 +131,7 @@ public class MainPagerActivity extends FragmentActivity {
 
         @Override
         public int getCount() {
-            return 4;
+            return 3;
         }
 
         @Override

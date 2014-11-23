@@ -44,4 +44,14 @@
     <string name="app_theme_summary">Применяется после перезагрузки приложения</string>
     <string name="dark_theme">Темная</string>
     <string name="light_theme">Светлая</string>
+    <string name="add">Добавить</string>
+    <string name="current_folder">Текущая папка: </string>
+    <string name="file_not_found">Файл не найден</string>
+    <string name="folders">Папки</string>
+    <string name="local_storage">Локально</string>
+    <string name="remove">Удалить</string>
+    <string name="select">Выбрать</string>
+    <string name="select_folder">Выберите каталог</string>
+    <string name="watched_folders">Отслеживаемые каталоги</string>
+    <string name="wrong_file_format">Некорректный формат файла</string>
 </resources>

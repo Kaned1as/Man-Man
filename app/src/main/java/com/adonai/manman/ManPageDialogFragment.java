@@ -31,7 +31,14 @@ import android.widget.ViewFlipper;
 import com.adonai.manman.database.DbProvider;
 import com.adonai.manman.entities.ManPage;
 import com.adonai.manman.misc.AbstractNetworkAsyncLoader;
+import com.adonai.manman.misc.HttpClientFactory;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -167,27 +174,33 @@ public class ManPageDialogFragment extends DialogFragment {
                     }
 
                     try {
-                        Document root = Jsoup.connect(mAddressUrl).timeout(10000).get();
-                        Element man = root.select("div.man-page").first();
-                        if(man != null) { // it's actually a man page
-                            String webContent = man.html();
-                            // retrieve links
-                            Elements links = man.select("a[href*=#]");
-                            TreeSet<String> linkContainer = new TreeSet<>();
-                            for(Element link : links) {
-                                if(!TextUtils.isEmpty(link.text()) && link.attr("href").contains("#" + link.text())) { // it's like <a href="http:/ex.com/#a">-x</a>
-                                    linkContainer.add(link.text());
+                        DefaultHttpClient httpClient = HttpClientFactory.getTolerantClient();
+                        HttpUriRequest post = new HttpGet(mAddressUrl);
+                        HttpResponse response = httpClient.execute(post);
+                        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                            String result = EntityUtils.toString(response.getEntity());
+                            Document root = Jsoup.parse(result, mAddressUrl);
+                            Element man = root.select("div.man-page").first();
+                            if (man != null) { // it's actually a man page
+                                String webContent = man.html();
+                                // retrieve links
+                                Elements links = man.select("a[href*=#]");
+                                TreeSet<String> linkContainer = new TreeSet<>();
+                                for (Element link : links) {
+                                    if (!TextUtils.isEmpty(link.text()) && link.attr("href").contains("#" + link.text())) { // it's like <a href="http:/ex.com/#a">-x</a>
+                                        linkContainer.add(link.text());
+                                    }
                                 }
+
+                                // save to DB for caching
+                                ManPage toCache = new ManPage(mCommandName, mAddressUrl);
+                                toCache.setLinks(linkContainer);
+                                toCache.setWebContent(webContent);
+                                DbProvider.getHelper().getManPagesDao().createIfNotExists(toCache);
+                                LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(new Intent(MainPagerActivity.DB_CHANGE_NOTIFY));
+
+                                return toCache;
                             }
-
-                            // save to DB for caching
-                            ManPage toCache = new ManPage(mCommandName, mAddressUrl);
-                            toCache.setLinks(linkContainer);
-                            toCache.setWebContent(webContent);
-                            DbProvider.getHelper().getManPagesDao().createIfNotExists(toCache);
-                            LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(new Intent(MainPagerActivity.DB_CHANGE_NOTIFY));
-
-                            return toCache;
                         }
                     } catch (IOException e) {
                         Log.e("Man Man", "Database", e);

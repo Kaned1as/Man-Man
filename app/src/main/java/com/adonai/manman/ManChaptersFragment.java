@@ -28,20 +28,24 @@ import com.adonai.manman.database.DbProvider;
 import com.adonai.manman.entities.ManSectionIndex;
 import com.adonai.manman.entities.ManSectionItem;
 import com.adonai.manman.misc.AbstractNetworkAsyncLoader;
+import com.adonai.manman.misc.HttpClientFactory;
 import com.adonai.manman.misc.ManSectionExtractor;
 import com.adonai.manman.views.ProgressBarWrapper;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.misc.TransactionManager;
 import com.j256.ormlite.stmt.PreparedQuery;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.ccil.cowan.tagsoup.Parser;
 import org.xml.sax.InputSource;
 
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -200,18 +204,30 @@ public class ManChaptersFragment extends Fragment {
                 private List<ManSectionItem> loadFromNetwork(final String index, String link) {
                     try {
                         // load chapter page with command links
-                        URLConnection conn = new URL(link).openConnection();
-                        conn.setRequestProperty("Accept-Encoding", "gzip, deflate");
-                        conn.setReadTimeout(10000);
-                        conn.setConnectTimeout(5000);
-                        // count the bytes and show progress
-                        InputStream is = new GZIPInputStream(new CountingInputStream(conn.getInputStream(), conn.getContentLength()), conn.getContentLength());
-                        final Parser parser = new Parser();
-                        final List<ManSectionItem> msItems = new ArrayList<>(500);
-                        parser.setContentHandler(new ManSectionExtractor(index, msItems));
-                        parser.setFeature(Parser.namespacesFeature, false);
-                        parser.parse(new InputSource(is));
-                        return msItems;
+                        DefaultHttpClient httpClient = HttpClientFactory.getTolerantClient();
+                        HttpUriRequest post = new HttpGet(link);
+                        post.setHeader("Accept-Encoding", "gzip, deflate");
+                        HttpResponse response = httpClient.execute(post);
+                        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                            // count the bytes and show progress
+                            InputStream is;
+                            if(response.getFirstHeader("Content-Length") != null) {
+                                is = new GZIPInputStream(
+                                        new CountingInputStream(response.getEntity().getContent(),
+                                                (int) response.getEntity().getContentLength()),
+                                                (int) response.getEntity().getContentLength());
+                            } else {
+                                is = new GZIPInputStream(new CountingInputStream(response.getEntity().getContent(),
+                                        (int) response.getEntity().getContentLength()));
+                            }
+
+                            final Parser parser = new Parser();
+                            final List<ManSectionItem> msItems = new ArrayList<>(500);
+                            parser.setContentHandler(new ManSectionExtractor(index, msItems));
+                            parser.setFeature(Parser.namespacesFeature, false);
+                            parser.parse(new InputSource(is));
+                            return msItems;
+                        }
                     } catch (Exception e) {
                         Log.e("Man Man", "Network", e);
                         // can't show a toast from a thread without looper
@@ -330,7 +346,7 @@ public class ManChaptersFragment extends Fragment {
             int res = super.read(buffer, byteOffset, byteCount);
             if(shouldWarn) {
                 shouldWarn = false;
-                if(length > (25 << 10)) { // 25 kbytes
+                if(length <= 0 || length > (25 << 10)) { // if no length provided or it's more than 25 kbytes
                     Utils.showToastFromAnyThread(getActivity(), R.string.long_load_warn);
                 }
             }
@@ -343,7 +359,7 @@ public class ManChaptersFragment extends Fragment {
                         public void run() {
                             int progress = transferred * 100 / length;
                             mProgress.setProgress(progress);
-                            if (progress == 100) {
+                            if (length <= 0 || progress == 100) { // if no length provided or download is complete
                                 mProgress.setIndeterminate(true);
                                 shouldCount = false; // don't count further, it's pointless
                             }

@@ -34,6 +34,7 @@ import com.adonai.manman.entities.Description;
 import com.adonai.manman.entities.SearchResult;
 import com.adonai.manman.entities.SearchResultList;
 import com.adonai.manman.misc.AbstractNetworkAsyncLoader;
+import com.adonai.manman.misc.HttpClientFactory;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -139,7 +140,7 @@ public class ManPageSearchFragment extends Fragment {
                 @Override
                 public SearchResultList loadInBackground() {
                     try {
-                        DefaultHttpClient httpClient = new DefaultHttpClient();
+                        DefaultHttpClient httpClient = HttpClientFactory.getTolerantClient();
                         String request = URLEncoder.encode(mSearchView.getQuery().toString(), "UTF-8");
                         HttpUriRequest post = new HttpGet(SEARCH_COMMAND_PREFIX + request);
                         HttpResponse response = httpClient.execute(post);
@@ -195,7 +196,7 @@ public class ManPageSearchFragment extends Fragment {
                 @Override
                 public String loadInBackground() {
                     try {
-                        DefaultHttpClient httpClient = new DefaultHttpClient(Utils.defaultHttpParams);
+                        DefaultHttpClient httpClient = HttpClientFactory.getTolerantClient();
                         String request = URLEncoder.encode(mSearchView.getQuery().toString(), "UTF-8");
                         HttpUriRequest post = new HttpGet(SEARCH_ONE_LINER_PREFIX + request);
                         HttpResponse response = httpClient.execute(post);
@@ -361,7 +362,7 @@ public class ManPageSearchFragment extends Fragment {
                                             @Override
                                             public void run() {
                                                 try {
-                                                    DefaultHttpClient httpClient = new DefaultHttpClient();
+                                                    DefaultHttpClient httpClient = HttpClientFactory.getTolerantClient();
                                                     String request = URLEncoder.encode(descriptionCommand, "UTF-8");
                                                     HttpUriRequest post = new HttpGet(SEARCH_DESCRIPTION_PREFIX + request);
                                                     HttpResponse response = httpClient.execute(post);
