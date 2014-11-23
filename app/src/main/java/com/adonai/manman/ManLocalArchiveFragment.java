@@ -13,6 +13,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SearchView;
 
@@ -21,6 +22,8 @@ import com.adonai.manman.misc.AbstractNetworkAsyncLoader;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -30,11 +33,34 @@ import java.util.Set;
  *
  * @author Adonai
  */
-public class ManLocalArchiveFragment extends Fragment {
+public class ManLocalArchiveFragment extends Fragment implements SharedPreferences.OnSharedPreferenceChangeListener {
+
+    private SharedPreferences mPreferences; // needed for folder list retrieval
 
     private ListView mLocalPageList;
     private SearchView mSearchLocalPage;
     private LocalArchiveParserCallback mLocalArchiveParseCallback = new LocalArchiveParserCallback();
+
+    /**
+     * Click listener for loading man page from selected archive file (or show config if no folders are present)
+     * <br/>
+     * Archives are pretty small, so gzip decompression and parsing won't take loads of time...
+     * <br/>
+     * Long story short, let's try to do this in UI and look at the performance
+     *
+     */
+    private AdapterView.OnItemClickListener mManArchiveClickListener = new AdapterView.OnItemClickListener() {
+
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            File data = (File) parent.getItemAtPosition(position);
+            if(data == null) { // header is present, start config tool
+                showFolderSettingsDialog();
+            } else {
+                ManPageDialogFragment.newInstance(data.getName(), data.getAbsolutePath()).show(getFragmentManager(), "manPage");
+            }
+        }
+    };
 
     @NonNull
     public static ManLocalArchiveFragment newInstance() {
@@ -47,11 +73,17 @@ public class ManLocalArchiveFragment extends Fragment {
     public ManLocalArchiveFragment() {
     }
 
+
+
     @NonNull
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        mPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        mPreferences.registerOnSharedPreferenceChangeListener(this);
+
         View root = inflater.inflate(R.layout.fragment_local_storage, container, false);
         mLocalPageList = (ListView) root.findViewById(R.id.local_storage_page_list);
+        mLocalPageList.setOnItemClickListener(mManArchiveClickListener);
         mSearchLocalPage = (SearchView) root.findViewById(R.id.local_search_edit);
         mSearchLocalPage.setOnQueryTextListener(null);
 
@@ -59,6 +91,12 @@ public class ManLocalArchiveFragment extends Fragment {
         setHasOptionsMenu(true);
 
         return root;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mPreferences.unregisterOnSharedPreferenceChangeListener(this);
     }
 
     @Override
@@ -79,7 +117,13 @@ public class ManLocalArchiveFragment extends Fragment {
 
     private void showFolderSettingsDialog() {
         new FolderChooseFragment().show(getFragmentManager(), "FolderListFragment");
-        getLoaderManager().restartLoader(MainPagerActivity.LOCAL_PACKAGE_LOADER, null, mLocalArchiveParseCallback);
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if(key.equals(MainPagerActivity.FOLDER_LIST_KEY)) { // the only needed key
+            getLoaderManager().getLoader(MainPagerActivity.LOCAL_PACKAGE_LOADER).onContentChanged();
+        }
     }
 
     private class LocalArchiveParserCallback implements LoaderManager.LoaderCallbacks<List<File>> {
@@ -88,16 +132,10 @@ public class ManLocalArchiveFragment extends Fragment {
             return new AbstractNetworkAsyncLoader<List<File>>(getActivity()) {
                 Set<String> mFolderList;
 
-                @Override
-                protected void onStartLoading() {
-                    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-                    mFolderList = prefs.getStringSet(MainPagerActivity.FOLDER_LIST_KEY, new HashSet<String>());
-                    super.onStartLoading();
-                }
-
                 @NonNull
                 @Override
                 public List<File> loadInBackground() {
+                    mFolderList = mPreferences.getStringSet(MainPagerActivity.FOLDER_LIST_KEY, new HashSet<String>());
                     List<File> result = new ArrayList<>();
                     for(String path : mFolderList) {
                         File targetedFolder = new File(path);
@@ -105,6 +143,13 @@ public class ManLocalArchiveFragment extends Fragment {
                             walkFileTree(targetedFolder, result);
                         }
                     }
+                    // sort results alphabetically...
+                    Collections.sort(result, new Comparator<File>() {
+                        @Override
+                        public int compare(File lhs, File rhs) {
+                            return lhs.getName().compareTo(rhs.getName());
+                        }
+                    });
                     return result;
                 }
 
@@ -113,7 +158,7 @@ public class ManLocalArchiveFragment extends Fragment {
                     for (File f : list) {
                         if (f.isDirectory()) {
                             walkFileTree(f, resultList);
-                        } else if(f.getName().toLowerCase().endsWith("gz")) { // take only zipped files
+                        } else if(f.getName().toLowerCase().endsWith("gz")) { // take only gzipped files
                             resultList.add(f);
                         }
                     }

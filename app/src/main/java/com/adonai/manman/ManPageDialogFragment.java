@@ -25,6 +25,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 import com.adonai.manman.database.DbProvider;
@@ -35,11 +36,18 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.netbeans.modules.cnd.completion.doxygensupport.Man2Html;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.zip.GZIPInputStream;
 
 /**
  * Dialog fragment for showing web page with man content
@@ -125,6 +133,29 @@ public class ManPageDialogFragment extends DialogFragment {
                 @Nullable
                 @Override
                 public ManPage loadInBackground() {
+                    // handle special case when it's a local file
+                    if(mAddressUrl.startsWith("/")) { // TODO: rewrite with URI
+                        try {
+                            File input = new File(mAddressUrl);
+                            FileInputStream fis = new FileInputStream(input);
+                            GZIPInputStream gis = new GZIPInputStream(fis);
+                            BufferedReader br = new BufferedReader(new InputStreamReader(gis));
+                            Man2Html parser = new Man2Html(br);
+                            ManPage result = new ManPage(input.getName(), "file://" + mAddressUrl);
+                            result.setWebContent(parser.getHtml()); // we're not using it in DB!
+                            // no side pane with links for now
+                            br.close(); // closes all the IS hierarchy
+                            return result;
+                        } catch (FileNotFoundException e) {
+                            Log.e("Man Man", "Filesystem", e);
+                            Toast.makeText(getActivity(), R.string.file_not_found, Toast.LENGTH_SHORT).show();
+                        } catch (IOException e) {
+                            Log.e("Man Man", "Filesystem", e);
+                            Toast.makeText(getActivity(), R.string.wrong_file_format, Toast.LENGTH_SHORT).show();
+                        }
+                        return null; // no further querying
+                    }
+
                     try { // query cache database for corresponding command
                         ManPage cached = DbProvider.getHelper().getManPagesDao().queryForId(mAddressUrl);
                         if(cached != null) {

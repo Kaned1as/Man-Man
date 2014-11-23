@@ -28,10 +28,11 @@ public class LocalArchiveArrayAdapter extends ArrayAdapter<File> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         final File current = getItem(position);
+        String effectiveName = current.getName().replaceAll("\\.gz$", "").replaceAll("\\.\\d$", "");
         View root = super.getView(position, convertView, parent);
 
         TextView command = (TextView) root.findViewById(R.id.command_name_label);
-        command.setText(current.getName().toLowerCase().replace(".gz", ""));
+        command.setText(effectiveName);
 
         TextView url = (TextView) root.findViewById(R.id.command_description_label);
         url.setText(current.getParent());

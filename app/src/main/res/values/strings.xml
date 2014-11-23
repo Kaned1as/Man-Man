@@ -51,4 +51,8 @@
     <string name="select_folder">Select folder to pick</string>
     <string name="select">Select</string>
     <string name="current_folder">Current folder:</string>
+    <string name="remove">Remove</string>
+    <string name="add">Add</string>
+    <string name="file_not_found">File not found</string>
+    <string name="wrong_file_format">Wrong file format</string>
 </resources>

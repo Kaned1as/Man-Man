@@ -11,18 +11,19 @@
         android:layout_weight="1"
         android:layout_gravity="center_vertical"
         android:gravity="center"
-        android:textAppearance="?android:textAppearanceLarge"/>
+        android:textAppearance="?android:textAppearanceSmall"/>
 
     <ImageView
-        android:id="@+id/add_local_folder"
+        android:id="@+id/remove_local_folder"
         android:src="@drawable/ic_menu_add"
         android:scaleType="fitCenter"
+        android:rotation="45"
         android:scaleX="0.8"
         android:scaleY="0.8"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:tint="?text_color"
         android:layout_gravity="center_vertical"
-        android:contentDescription="@string/add"/>
+        android:contentDescription="@string/remove"/>
 
 </LinearLayout>

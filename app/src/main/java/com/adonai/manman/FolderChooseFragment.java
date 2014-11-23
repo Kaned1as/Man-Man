@@ -19,7 +19,6 @@ import com.adonai.manman.misc.FolderAddDialog;
 
 import java.io.File;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -57,6 +56,7 @@ public class FolderChooseFragment extends DialogFragment {
         mAddButton.setOnClickListener(new AddFolderClickListener());
 
         mFolderList = new ListView(getActivity());
+        mFolderList.setAdapter(new FolderListArrayAdapter(getActivity(), mStoredFolders.toArray(new String[mStoredFolders.size()])));
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setCustomTitle(title);
@@ -72,25 +72,44 @@ public class FolderChooseFragment extends DialogFragment {
                 public void receiveResult(File resultDir) {
                     // add dir to the list
                     mStoredFolders.add(resultDir.getAbsolutePath());
-
-                    // sync with shared prefs
-                    mSharedPrefs.edit().putStringSet(MainPagerActivity.FOLDER_LIST_KEY, mStoredFolders).apply();
+                    syncFolderList();
                 }
             });
             folder.show(getFragmentManager(), "FolderChooseFragment");
         }
     }
 
-    private static class FolderListArrayAdapter extends ArrayAdapter<String> {
+    private class FolderListArrayAdapter extends ArrayAdapter<String> {
 
-        public FolderListArrayAdapter(Context context, List<String> objects) {
-            super(context, R.layout.folder_list_dialog_title, android.R.id.title, objects);
+        public FolderListArrayAdapter(Context context, String[] objects) {
+            super(context, R.layout.folder_list_dialog_item, android.R.id.title, objects);
         }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            View cached = super.getView(position, convertView, parent);
+        public View getView(final int position, View convertView, ViewGroup parent) {
+            final View cached = super.getView(position, convertView, parent);
+            final String current = getItem(position);
+
+            ImageView img = (ImageView) cached.findViewById(R.id.remove_local_folder);
+            img.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mStoredFolders.remove(current);
+                    syncFolderList();
+                }
+            });
+
             return cached;
         }
+    }
+
+    /**
+     * Should be called from UI thread...
+     */
+    private void syncFolderList() {
+        mFolderList.setAdapter(new FolderListArrayAdapter(getActivity(), mStoredFolders.toArray(new String[mStoredFolders.size()])));
+
+        // sync with shared prefs
+        mSharedPrefs.edit().putStringSet(MainPagerActivity.FOLDER_LIST_KEY, mStoredFolders).apply();
     }
 }
