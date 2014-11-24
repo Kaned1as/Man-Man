@@ -32,6 +32,7 @@ import com.adonai.manman.database.DbProvider;
 import com.adonai.manman.entities.ManPage;
 import com.adonai.manman.misc.AbstractNetworkAsyncLoader;
 import com.adonai.manman.misc.HttpClientFactory;
+import com.adonai.manman.parser.Man2Html;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -43,7 +44,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.netbeans.modules.cnd.completion.doxygensupport.Man2Html;
 
 import java.io.BufferedReader;
 import java.io.File;
