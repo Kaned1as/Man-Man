@@ -34,7 +34,7 @@ public class HttpClientFactory {
     private static final X509HostnameVerifier delegate = new X509HostnameVerifier() {
         @Override
         public boolean verify(String s, SSLSession sslSession) {
-            return false;
+            return true;
         }
 
         @Override

@@ -23,7 +23,6 @@ import com.adonai.manman.misc.AbstractNetworkAsyncLoader;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -85,7 +84,7 @@ public class ManLocalArchiveFragment extends Fragment implements SharedPreferenc
         mLocalPageList = (ListView) root.findViewById(R.id.local_storage_page_list);
         mLocalPageList.setOnItemClickListener(mManArchiveClickListener);
         mSearchLocalPage = (SearchView) root.findViewById(R.id.local_search_edit);
-        mSearchLocalPage.setOnQueryTextListener(null);
+        mSearchLocalPage.setOnQueryTextListener(new FilterLocalStorage());
 
         getLoaderManager().initLoader(MainPagerActivity.LOCAL_PACKAGE_LOADER, null, mLocalArchiveParseCallback);
         setHasOptionsMenu(true);
@@ -150,12 +149,7 @@ public class ManLocalArchiveFragment extends Fragment implements SharedPreferenc
                         }
                     }
                     // sort results alphabetically...
-                    Collections.sort(result, new Comparator<File>() {
-                        @Override
-                        public int compare(File lhs, File rhs) {
-                            return lhs.getName().compareTo(rhs.getName());
-                        }
-                    });
+                    Collections.sort(result);
                     return result;
                 }
 
@@ -177,16 +171,43 @@ public class ManLocalArchiveFragment extends Fragment implements SharedPreferenc
             if(mLocalPageList.getHeaderViewsCount() > 0) {
                 mLocalPageList.removeHeaderView(mLocalPageList.getChildAt(0));
             }
+
             mLocalPageList.setAdapter(new LocalArchiveArrayAdapter(getActivity(), R.layout.chapter_command_list_item, R.id.command_name_label, manPageFiles));
             if(manPageFiles.isEmpty()) {
+                mSearchLocalPage.setVisibility(View.GONE);
                 View header = View.inflate(getActivity(), R.layout.add_folder_header, null);
                 mLocalPageList.addHeaderView(header);
+            } else {
+                mSearchLocalPage.setVisibility(View.VISIBLE);
             }
         }
 
         @Override
         public void onLoaderReset(Loader<List<File>> loader) {
 
+        }
+    }
+
+    private class FilterLocalStorage implements SearchView.OnQueryTextListener {
+
+        @Override
+        public boolean onQueryTextSubmit(String query) {
+            applyFilter(query);
+            return true;
+        }
+
+        @Override
+        public boolean onQueryTextChange(String newText) {
+            applyFilter(newText);
+            return true;
+        }
+
+        private void applyFilter(CharSequence text) {
+            // safe to cast, we have only this type of adapter here
+            LocalArchiveArrayAdapter adapter = (LocalArchiveArrayAdapter) mLocalPageList.getAdapter();
+            if(adapter != null) { // another paranoid check?
+                adapter.getFilter().filter(text);
+            }
         }
     }
 }
