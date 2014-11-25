@@ -12,7 +12,6 @@ public class SpecialsHandler {
         switch (code) {
             case "-D":
                 return "Ð";
-
             case "Sd":
                 return "ð";
             case "TP":
@@ -567,6 +566,8 @@ public class SpecialsHandler {
                 return "♥";
             case "DI":
                 return "♦";
+            case "mi":
+                return "-";
             default:
                 return "";
         }

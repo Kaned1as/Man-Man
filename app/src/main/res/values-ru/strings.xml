@@ -17,10 +17,10 @@
     <string name="long_load_warn">Первоначальное заполнение может занять время, пожалуйста, подождите.</string>
     <string name="database_retrieve_error">Не могу загрузить данные из БД!</string>
     <string name="cache_search">Фильтр кэша…</string>
-    <string name="app_description">Man Man это свободная утилита для поиска, загрузки и просмотра мануалов команд Linux</string>
+    <string name="app_description">Man Man - это свободная утилита для поиска, загрузки и просмотра мануалов команд Linux</string>
     <string name="app_author"><![CDATA[Автор: Адонай <algonkvel@gmail.com>]]></string>
     <string name="app_credits"><![CDATA[Инфо: Весь контент загружается с сайта www.mankier.com, автор Jackson Pauls <jackson@mankier.com>]]></string>
-    <string name="app_license"><![CDATA[Copyright © 2014 Adonai\nTЭто свободная программа: вы можете перераспространять ее и/или изменять ее на условиях Стандартной общественной лицензии GNU в том виде, в каком она была опубликована Фондом свободного программного обеспечения; либо версии 3 лицензии, либо (по вашему выбору) любой более поздней версии. \n Эта программа распространяется в надежде, что она будет полезной, но БЕЗО ВСЯКИХ ГАРАНТИЙ; даже без неявной гарантии ТОВАРНОГО ВИДА или ПРИГОДНОСТИ ДЛЯ ОПРЕДЕЛЕННЫХ ЦЕЛЕЙ. Подробнее см. в Стандартной общественной лицензии GNU. \n Вы должны были получить копию Стандартной общественной лицензии GNU вместе с этой программой. Если это не так, см. <http://www.gnu.org/licenses/>.]]></string>
+    <string name="app_license"><![CDATA[Copyright © 2014 Adonai\nЭто свободная программа: вы можете перераспространять ее и/или изменять ее на условиях Стандартной общественной лицензии GNU в том виде, в каком она была опубликована Фондом свободного программного обеспечения; либо версии 3 лицензии, либо (по вашему выбору) любой более поздней версии. \n Эта программа распространяется в надежде, что она будет полезной, но БЕЗО ВСЯКИХ ГАРАНТИЙ; даже без неявной гарантии ТОВАРНОГО ВИДА или ПРИГОДНОСТИ ДЛЯ ОПРЕДЕЛЕННЫХ ЦЕЛЕЙ. Подробнее см. в Стандартной общественной лицензии GNU. \n Вы должны были получить копию Стандартной общественной лицензии GNU вместе с этой программой. Если это не так, см. <http://www.gnu.org/licenses/>.]]></string>
     <string name="about">О программе</string>
     <string name="donate">Помочь проекту…</string>
     <string name="completed">Завершено!</string>
@@ -39,13 +39,13 @@
     <string name="copied">Скопировано:</string>
     <string name="delete">Удалить</string>
     <string name="filter_local_storage">Фильтр локальных манов…</string>
-    <string name="no_folders_in_local_storage">Нет ни одной папки в списке</string>
+    <string name="no_folders_in_local_storage">Нет файлов *.gz в отслеживаемых каталогах</string>
     <string name="app_theme">Тема оформления</string>
     <string name="app_theme_summary">Применяется после перезагрузки приложения</string>
     <string name="dark_theme">Темная</string>
     <string name="light_theme">Светлая</string>
     <string name="add">Добавить</string>
-    <string name="current_folder">Текущая папка: </string>
+    <string name="current_folder">Текущий каталог:</string>
     <string name="file_not_found">Файл не найден</string>
     <string name="folders">Папки</string>
     <string name="local_storage">Локально</string>
@@ -54,4 +54,5 @@
     <string name="select_folder">Выберите каталог</string>
     <string name="watched_folders">Отслеживаемые каталоги</string>
     <string name="wrong_file_format">Некорректный формат файла</string>
+    <string name="scanning_folders">Сканирование каталогов…</string>
 </resources>

@@ -24,14 +24,14 @@ public class Man2Html {
     private enum FontState {
         NORMAL,
         BOLD,
-        ITALIC
+        ITALIC,
     }
 
     private enum Command {
         TH(true), SH(true), PP(true), RS, RE,       // headers, titles
         TP(true), IP(true),                         // special triggers
         B, I, BR, BI,                               // font directives
-        ie, el, nh, ad, sp(true);                   // conditionals and stuff...
+        fi, ie, el, nh, ad, sp(true);               // conditionals and stuff...
 
         private boolean stopsIndentation;
 
@@ -52,7 +52,7 @@ public class Man2Html {
 
     private FontState fontState;
     private boolean insideParagraph;
-    private int linesBeforeIndent = -1;
+    private int linesBeforeIndent = -1; // 0 == we're indenting right now
 
     public Man2Html(BufferedReader source) {
         this.source = source;
@@ -191,6 +191,9 @@ public class Man2Html {
                     }
                     linesBeforeIndent = 0;
                     break;
+                case fi: //re-enable margins
+                    result.append(" ").append(parseTextField(lineAfterCommand));
+                    break;
             }
         } catch (IllegalArgumentException iae) {
             // unimplemented control, skip...
@@ -234,10 +237,16 @@ public class Man2Html {
                         if(length > i + 1) {
                             switch (text.charAt(++i)) {
                                 case 'B':
+                                    if(fontState == FontState.ITALIC) {
+                                        output.append("</i>");
+                                    }
                                     fontState = FontState.BOLD;
                                     output.append("<b>");
                                     break;
                                 case 'I':
+                                    if(fontState == FontState.BOLD) {
+                                        output.append("</b>");
+                                    }
                                     fontState = FontState.ITALIC;
                                     output.append("<i>");
                                     break;
@@ -249,6 +258,7 @@ public class Man2Html {
                                             break;
                                         case ITALIC:
                                             output.append("</i>");
+                                            break;
                                     }
                                     fontState = FontState.NORMAL;
                                     break;

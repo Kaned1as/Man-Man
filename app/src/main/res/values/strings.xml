@@ -40,7 +40,7 @@
     <string name="copied">Copied:</string>
     <string name="delete">Delete</string>
     <string name="filter_local_storage">Filter local storage…</string>
-    <string name="no_folders_in_local_storage">You\'ve not added any folder to search path</string>
+    <string name="no_folders_in_local_storage">No *.gz files in search path</string>
     <string name="app_theme">Theme</string>
     <string name="app_theme_summary">Theme applies after application restart</string>
     <string name="light_theme">Light</string>
@@ -55,4 +55,5 @@
     <string name="add">Add</string>
     <string name="file_not_found">File not found</string>
     <string name="wrong_file_format">Wrong file format</string>
+    <string name="scanning_folders">Scanning folders…</string>
 </resources>

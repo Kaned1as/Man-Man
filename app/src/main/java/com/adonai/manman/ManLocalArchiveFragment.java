@@ -132,6 +132,12 @@ public class ManLocalArchiveFragment extends Fragment implements SharedPreferenc
             return new AbstractNetworkAsyncLoader<List<File>>(getActivity()) {
                 Set<String> mFolderList;
 
+                @Override
+                protected void onForceLoad() {
+                    Utils.showToastFromAnyThread(getActivity(), R.string.scanning_folders);
+                    super.onForceLoad();
+                }
+
                 @NonNull
                 @Override
                 public List<File> loadInBackground() {
