@@ -155,10 +155,13 @@ public class ManLocalArchiveFragment extends Fragment implements SharedPreferenc
 
                 public void walkFileTree(File directoryRoot, List<File> resultList) {
                     File[] list = directoryRoot.listFiles();
+                    if(list == null) // unknown, happens on some devices
+                        return;
+
                     for (File f : list) {
                         if (f.isDirectory()) {
                             walkFileTree(f, resultList);
-                        } else if(f.getName().toLowerCase().endsWith("gz")) { // take only gzipped files
+                        } else if(f.getName().toLowerCase().endsWith(".gz")) { // take only gzipped files
                             resultList.add(f);
                         }
                     }
