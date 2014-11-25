@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.adonai.manman.R;
@@ -36,6 +37,9 @@ public class LocalArchiveArrayAdapter extends ArrayAdapter<File> {
 
         TextView url = (TextView) root.findViewById(R.id.command_description_label);
         url.setText(current.getParent());
+
+        ImageView popup = (ImageView) root.findViewById(R.id.popup_menu);
+        popup.setVisibility(View.GONE); // save for future, hide for now
 
         return root;
     }

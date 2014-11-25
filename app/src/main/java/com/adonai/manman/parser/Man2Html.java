@@ -50,7 +50,7 @@ public class Man2Html {
     private BufferedReader source;
     private StringBuilder result = new StringBuilder();
 
-    private FontState fontState;
+    private FontState fontState = FontState.NORMAL;
     private boolean insideParagraph;
     private int linesBeforeIndent = -1; // 0 == we're indenting right now
 
@@ -81,6 +81,11 @@ public class Man2Html {
         return result.toString();
     }
 
+    /**
+     * Handle some special conditions while line-parsing.
+     * For example, .TP directive causes the line <b>after</b> next line to be indented
+     *
+     */
     private void handleSpecialConditions() {
         if(linesBeforeIndent > 0) {
             switch (--linesBeforeIndent) {
@@ -191,7 +196,7 @@ public class Man2Html {
                     }
                     linesBeforeIndent = 0;
                     break;
-                case fi: //re-enable margins
+                case fi: // re-enable margins (not used, just print what we have)
                     result.append(" ").append(parseTextField(lineAfterCommand));
                     break;
             }
@@ -220,6 +225,12 @@ public class Man2Html {
         return results;
     }
 
+    /**
+     * Parses text line and replaces all the GROFF escape symbols with appropriate UTF-8 characters.
+     * Also handles font change.
+     * @param text escaped line
+     * @return GROFF-unescaped string convenient for html inserting
+     */
     @NonNull
     private String parseTextField(String text) {
         int length = text.length();
@@ -235,31 +246,27 @@ public class Man2Html {
                 switch (firstEscapeChar) {
                     case 'f':    // change font
                         if(length > i + 1) {
+                            // get rid of the old one...
+                            switch (fontState) {
+                                case BOLD:
+                                    output.append("</b>");
+                                    break;
+                                case ITALIC:
+                                    output.append("</i>");
+                                    break;
+                            }
+                            // apply new one...
                             switch (text.charAt(++i)) {
                                 case 'B':
-                                    if(fontState == FontState.ITALIC) {
-                                        output.append("</i>");
-                                    }
                                     fontState = FontState.BOLD;
                                     output.append("<b>");
                                     break;
                                 case 'I':
-                                    if(fontState == FontState.BOLD) {
-                                        output.append("</b>");
-                                    }
                                     fontState = FontState.ITALIC;
                                     output.append("<i>");
                                     break;
                                 case 'R':
                                 case 'P':
-                                    switch (fontState) {
-                                        case BOLD:
-                                            output.append("</b>");
-                                            break;
-                                        case ITALIC:
-                                            output.append("</i>");
-                                            break;
-                                    }
                                     fontState = FontState.NORMAL;
                                     break;
                                 case '1': // nothing to do for now...
@@ -297,6 +304,11 @@ public class Man2Html {
         return output.toString();
     }
 
+    /**
+     * GROFF control statements start with dot or asterisk
+     * @param line line to check
+     * @return true if this line is control statement, false if it's just a text
+     */
     private boolean isControl(String line) {
         return line.startsWith(".") || line.startsWith("'");
     }

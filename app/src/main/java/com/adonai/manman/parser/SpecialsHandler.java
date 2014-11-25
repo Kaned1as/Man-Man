@@ -3,10 +3,17 @@ package com.adonai.manman.parser;
 import android.support.annotation.NonNull;
 
 /**
- * Created by adonai on 24.11.14.
+ * Helper class to deal with GROFF special characters
+ *
+ * @author Adonai
  */
 public class SpecialsHandler {
 
+    /**
+     * Returns appropriate UTF-8 character for requested GROFF special code
+     * @param code code to look for
+     * @return string of one  UTF-8 character (can't use char here, they're 2-byte almost always)
+     */
     @NonNull
     static String parseSpecial(String code) {
         switch (code) {
