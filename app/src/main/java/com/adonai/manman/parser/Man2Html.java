@@ -28,18 +28,31 @@ public class Man2Html {
     }
 
     private enum Command {
-        TH, SH, PP, RS, RE, // headers, titles
-        B, I,               // font directives
-        ie, el, nh, ad, sp  // conditionals and stuff...
+        TH(true), SH(true), PP(true), RS, RE,       // headers, titles
+        TP(true), IP(true),                         // special triggers
+        B, I, BR, BI,                               // font directives
+        ie, el, nh, ad, sp(true);                   // conditionals and stuff...
+
+        private boolean stopsIndentation;
+
+        Command() {
+        }
+
+        Command(boolean stopsIndentation) {
+            this.stopsIndentation = stopsIndentation;
+        }
+
+        public boolean stopsIndentation() {
+            return stopsIndentation;
+        }
     }
 
     private BufferedReader source;
     private StringBuilder result = new StringBuilder();
 
     private FontState fontState;
-    private int fontSize;
-    private boolean insideParagraph = false;
-
+    private boolean insideParagraph;
+    private int linesBeforeIndent = -1;
 
     public Man2Html(BufferedReader source) {
         this.source = source;
@@ -58,13 +71,27 @@ public class Man2Html {
             if(isControl(line)) {
                 evaluateCommand(line);
             } else {
-                result.append(parseTextField(line));
+                result.append(" ").append(parseTextField(line));
             }
+            handleSpecialConditions();
         }
         if(insideParagraph)
             result.append("</p>");
         result.append("</body></html>");
         return result.toString();
+    }
+
+    private void handleSpecialConditions() {
+        if(linesBeforeIndent > 0) {
+            switch (--linesBeforeIndent) {
+                case 1:
+                    result.append("<dl><dt>");
+                    break;
+                case 0:
+                    result.append("</dt><dd>");
+                    break;
+            }
+        }
     }
 
     /**
@@ -75,37 +102,95 @@ public class Man2Html {
         if(line.startsWith("'") || line.startsWith(".\\"))
             return; // beginning of message or comment, skip...
 
-        if(line.length() < 3)
-            return; // less than dot + 2 chars - t can't be command
+        if(line.length() < 2)
+            return; // less than dot + 1 chars - it can't be command
+
+        // let's try to extract command from the line
+        String firstWord;
+        String lineAfterCommand;
+
+        int firstSpace = line.indexOf(" ");
+        if(firstSpace != -1) {
+            firstWord = line.substring(1, firstSpace); // word before first space
+            lineAfterCommand = line.substring(firstSpace + 1);
+        } else {
+            firstWord = line.substring(1); // till the end of line
+            lineAfterCommand = "";
+        }
 
         try {
-            Command command = Command.valueOf(line.substring(1, 3));
-            List<String> args = parseQuotedCommandArguments(line.substring(3));
+            Command command = Command.valueOf(firstWord);
+            if(command.stopsIndentation) {
+                if(linesBeforeIndent == 0) { // we were indenting right now, reset
+                    result.append("</dd></dl>");
+                    linesBeforeIndent = -1;
+                }
+            }
             switch (command) {
-                case TH:
-                    if(!args.isEmpty()) {
-                        result.append("<h1>").append(parseTextField(args.get(0))).append("</h1>");
+                case TH: // table header
+                    List<String> titleArgs = parseQuotedCommandArguments(lineAfterCommand);
+                    if(!titleArgs.isEmpty()) {  // take only name of command
+                        result.append("<h1>").append(parseTextField(titleArgs.get(0))).append("</h1>");
                     }
                     break;
-                case PP:
-                    if(insideParagraph)
+                case PP: // paragraph
+                case sp: // line break
+                    if(insideParagraph) {
                         result.append("</p>");
+                    }
 
                     insideParagraph = true;
                     result.append("<p>");
-                case SH:
-                    if(!args.isEmpty()) {
-                        result.append("<h2>").append(parseTextField(args.get(0))).append("</h2>");
+                    break;
+                case SH: // sub header
+                    List<String> subHeaderArgs = parseQuotedCommandArguments(lineAfterCommand);
+                    if(!subHeaderArgs.isEmpty()) {
+                        result.append("<h2>").append(parseTextField(subHeaderArgs.get(0))).append("</h2>");
                     }
                     break;
-                case RS:
+                case RS: // indent start
                     result.append("<dl><dd>");
                     break;
-                case RE:
+                case RE: // indent end
                     result.append("</dd></dl>");
                     break;
-                case sp:
-                    result.append("<br/>");
+                case BI:
+                    result.append(" ").append("<b><i>").append(parseTextField(lineAfterCommand)).append("</i></b>").append(" ");
+                    break;
+                case B: // bold
+                    result.append(" ").append("<b>").append(parseTextField(lineAfterCommand)).append("</b>").append(" ");
+                    break;
+                case I: // italic
+                    result.append(" ").append("<i>").append(parseTextField(lineAfterCommand)).append("</i>").append(" ");
+                    break;
+                case BR:
+                    String[] words = lineAfterCommand.split(" ");
+                    // first word is bold...
+                    result.append(" ").append("<b>").append(parseTextField(words[0])).append("</b>");
+
+                    // others are regular
+                    for(int i = 1; i < words.length; ++i) {
+                        result.append(" ").append(parseTextField(words[i]));
+                    }
+                    break;
+                case TP: // indent after next line
+                    linesBeforeIndent = 2;
+                    break;
+                case IP: // notation
+                    if(lineAfterCommand.startsWith("\"")) { // quoted arg
+                        if(!lineAfterCommand.startsWith("\"\"")) { // not empty (hack?)
+                            List<String> notationArgs = parseQuotedCommandArguments(lineAfterCommand);
+                            if (!notationArgs.isEmpty()) {
+                                result.append("<dl><dt>").append(parseTextField(notationArgs.get(0))).append("</dt><dd>");
+                            }
+                        } else {
+                            result.append("<dl><dd>");
+                        }
+                    } else {
+                        result.append("<dl><dt>").append(parseTextField(lineAfterCommand)).append("</dt><dd>");
+                    }
+                    linesBeforeIndent = 0;
+                    break;
             }
         } catch (IllegalArgumentException iae) {
             // unimplemented control, skip...
@@ -155,7 +240,9 @@ public class Man2Html {
                                 case 'I':
                                     fontState = FontState.ITALIC;
                                     output.append("<i>");
+                                    break;
                                 case 'R':
+                                case 'P':
                                     switch (fontState) {
                                         case BOLD:
                                             output.append("</b>");
@@ -164,6 +251,10 @@ public class Man2Html {
                                             output.append("</i>");
                                     }
                                     fontState = FontState.NORMAL;
+                                    break;
+                                case '1': // nothing to do for now...
+                                case '2':
+                                case '3':
                                     break;
                             }
                         }
