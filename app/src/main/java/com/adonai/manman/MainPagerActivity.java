@@ -20,13 +20,7 @@ import android.view.ViewGroup;
 
 import com.adonai.manman.database.DbProvider;
 import com.adonai.manman.preferences.PreferencesActivity;
-import com.android.vending.util.IabHelper;
-import com.android.vending.util.IabResult;
-import com.android.vending.util.Inventory;
-import com.android.vending.util.Purchase;
 import com.astuetz.PagerSlidingTabStrip;
-
-import java.util.Date;
 
 /**
  * Main activity where everything takes place
@@ -48,12 +42,8 @@ public class MainPagerActivity extends FragmentActivity {
     public final static String DB_CHANGE_NOTIFY = "database.updated";
     public final static String BACK_BUTTON_NOTIFY = "back.button.pressed";
 
-    // helpers for donations (from android vending tutorial)
-    private static final String SKU_DONATE = "small";
-    private IabHelper mHelper;
-    private boolean mCanBuy = false;
-
     private ViewPager mPager;
+    private DonateHelper mDonateHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,16 +61,7 @@ public class MainPagerActivity extends FragmentActivity {
         tabs.setViewPager(mPager);
 
         // setting up vending
-        String base64EncodedPublicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA51neavcx/+qXg/uguvvN3511aPXP6jgPc2Q0+ekGNeS2lNzwpq5+qBywbQ2PIs0DPvLrtiOwpxxNmKn4EH6i9YmmrEa02rVg1DdJnodZarx/Bg28V55YUKSGAWHKCZVrCSy+VXyVu4iBMmpHf/oHsLxeZqpx7s7YAvzJ4mqoDHThf39RLmnwWPKRl2WFnsDBX9vNCchx5xE8OdZXZZI9zkc46JJxeiJa3ypqAqMhiDPX/E3lznKCoavPGH7z/mCXwc63nSW1LmRnViT3Zg/onPtcsc/NyahYfoEllA2Vx8QG709w7sp8MngjxHGJ1ZzFDd22UeaiOvoIKBwzA0BUxwIDAQAB";
-        mHelper = new IabHelper(this, base64EncodedPublicKey);
-        mHelper.startSetup(new IabHelper.OnIabSetupFinishedListener() {
-            @Override
-            public void onIabSetupFinished(IabResult result) {
-                if (result.isSuccess())
-                    mCanBuy = true;
-            }
-        });
-
+        mDonateHelper = new DonateHelper(this);
     }
 
     @Override
@@ -97,7 +78,7 @@ public class MainPagerActivity extends FragmentActivity {
                 showAbout();
                 return true;
             case R.id.donate_menu_item:
-                purchaseGift();
+                mDonateHelper.purchaseGift();
                 return true;
             case R.id.settings_menu_item:
                 startActivity(new Intent(this, PreferencesActivity.class));
@@ -193,37 +174,10 @@ public class MainPagerActivity extends FragmentActivity {
         builder.show();
     }
 
-    // needed for vending
-    private void purchaseGift() {
-        if (mCanBuy) {
-            mHelper.launchPurchaseFlow(MainPagerActivity.this, SKU_DONATE, 6666, new IabHelper.OnIabPurchaseFinishedListener() {
-                @Override
-                public void onIabPurchaseFinished(IabResult result, Purchase info) {
-                    if (result.isSuccess()) {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(MainPagerActivity.this);
-                        builder.setTitle(R.string.completed).setMessage(R.string.thanks_for_pledge);
-                        builder.setPositiveButton(android.R.string.ok, null);
-                        builder.create().show();
-                    }
-
-                    mHelper.queryInventoryAsync(false, new IabHelper.QueryInventoryFinishedListener() {
-                        @Override
-                        public void onQueryInventoryFinished(IabResult result, Inventory inv) {
-                            if (result.isSuccess()) {
-                                if (inv.getPurchase(SKU_DONATE) != null)
-                                    mHelper.consumeAsync(inv.getPurchase(SKU_DONATE), null);
-                            }
-                        }
-                    });
-                }
-            }, "ManManDonation " + new Date());
-        }
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // Pass on the activity result to the helper for handling
-        if (!mHelper.handleActivityResult(requestCode, resultCode, data)) {
+        if (!mDonateHelper.handleActivityResult(requestCode, resultCode, data)) {
             // not handled, so handle it ourselves (here's where you'd
             // perform any handling of activity results not related to in-app
             // billing...
@@ -241,8 +195,6 @@ public class MainPagerActivity extends FragmentActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // needed for vending
-        if (mCanBuy)
-            mHelper.dispose();
+        mDonateHelper.handleActivityDestroy();
     }
 }

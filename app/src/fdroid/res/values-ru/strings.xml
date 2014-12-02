@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="donate_via_paypal">Через Paypal…</string>
+    <string name="donations_alert_dialog_no_browser">Браузер не найден! :(</string>
+</resources>
