@@ -19,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.FrameLayout;
 import android.widget.ListView;
 
 import com.adonai.manman.adapters.ChapterContentsArrayAdapter;
@@ -73,6 +74,7 @@ public class ManChaptersFragment extends Fragment {
 
     private Map<String, String> mCachedChapters;
 
+    private FrameLayout mFrame;
     private ListView mListView;
     private ProgressBarWrapper mProgress;
     /**
@@ -137,6 +139,9 @@ public class ManChaptersFragment extends Fragment {
         mListView = (ListView) root.findViewById(R.id.chapter_commands_list);
         mListView.setAdapter(mChaptersAdapter);
         mListView.setOnItemClickListener(mChapterClickListener);
+
+        mFrame = (FrameLayout) root.findViewById(R.id.chapter_fragment_frame);
+
         mProgress = new ProgressBarWrapper(getActivity());
         getLoaderManager().initLoader(MainPagerActivity.CONTENTS_RETRIEVER_LOADER, Bundle.EMPTY, mContentRetrieveCallback);
         return root;
@@ -277,12 +282,15 @@ public class ManChaptersFragment extends Fragment {
                     // close opened cursor prior to adapter change
                     ((ChapterContentsCursorAdapter) mListView.getAdapter()).closeCursor();
                 }
+                mListView.setFastScrollEnabled(false);
                 mListView.setAdapter(null);
+                swapListView();
                 if(data.choiceDbCache != null) {
                     mListView.setAdapter(new ChapterContentsCursorAdapter(getActivity(), data.choiceDbCache.first, data.choiceDbCache.second, data.chapter));
                 } else {
                     mListView.setAdapter(new ChapterContentsArrayAdapter(getActivity(), R.layout.chapter_command_list_item, R.id.command_name_label, data.choiceList));
                 }
+                mListView.setFastScrollEnabled(true);
                 mListView.setOnItemClickListener(mCommandClickListener);
                 LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mBroadcastHandler, new IntentFilter(MainPagerActivity.BACK_BUTTON_NOTIFY));
             }
@@ -406,5 +414,30 @@ public class ManChaptersFragment extends Fragment {
             mListView.setOnItemClickListener(mChapterClickListener);
             LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(this);
         }
+    }
+
+    /**
+     * Workaround for <a href="http://stackoverflow.com/questions/20730301/android-refresh-listview-sections-overlay-not-working-in-4-4">this</a>
+     * <br/>
+     * Swaps the list view prior to setting adapter to invalidate fast scroller
+     */
+    private void swapListView() {
+        //save layout params
+        ViewGroup.LayoutParams listViewParams;
+        if (mListView != null) {
+            listViewParams = mListView.getLayoutParams();
+        } else {
+            listViewParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        }
+
+        //frame is a FrameLayout around the ListView
+        mFrame.removeView(mListView);
+
+        mListView = new ListView(getActivity());
+        mListView.setLayoutParams(listViewParams);
+        //other ListView initialization code like divider settings
+        mListView.setDivider(null);
+
+        mFrame.addView(mListView);
     }
 }
