@@ -13,9 +13,13 @@ Features
 - Supports explaining command one-liners
 - Supports browsing and indexing of man chapters
 - Supports caching of man pages that were previously accessed
+- Supports loading and viewing troff files from local man archive
 
 In progress
 -----------
-
-- Loading and viewing troff files from local man archive
 - Page actions (multiple load to cache, cache purging, favorites etc.)
+
+Updating
+-----------
+I consider this app as stable now, 
+so if you want any additional features to be included, please create an enhancement issue here
