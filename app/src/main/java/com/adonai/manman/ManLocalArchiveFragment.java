@@ -171,11 +171,12 @@ public class ManLocalArchiveFragment extends Fragment implements SharedPreferenc
 
         @Override
         public void onLoadFinished(Loader<List<File>> loader, List<File> manPageFiles) {
+            mLocalPageList.setAdapter(null); // for android < kitkat for header to work properly
+
             if(mLocalPageList.getHeaderViewsCount() > 0) {
                 mLocalPageList.removeHeaderView(mLocalPageList.getChildAt(0));
             }
 
-            mLocalPageList.setAdapter(new LocalArchiveArrayAdapter(getActivity(), R.layout.chapter_command_list_item, R.id.command_name_label, manPageFiles));
             if(manPageFiles.isEmpty()) {
                 mSearchLocalPage.setVisibility(View.GONE);
                 View header = View.inflate(getActivity(), R.layout.add_folder_header, null);
@@ -183,6 +184,7 @@ public class ManLocalArchiveFragment extends Fragment implements SharedPreferenc
             } else {
                 mSearchLocalPage.setVisibility(View.VISIBLE);
             }
+            mLocalPageList.setAdapter(new LocalArchiveArrayAdapter(getActivity(), R.layout.chapter_command_list_item, R.id.command_name_label, manPageFiles));
         }
 
         @Override
