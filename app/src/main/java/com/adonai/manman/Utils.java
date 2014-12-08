@@ -14,11 +14,16 @@ import com.adonai.manman.entities.ManSectionIndex;
 import com.adonai.manman.entities.ManSectionItem;
 
 import org.jsoup.nodes.Document;
+import org.mozilla.universalchardet.UniversalDetector;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
 
 /**
  * Utility class for wrapping useful static functions
@@ -101,5 +106,21 @@ public class Utils {
         Document doc = Document.createShell(url);
         doc.head().append("<link rel=\"stylesheet\" href=\"file:///android_asset/css/" + theme + ".css\" type=\"text/css\" media=\"all\" title=\"Standard\"/>");
         return doc.html().replace("<body>", "<body>" + htmlContent); // ugly hack, huh? Well, why don't you come up with something?
+    }
+
+    public static String detectEncodingOfArchive(File gzipped) throws IOException {
+        FileInputStream fis = new FileInputStream(gzipped);
+        GZIPInputStream gis = new GZIPInputStream(fis);
+        byte[] buf = new byte[4096];
+
+        UniversalDetector detector = new UniversalDetector(null);
+        int read;
+        while ((read = gis.read(buf)) > 0 && !detector.isDone()) {
+            detector.handleData(buf, 0, read);
+        }
+        detector.dataEnd();
+        gis.close();
+
+        return detector.getDetectedCharset();
     }
 }

@@ -171,11 +171,10 @@ public class ManLocalArchiveFragment extends Fragment implements SharedPreferenc
 
         @Override
         public void onLoadFinished(Loader<List<File>> loader, List<File> manPageFiles) {
-            mLocalPageList.setAdapter(null); // for android < kitkat for header to work properly
-
             if(mLocalPageList.getHeaderViewsCount() > 0) {
                 mLocalPageList.removeHeaderView(mLocalPageList.getChildAt(0));
             }
+            mLocalPageList.setAdapter(null); // for android < kitkat for header to work properly
 
             if(manPageFiles.isEmpty()) {
                 mSearchLocalPage.setVisibility(View.GONE);

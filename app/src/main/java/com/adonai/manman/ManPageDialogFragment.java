@@ -144,9 +144,10 @@ public class ManPageDialogFragment extends DialogFragment {
                     if(mAddressUrl.startsWith("/")) { // TODO: rewrite with URI
                         try {
                             File input = new File(mAddressUrl);
+                            String charset = Utils.detectEncodingOfArchive(input);
                             FileInputStream fis = new FileInputStream(input);
                             GZIPInputStream gis = new GZIPInputStream(fis);
-                            BufferedReader br = new BufferedReader(new InputStreamReader(gis));
+                            BufferedReader br = charset == null ? new BufferedReader(new InputStreamReader(gis)) : new BufferedReader(new InputStreamReader(gis, charset));
                             Man2Html parser = new Man2Html(br);
                             ManPage result = new ManPage(input.getName(), "file://" + mAddressUrl);
                             result.setWebContent(parser.getHtml()); // we're not using it in DB!

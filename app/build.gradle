@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 21
-    buildToolsVersion "21.1.0"
+    buildToolsVersion "21.1.1"
 
     defaultConfig {
         applicationId "com.adonai.manman"
@@ -30,7 +30,6 @@ android {
         }
         release {
             debuggable false
-            jniDebugBuild false
             signingConfig signingConfigs.release
             minifyEnabled true
             shrinkResources true
@@ -38,7 +37,6 @@ android {
         }
         fdroid {
             debuggable false
-            jniDebugBuild false
             signingConfig signingConfigs.release
             minifyEnabled true
             shrinkResources true
@@ -63,4 +61,5 @@ dependencies {
     compile 'com.google.code.gson:gson:2.3'                             // Json (De)Serializer
     compile 'org.jsoup:jsoup:1.8.1'                                     // html parser
     compile 'org.ccil.cowan.tagsoup:tagsoup:1.2'                        // html SAX parser
+    compile 'com.googlecode.juniversalchardet:juniversalchardet:1.0.3'  // file encoding detector
 }
