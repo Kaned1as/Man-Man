@@ -8,8 +8,8 @@ android {
         applicationId "com.adonai.manman"
         minSdkVersion 14
         targetSdkVersion 21
-        versionCode 124
-        versionName "1.2.4"
+        versionCode 125
+        versionName "1.2.5"
     }
 
     signingConfigs {
@@ -23,9 +23,9 @@ android {
 
     buildTypes {
         debug {
-//            minifyEnabled true
-//            shrinkResources true
-//            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+//          minifyEnabled true
+//          shrinkResources true
+//          proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             applicationIdSuffix ".debug"
         }
         release {
@@ -35,16 +35,15 @@ android {
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
-        fdroid {
-            debuggable false
-            signingConfig signingConfigs.release
-            minifyEnabled true
-            shrinkResources true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
     }
 
-    sourceSets.debug.setRoot('src/fdroid')
+    productFlavors {
+        fdroid {
+        }
+
+        googleplay {
+        }
+    }
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
