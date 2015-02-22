@@ -8,8 +8,8 @@ android {
         applicationId "com.adonai.manman"
         minSdkVersion 14
         targetSdkVersion 21
-        versionCode 125
-        versionName "1.2.5"
+        versionCode 127
+        versionName "1.2.7"
     }
 
     signingConfigs {
