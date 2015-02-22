@@ -62,6 +62,7 @@ public class MainPagerActivity extends ActionBarActivity {
 
         // setting up vending
         mDonateHelper = new DonateHelper(this);
+        DbProvider.setHelper(this);
     }
 
     @Override
@@ -147,18 +148,6 @@ public class MainPagerActivity extends ActionBarActivity {
         }
     }
 
-    @Override
-    protected void onStart() {
-        DbProvider.setHelper(this);
-        super.onStart();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        DbProvider.releaseHelper();
-    }
-
     /**
      * Shows about dialog, with description, author and stuff
      */
@@ -195,6 +184,7 @@ public class MainPagerActivity extends ActionBarActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        DbProvider.releaseHelper();
         mDonateHelper.handleActivityDestroy();
     }
 }

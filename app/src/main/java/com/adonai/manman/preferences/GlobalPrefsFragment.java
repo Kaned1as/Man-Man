@@ -35,7 +35,7 @@ public class GlobalPrefsFragment extends PreferenceFragment {
                             DbProvider.setHelper(getActivity());
                             DbProvider.getHelper().clearAllTables();
                             DbProvider.releaseHelper();
-                        } else { // not paused (actually does not happen)
+                        } else { // not paused
                             DbProvider.getHelper().clearAllTables();
                         }
                         LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(new Intent(MainPagerActivity.DB_CHANGE_NOTIFY));
