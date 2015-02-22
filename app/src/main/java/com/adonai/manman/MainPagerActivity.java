@@ -8,11 +8,11 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,7 +28,7 @@ import com.astuetz.PagerSlidingTabStrip;
  * @author Adonai
  */
 @SuppressWarnings("FieldCanBeLocal")
-public class MainPagerActivity extends FragmentActivity {
+public class MainPagerActivity extends ActionBarActivity {
 
     public static String FOLDER_LIST_KEY = "folder.list";
 
@@ -47,12 +47,12 @@ public class MainPagerActivity extends FragmentActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
+        // should set theme prior to instantiating compat actionbar etc.
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         final String theme = prefs.getString("app.theme", "light");
         setTheme(theme.equals("light") ? R.style.Light : R.style.Dark);
 
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_pager);
 
         mPager = (ViewPager) findViewById(R.id.page_holder);

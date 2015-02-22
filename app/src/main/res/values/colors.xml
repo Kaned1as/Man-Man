@@ -11,4 +11,8 @@
 
     <color name="semi_transparent_dark">#33000000</color>
     <color name="semi_transparent_light">#33ffffff</color>
+    
+    <color name="primary">#ff202020</color>
+    <color name="primary_dark">#ff101010</color>
+    <color name="accent">#ff505050</color>
 </resources>
