@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Browser;
@@ -21,6 +22,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
@@ -112,6 +114,11 @@ public class ManPageDialogFragment extends DialogFragment {
         mContent = (WebView) root.findViewById(R.id.man_content_web);
         mContent.setWebViewClient(new ManPageChromeClient());
         mContent.getSettings().setJavaScriptEnabled(true);
+
+        // Lollipop blocks mixed content but we should load CSS from filesystem
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            mContent.getSettings().setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+        }
         getLoaderManager().initLoader(MainPagerActivity.MAN_PAGE_RETRIEVER_LOADER, null, manPageCallback);
         return root;
     }
@@ -217,7 +224,7 @@ public class ManPageDialogFragment extends DialogFragment {
         public void onLoadFinished(Loader<ManPage> loader, ManPage data) {
             if(data != null) {
                 mContent.loadDataWithBaseURL(mAddressUrl, Utils.getWebWithCss(getActivity(), data.getUrl(), data.getWebContent()), "text/html", "UTF-8", null);
-                mContent.setBackgroundColor(Utils.getThemedValue(getActivity(), R.attr.fill_color)); // prevent flickering
+                //mContent.setBackgroundColor(Utils.getThemedValue(getActivity(), R.attr.fill_color)); // prevent flickering
                 fillLinkPane(data.getLinks());
                 mFlipper.showNext();
                 shakeSlider();
