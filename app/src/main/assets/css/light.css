@@ -229,3 +229,11 @@ var{
 .func-name{
 	color:#be2971
 }
+
+a h2, a h3{
+	color:#333
+}
+
+a{
+	text-decoration:none
+}

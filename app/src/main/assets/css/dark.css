@@ -24,11 +24,11 @@ button,html,input,select,textarea{
 body{
 	margin: 5pt;
 	background-color: #000000;
-	color: white;
+	color: #ccc;
 }
 
 .in-doc{
-	color:#648f42;
+	color:#cba0df;
 }
 
 h1{
@@ -223,9 +223,18 @@ table{
 
 var{
 	font-style:normal;
-	color:#90533a
+	color:#9fdce7
 }
 
 .func-name{
-	color:#de59A1
+	color:#41d68e
+}
+
+a h2, a h3{
+	color:#ccc
+}
+
+a{
+	color:#f0c90e;
+	text-decoration:none
 }

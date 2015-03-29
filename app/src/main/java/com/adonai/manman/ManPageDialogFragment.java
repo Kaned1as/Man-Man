@@ -195,7 +195,7 @@ public class ManPageDialogFragment extends DialogFragment {
                                 Elements links = man.select("a[href*=#]");
                                 TreeSet<String> linkContainer = new TreeSet<>();
                                 for (Element link : links) {
-                                    if (!TextUtils.isEmpty(link.text()) && link.attr("href").contains("#" + link.text())) { // it's like <a href="http:/ex.com/#a">-x</a>
+                                    if (!TextUtils.isEmpty(link.text()) && link.attr("href").contains("#" + link.text())) { // it's like <a href="http://ex.com/#a">-x</a>
                                         linkContainer.add(link.text());
                                     }
                                 }
@@ -224,7 +224,7 @@ public class ManPageDialogFragment extends DialogFragment {
         public void onLoadFinished(Loader<ManPage> loader, ManPage data) {
             if(data != null) {
                 mContent.loadDataWithBaseURL(mAddressUrl, Utils.getWebWithCss(getActivity(), data.getUrl(), data.getWebContent()), "text/html", "UTF-8", null);
-                //mContent.setBackgroundColor(Utils.getThemedValue(getActivity(), R.attr.fill_color)); // prevent flickering
+                mContent.setBackgroundColor(Utils.getThemedValue(getActivity(), R.attr.fill_color)); // prevent flickering
                 fillLinkPane(data.getLinks());
                 mFlipper.showNext();
                 shakeSlider();
