@@ -8,8 +8,8 @@ android {
         applicationId "com.adonai.manman"
         minSdkVersion 14
         targetSdkVersion 21
-        versionCode 127
-        versionName "1.2.7"
+        versionCode 128
+        versionName "1.2.8"
     }
 
     signingConfigs {
@@ -53,8 +53,8 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:support-v4:21.0.3'                     // support library (ViewPager etc.)
-    compile "com.android.support:appcompat-v7:21.0.3"                   // support library (material design)
+    compile 'com.android.support:support-v4:22.0.0'                     // support library (ViewPager etc.)
+    compile "com.android.support:appcompat-v7:22.0.0"                   // support library (material design)
     compile 'com.astuetz:pagerslidingtabstrip:1.0.1'                    // header tabs bar
     compile 'com.github.castorflex.smoothprogressbar:library:1.0.0'     // progressbar on chapter load
     compile 'com.j256.ormlite:ormlite-android:4.48'                     // ORM for man pages
