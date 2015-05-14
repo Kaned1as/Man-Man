@@ -47,3 +47,23 @@
 ##---------------Begin: proguard configuration for Jsoup ------
 -keep public class org.jsoup.** { *; }
 ##---------------End: proguard configuration for Jsoup -------
+
+##---------------Begin: proguard configuration for OkHttp ------
+# OkHttp itself
+-dontwarn rx.**
+-dontwarn okio.**
+
+-dontwarn com.squareup.okhttp.**
+-keep class com.squareup.okhttp.** { *; }
+-keep interface com.squareup.okhttp.** { *; }
+# RetroFit
+-dontwarn retrofit.**
+-dontwarn retrofit.appengine.UrlFetchClient
+-keep class retrofit.** { *; }
+-keepclasseswithmembers class * {
+    @retrofit.http.* <methods>;
+}
+
+# Signature and Annotation are already handled above by GSON
+
+##---------------End: proguard configuration for OkHttp -------
