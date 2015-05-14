@@ -33,8 +33,10 @@ import android.widget.ViewFlipper;
 import com.adonai.manman.database.DbProvider;
 import com.adonai.manman.entities.ManPage;
 import com.adonai.manman.misc.AbstractNetworkAsyncLoader;
-import com.adonai.manman.misc.HttpClientFactory;
 import com.adonai.manman.parser.Man2Html;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -54,6 +56,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.zip.GZIPInputStream;
@@ -182,11 +185,11 @@ public class ManPageDialogFragment extends DialogFragment {
                     }
 
                     try {
-                        DefaultHttpClient httpClient = HttpClientFactory.getTolerantClient();
-                        HttpUriRequest post = new HttpGet(mAddressUrl);
-                        HttpResponse response = httpClient.execute(post);
-                        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                            String result = EntityUtils.toString(response.getEntity());
+                        OkHttpClient client = new OkHttpClient();
+                        Request request = new Request.Builder().url(mAddressUrl).build();
+                        Response response = client.newCall(request).execute();
+                        if (response.isSuccessful()) {
+                            String result = response.body().string();
                             Document root = Jsoup.parse(result, mAddressUrl);
                             Element man = root.select("div.man-page").first();
                             if (man != null) { // it's actually a man page

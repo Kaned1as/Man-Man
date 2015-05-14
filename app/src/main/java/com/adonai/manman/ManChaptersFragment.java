@@ -29,12 +29,14 @@ import com.adonai.manman.database.DbProvider;
 import com.adonai.manman.entities.ManSectionIndex;
 import com.adonai.manman.entities.ManSectionItem;
 import com.adonai.manman.misc.AbstractNetworkAsyncLoader;
-import com.adonai.manman.misc.HttpClientFactory;
 import com.adonai.manman.misc.ManSectionExtractor;
 import com.adonai.manman.views.ProgressBarWrapper;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.misc.TransactionManager;
 import com.j256.ormlite.stmt.PreparedQuery;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -209,21 +211,23 @@ public class ManChaptersFragment extends Fragment {
                 private List<ManSectionItem> loadFromNetwork(final String index, String link) {
                     try {
                         // load chapter page with command links
-                        DefaultHttpClient httpClient = HttpClientFactory.getTolerantClient();
-                        HttpUriRequest post = new HttpGet(link);
-                        post.setHeader("Accept-Encoding", "gzip, deflate");
-                        HttpResponse response = httpClient.execute(post);
-                        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                        OkHttpClient client = new OkHttpClient();
+                        Request request = new Request.Builder()
+                                .header("Accept-Encoding", "gzip, deflate")
+                                .url(link)
+                                .build();
+                        Response response = client.newCall(request).execute();
+                        if (response.isSuccessful()) {
                             // count the bytes and show progress
                             InputStream is;
-                            if(response.getFirstHeader("Content-Length") != null) {
+                            if(response.header("Content-Length") != null) {
                                 is = new GZIPInputStream(
-                                        new CountingInputStream(response.getEntity().getContent(),
-                                                (int) response.getEntity().getContentLength()),
-                                                (int) response.getEntity().getContentLength());
+                                        new CountingInputStream(response.body().byteStream(),
+                                                (int) response.body().contentLength()),
+                                                (int) response.body().contentLength());
                             } else {
-                                is = new GZIPInputStream(new CountingInputStream(response.getEntity().getContent(),
-                                        (int) response.getEntity().getContentLength()));
+                                is = new GZIPInputStream(new CountingInputStream(response.body().byteStream(),
+                                        (int) response.body().contentLength()));
                             }
 
                             final Parser parser = new Parser();

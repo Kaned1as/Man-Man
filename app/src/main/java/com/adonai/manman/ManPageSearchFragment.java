@@ -1,5 +1,6 @@
 package com.adonai.manman;
 
+import android.annotation.SuppressLint;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -34,10 +35,12 @@ import com.adonai.manman.entities.Description;
 import com.adonai.manman.entities.SearchResult;
 import com.adonai.manman.entities.SearchResultList;
 import com.adonai.manman.misc.AbstractNetworkAsyncLoader;
-import com.adonai.manman.misc.HttpClientFactory;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -46,11 +49,20 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.net.ssl.HttpsURLConnection;
 
 
 /**
@@ -140,12 +152,12 @@ public class ManPageSearchFragment extends Fragment {
                 @Override
                 public SearchResultList loadInBackground() {
                     try {
-                        DefaultHttpClient httpClient = HttpClientFactory.getTolerantClient();
-                        String request = URLEncoder.encode(mSearchView.getQuery().toString(), "UTF-8");
-                        HttpUriRequest post = new HttpGet(SEARCH_COMMAND_PREFIX + request);
-                        HttpResponse response = httpClient.execute(post);
-                        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                            String result = EntityUtils.toString(response.getEntity());
+                        String address = URLEncoder.encode(mSearchView.getQuery().toString(), "UTF-8");
+                        OkHttpClient client = new OkHttpClient();
+                        Request request = new Request.Builder().url(SEARCH_COMMAND_PREFIX + address).build();
+                        Response response = client.newCall(request).execute();
+                        if (response.isSuccessful()) {
+                            String result = response.body().string();
                             return mJsonConverter.fromJson(result, SearchResultList.class);
                         }
                     } catch (IOException e) {
@@ -196,12 +208,12 @@ public class ManPageSearchFragment extends Fragment {
                 @Override
                 public String loadInBackground() {
                     try {
-                        DefaultHttpClient httpClient = HttpClientFactory.getTolerantClient();
-                        String request = URLEncoder.encode(mSearchView.getQuery().toString(), "UTF-8");
-                        HttpUriRequest post = new HttpGet(SEARCH_ONE_LINER_PREFIX + request);
-                        HttpResponse response = httpClient.execute(post);
-                        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                            return EntityUtils.toString(response.getEntity());
+                        String address = URLEncoder.encode(mSearchView.getQuery().toString(), "UTF-8");
+                        OkHttpClient client = new OkHttpClient();
+                        Request request = new Request.Builder().url(SEARCH_ONE_LINER_PREFIX + address).build();
+                        Response response = client.newCall(request).execute();
+                        if (response.isSuccessful()) {
+                            return response.body().string();
                         }
                     } catch (IOException e) {
                         Log.e("Man Man", "Network", e);
@@ -362,15 +374,16 @@ public class ManPageSearchFragment extends Fragment {
                                             @Override
                                             public void run() {
                                                 try {
-                                                    DefaultHttpClient httpClient = HttpClientFactory.getTolerantClient();
-                                                    String request = URLEncoder.encode(descriptionCommand, "UTF-8");
-                                                    HttpUriRequest post = new HttpGet(SEARCH_DESCRIPTION_PREFIX + request);
-                                                    HttpResponse response = httpClient.execute(post);
-                                                    if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                                                        String result = EntityUtils.toString(response.getEntity());
+                                                    String address = URLEncoder.encode(descriptionCommand, "UTF-8");
+                                                    OkHttpClient client = new OkHttpClient();
+                                                    Request request = new Request.Builder().url(SEARCH_DESCRIPTION_PREFIX + address).build();
+                                                    Response response = client.newCall(request).execute();
+                                                    if (response.isSuccessful()) {
+                                                        String result = response.body().string();
                                                         final Description descAnswer = mJsonConverter.fromJson(result, Description.class);
                                                         // load description back into listview
                                                         getActivity().runOnUiThread(new Runnable() {
+                                                            @SuppressLint("SetJavaScriptEnabled")
                                                             @Override
                                                             public void run() {
                                                                 descriptionRequest.setImageResource(R.drawable.ic_menu_moreoverflow_normal_holo);
