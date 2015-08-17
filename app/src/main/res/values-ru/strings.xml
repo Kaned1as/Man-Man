@@ -55,5 +55,7 @@
     <string name="watched_folders">Отслеживаемые каталоги</string>
     <string name="wrong_file_format">Некорректный формат файла</string>
     <string name="scanning_folders">Сканирование каталогов…</string>
-    <string name="find_next">Find next</string>
+    <string name="find_next">Найти следующий</string>
+    <string name="close_search">Закрыть окно поиска</string>
+    <string name="find_previous">Найти предыдущий</string>
 </resources>
