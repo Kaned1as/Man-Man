@@ -17,15 +17,22 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SlidingPaneLayout;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -84,6 +91,12 @@ public class ManPageDialogFragment extends Fragment {
     private ViewFlipper mFlipper;
     private WebView mContent;
 
+    private LinearLayout mSearchContainer;
+    private EditText mSearchEdit;
+    private ImageView mCloseSearchBar;
+    private ImageView mFindNext;
+    private ImageView mFindPrevious;
+
     @NonNull
     public static ManPageDialogFragment newInstance(@NonNull String commandName, @NonNull String address) {
         ManPageDialogFragment fragment = new ManPageDialogFragment();
@@ -110,6 +123,8 @@ public class ManPageDialogFragment extends Fragment {
     @SuppressLint("SetJavaScriptEnabled")
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        setHasOptionsMenu(true);
+        
         View root = inflater.inflate(R.layout.fragment_man_page_show, container, false);
         mLinkContainer = (LinearLayout) root.findViewById(R.id.link_list);
         mSlider = (SlidingPaneLayout) root.findViewById(R.id.sliding_pane);
@@ -117,6 +132,18 @@ public class ManPageDialogFragment extends Fragment {
         mContent = (WebView) root.findViewById(R.id.man_content_web);
         mContent.setWebViewClient(new ManPageChromeClient());
         mContent.getSettings().setJavaScriptEnabled(true);
+        
+        // search-specific
+        mSearchContainer = (LinearLayout) root.findViewById(R.id.search_bar_layout);
+        mSearchEdit = (EditText) mSearchContainer.findViewById(R.id.search_edit);
+        mCloseSearchBar = (ImageView) mSearchContainer.findViewById(R.id.close_search_bar);
+        mFindNext = (ImageView) mSearchContainer.findViewById(R.id.find_next_occurrence);
+        mFindPrevious = (ImageView) mSearchContainer.findViewById(R.id.find_previous_occurrence);
+        
+        mCloseSearchBar.setOnClickListener(new SearchBarCloser());
+        mSearchEdit.addTextChangedListener(new SearchExecutor());
+        mFindNext.setOnClickListener(new SearchFurtherExecutor(true));
+        mFindPrevious.setOnClickListener(new SearchFurtherExecutor(false));
 
         // Lollipop blocks mixed content but we should load CSS from filesystem
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -124,6 +151,22 @@ public class ManPageDialogFragment extends Fragment {
         }
         getLoaderManager().initLoader(MainPagerActivity.MAN_PAGE_RETRIEVER_LOADER, null, manPageCallback);
         return root;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.man_page_menu, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.show_search_bar:
+                mSearchContainer.setVisibility(View.VISIBLE);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     /**
@@ -333,6 +376,60 @@ public class ManPageDialogFragment extends Fragment {
                 return false;
             }
             return true;
+        }
+    }
+
+    /**
+     * Closes the search bar
+     */
+    private class SearchBarCloser implements View.OnClickListener {
+        @Override
+        public void onClick(View v) {
+            mSearchContainer.setVisibility(View.GONE);
+            mContent.clearMatches();
+        }
+    }
+
+    /**
+     * Finds next occurrence depending on direction
+     */
+    private class SearchFurtherExecutor implements View.OnClickListener {
+
+        private boolean goDown;
+
+        public SearchFurtherExecutor(boolean goDown) {
+            this.goDown = goDown;
+        }
+
+        @Override
+        public void onClick(View v) {
+            mContent.findNext(goDown);
+        }
+    }
+
+    /**
+     * Executes search on string change
+     */
+    private class SearchExecutor implements TextWatcher {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        }
+
+        @SuppressWarnings("deprecation")
+        @Override
+        public void afterTextChanged(Editable s) {
+            // Lollipop blocks mixed content but we should load CSS from filesystem
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                mContent.findAllAsync(s.toString()); // API 16
+            } else {
+                mContent.findAll(s.toString());
+            }
         }
     }
 }

@@ -2,8 +2,8 @@
 <ViewFlipper xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:inAnimation="@android:anim/slide_in_left"
-    android:outAnimation="@android:anim/slide_out_right"
+    android:inAnimation="@android:anim/fade_in"
+    android:outAnimation="@android:anim/fade_out"
     android:background="?attr/semi_transparent_divider_color"
     android:id="@+id/flipper">
 
@@ -42,15 +42,18 @@
                 android:id="@+id/man_content_web" />
             
             <LinearLayout
-                android:id="@+id/search_layout"
+                android:id="@+id/search_bar_layout"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:background="?attr/background_color"
+                android:visibility="gone">
                 
                 <ImageView
                     android:contentDescription="@string/close_search"
-                    android:id="@+id/close_search"
+                    android:id="@+id/close_search_bar"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
+                    android:padding="5dp"
                     android:src="@android:drawable/ic_menu_close_clear_cancel"/>
                 
                 <EditText
@@ -58,10 +61,11 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:inputType="text"/>
+                    android:inputType="text"
+                    android:hint="@string/search"/>
                 
                 <ImageView
-                    android:id="@+id/find_next_occurence"
+                    android:id="@+id/find_next_occurrence"
                     android:contentDescription="@string/find_next"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
@@ -70,7 +74,7 @@
                     android:scaleType="center"/>
                 
                 <ImageView
-                    android:id="@+id/find_previous_occurence"
+                    android:id="@+id/find_previous_occurrence"
                     android:contentDescription="@string/find_previous"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
