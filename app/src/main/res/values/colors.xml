@@ -2,15 +2,19 @@
 <resources>
     <color name="background_light">#ffe0e0e0</color>
     <color name="background_dark">#ff101010</color>
+    <color name="background_green">#ff000000</color>
 
     <color name="alt_text_color_dark">#ff333333</color>
     <color name="alt_text_color_light">#ffc0c0c0</color>
+    <color name="alt_text_color_green">#35df00</color>
 
     <color name="link_color_dark">#ff000055</color>
     <color name="link_color_light">#ff9999ff</color>
+    <color name="link_color_green">#269200</color>
     
     <color name="side_link_color_dark">#ff101010</color>
     <color name="side_link_color_light">#ffe0e0e0</color>
+    <color name="side_link_color_green">#269200</color>
 
     <color name="semi_transparent_dark">#33000000</color>
     <color name="semi_transparent_light">#33ffffff</color>
@@ -18,4 +22,8 @@
     <color name="primary">#ff202020</color>
     <color name="primary_dark">#ff101010</color>
     <color name="accent">#ff505050</color>
+
+    <color name="primary_green">#001902</color>
+    <color name="primary_dark_green">#000000</color>
+    <color name="accent_green">#00a917</color>
 </resources>

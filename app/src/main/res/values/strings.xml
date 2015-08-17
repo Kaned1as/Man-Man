@@ -45,6 +45,7 @@
     <string name="app_theme_summary">Theme applies after application restart</string>
     <string name="light_theme">Light</string>
     <string name="dark_theme">Dark</string>
+    <string name="green_theme">Scr1pt Kiddie</string>
     <string name="local_storage">Local</string>
     <string name="folders">Folders</string>
     <string name="watched_folders">Watched folders</string>

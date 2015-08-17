@@ -14,6 +14,7 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="?attr/text_color"
         android:text="@string/placeholder_text"
         android:id="@+id/chapter_index_label"
         android:gravity="center"
@@ -24,6 +25,7 @@
         android:layout_height="match_parent"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="@string/placeholder_text"
+        android:textColor="?attr/text_color"
         android:id="@+id/chapter_name_label"
         android:gravity="center"
         android:layout_weight="3"/>

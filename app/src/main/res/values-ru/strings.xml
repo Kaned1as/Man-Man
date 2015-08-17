@@ -44,6 +44,7 @@
     <string name="app_theme_summary">Применяется после перезагрузки приложения</string>
     <string name="dark_theme">Темная</string>
     <string name="light_theme">Светлая</string>
+    <string name="green_theme">Хакерская</string>
     <string name="add">Добавить</string>
     <string name="current_folder">Текущий каталог:</string>
     <string name="file_not_found">Файл не найден</string>
@@ -55,7 +56,7 @@
     <string name="watched_folders">Отслеживаемые каталоги</string>
     <string name="wrong_file_format">Некорректный формат файла</string>
     <string name="scanning_folders">Сканирование каталогов…</string>
-    <string name="find_next">Найти следующий</string>
-    <string name="close_search">Закрыть окно поиска</string>
-    <string name="find_previous">Найти предыдущий</string>
+    <string name="find_next">Найти следующее</string>
+    <string name="find_previous">Найти предыдущее</string>
+    <string name="close_search">Закрыть поиск</string>
 </resources>

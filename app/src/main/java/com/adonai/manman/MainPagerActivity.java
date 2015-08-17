@@ -50,7 +50,11 @@ public class MainPagerActivity extends ActionBarActivity {
         // should set theme prior to instantiating compat actionbar etc.
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         final String theme = prefs.getString("app.theme", "light");
-        setTheme(theme.equals("light") ? R.style.Light : R.style.Dark);
+        switch (theme) {
+            case "light": setTheme(R.style.Light); break;
+            case "dark": setTheme(R.style.Dark); break;
+            case "green": setTheme(R.style.Green); break;
+        }
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_pager);

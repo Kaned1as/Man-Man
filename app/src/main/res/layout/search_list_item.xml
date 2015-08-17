@@ -24,6 +24,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="@string/placeholder_text"
+        android:textColor="?attr/text_color"
         android:id="@+id/command_name_label"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
