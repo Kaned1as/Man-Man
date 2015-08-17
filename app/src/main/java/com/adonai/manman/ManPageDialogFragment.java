@@ -12,6 +12,7 @@ import android.provider.Browser;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
@@ -68,7 +69,7 @@ import java.util.zip.GZIPInputStream;
  * @see com.adonai.manman.entities.ManPage
  * @author Adonai
  */
-public class ManPageDialogFragment extends DialogFragment {
+public class ManPageDialogFragment extends Fragment {
     private static final String USER_LEARNED_SLIDER = "user.learned.slider";
 
     private static final String PARAM_ADDRESS = "param.address";
@@ -100,7 +101,6 @@ public class ManPageDialogFragment extends DialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setStyle(DialogFragment.STYLE_NORMAL, android.R.style.Theme_Translucent);
         if(getArguments() != null) {
             mAddressUrl = getArguments().getString(PARAM_ADDRESS);
             mCommandName = getArguments().getString(PARAM_NAME);
@@ -124,15 +124,6 @@ public class ManPageDialogFragment extends DialogFragment {
         }
         getLoaderManager().initLoader(MainPagerActivity.MAN_PAGE_RETRIEVER_LOADER, null, manPageCallback);
         return root;
-    }
-
-    @NonNull
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        Dialog dia = super.onCreateDialog(savedInstanceState);
-        dia.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dia.getWindow().setWindowAnimations(R.style.ManPageFadeAnimation);
-        return dia;
     }
 
     /**
@@ -232,7 +223,12 @@ public class ManPageDialogFragment extends DialogFragment {
                 mFlipper.showNext();
                 shakeSlider();
             } else {
-                dismissAllowingStateLoss(); // can't perform transactions from onLoadFinished
+                mContent.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        getFragmentManager().popBackStack(); // can't perform transactions from onLoadFinished
+                    }
+                }, 0);
             }
         }
 

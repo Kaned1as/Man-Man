@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
@@ -77,7 +78,13 @@ public class ManPageCacheFragment extends Fragment implements AdapterView.OnItem
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         ManPage manPage = (ManPage) parent.getItemAtPosition(position);
-        ManPageDialogFragment.newInstance(manPage.getName(), manPage.getUrl()).show(getFragmentManager(), "manPage");
+        ManPageDialogFragment mpdf = ManPageDialogFragment.newInstance(manPage.getName(), manPage.getUrl());
+        getFragmentManager()
+                .beginTransaction()
+                .addToBackStack("PageFromCache")
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                .replace(R.id.replacer, mpdf)
+                .commit();
     }
 
     /**

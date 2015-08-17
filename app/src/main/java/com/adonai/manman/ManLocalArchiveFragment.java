@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
@@ -56,7 +57,13 @@ public class ManLocalArchiveFragment extends Fragment implements SharedPreferenc
             if(data == null) { // header is present, start config tool
                 showFolderSettingsDialog();
             } else {
-                ManPageDialogFragment.newInstance(data.getName(), data.getAbsolutePath()).show(getFragmentManager(), "manPage");
+                ManPageDialogFragment mpdf = ManPageDialogFragment.newInstance(data.getName(), data.getAbsolutePath());
+                getFragmentManager()
+                        .beginTransaction()
+                        .addToBackStack("PageFromLocalArchive")
+                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                        .replace(R.id.replacer, mpdf)
+                        .commit();
             }
         }
     };

@@ -12,6 +12,7 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.text.TextUtils;
@@ -100,7 +101,13 @@ public class ManPageSearchFragment extends Fragment {
             SearchResult sr = (SearchResult) parent.getItemAtPosition(position);
             Pair<String, String> nameChapter = getNameChapterFromResult(sr);
             if (nameChapter != null) {
-                ManPageDialogFragment.newInstance(nameChapter.first, sr.getUrl()).show(getFragmentManager(), "manPage");
+                ManPageDialogFragment mpdf =  ManPageDialogFragment.newInstance(nameChapter.first, sr.getUrl());
+                getFragmentManager()
+                        .beginTransaction()
+                        .addToBackStack("PageFromSearch")
+                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                        .replace(R.id.replacer, mpdf)
+                        .commit();
             }
         }
     };

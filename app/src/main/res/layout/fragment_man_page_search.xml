@@ -1,9 +1,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.adonai.manman.ManPageSearchFragment"          
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.adonai.manman.ManPageSearchFragment"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:focusableInTouchMode="true"> <!-- prevent searchview from gaining focus -->
 
     <SearchView
         android:layout_width="match_parent"

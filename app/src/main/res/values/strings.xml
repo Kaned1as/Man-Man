@@ -56,4 +56,7 @@
     <string name="file_not_found">File not found</string>
     <string name="wrong_file_format">Wrong file format</string>
     <string name="scanning_folders">Scanning folders…</string>
+    <string name="find_next">Find next</string>
+    <string name="find_previous">Find previous</string>
+    <string name="close_search">Close search bar</string>
 </resources>

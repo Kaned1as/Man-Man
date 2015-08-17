@@ -7,15 +7,6 @@
     android:background="?attr/semi_transparent_divider_color"
     android:id="@+id/flipper">
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/wait_icon"
-        android:src="?attr/loading_icon_resource"
-        android:scaleX="2.0"
-        android:scaleY="2.0"
-        android:layout_gravity="center"
-        android:contentDescription="@string/loading" />
 
     <com.adonai.manman.views.PassiveSlidingPane
         android:id="@+id/sliding_pane"
@@ -39,9 +30,57 @@
                 </LinearLayout>
         </ScrollView>
 
-        <WebView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/man_content_web" />
+            android:orientation="vertical">
+            
+            <WebView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:id="@+id/man_content_web" />
+            
+            <LinearLayout
+                android:id="@+id/search_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                
+                <ImageView
+                    android:contentDescription="@string/close_search"
+                    android:id="@+id/close_search"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:src="@android:drawable/ic_menu_close_clear_cancel"/>
+                
+                <EditText
+                    android:id="@+id/search_edit"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:inputType="text"/>
+                
+                <ImageView
+                    android:id="@+id/find_next_occurence"
+                    android:contentDescription="@string/find_next"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:padding="10dp"
+                    android:src="@android:drawable/arrow_down_float"
+                    android:scaleType="center"/>
+                
+                <ImageView
+                    android:id="@+id/find_previous_occurence"
+                    android:contentDescription="@string/find_previous"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:padding="10dp"
+                    android:src="@android:drawable/arrow_up_float"
+                    android:scaleType="center"/>
+                
+            </LinearLayout>
+            
+        </LinearLayout>
+        
     </com.adonai.manman.views.PassiveSlidingPane>
 </ViewFlipper>

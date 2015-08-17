@@ -1,5 +1,6 @@
 <resources>
     <attr name="link_color" format="reference"/>
+    <attr name="side_link_color" format="reference"/>
     <attr name="text_color" format="reference"/>
     <attr name="background_color" format="reference"/>
     <attr name="item_background_resource" format="reference"/>
@@ -12,6 +13,7 @@
     <!-- Base application theme. -->
     <style name="Light" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="link_color">@color/link_color_dark</item>
+        <item name="side_link_color">@color/side_link_color_dark</item>
         <item name="text_color">@color/alt_text_color_dark</item>
         <item name="background_color">@color/background_light</item>
         <item name="item_background_resource">@drawable/list_item_background_light</item>
@@ -28,6 +30,7 @@
 
     <style name="Dark" parent="Theme.AppCompat">
         <item name="link_color">@color/link_color_light</item>
+        <item name="side_link_color">@color/side_link_color_light</item>
         <item name="text_color">@color/alt_text_color_light</item>
         <item name="background_color">@color/background_dark</item>
         <item name="item_background_resource">@drawable/list_item_background_dark</item>
@@ -40,10 +43,6 @@
         <item name="colorPrimary">@color/primary</item> <!-- used for the default action bar background -->
         <item name="colorPrimaryDark">@color/primary_dark</item> <!-- used for the status bar -->
         <item name="colorAccent">@color/accent</item> <!-- used to tint widgets -->
-    </style>
-
-    <style name="ManPageFadeAnimation">
-        <item name="android:windowExitAnimation">@android:anim/slide_out_right</item>
     </style>
 
 </resources>

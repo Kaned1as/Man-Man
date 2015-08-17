@@ -1,9 +1,10 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.adonai.manman.ManChaptersFragment"
     android:id="@+id/chapter_fragment_frame"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.adonai.manman.ManChaptersFragment">
+    android:focusableInTouchMode="true"> <!-- prevent searchview from gaining focus -->
 
     <ListView
         android:layout_width="match_parent"

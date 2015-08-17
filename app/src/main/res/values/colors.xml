@@ -8,6 +8,9 @@
 
     <color name="link_color_dark">#ff000055</color>
     <color name="link_color_light">#ff9999ff</color>
+    
+    <color name="side_link_color_dark">#ff101010</color>
+    <color name="side_link_color_light">#ffe0e0e0</color>
 
     <color name="semi_transparent_dark">#33000000</color>
     <color name="semi_transparent_light">#33ffffff</color>

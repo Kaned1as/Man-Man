@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
@@ -115,7 +116,13 @@ public class ManChaptersFragment extends Fragment {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             ManSectionItem item = (ManSectionItem) parent.getItemAtPosition(position);
-            ManPageDialogFragment.newInstance(item.getName(), item.getUrl()).show(getFragmentManager(), "manPage");
+            ManPageDialogFragment mpdf = ManPageDialogFragment.newInstance(item.getName(), item.getUrl());
+            getFragmentManager()
+                    .beginTransaction()
+                    .addToBackStack("PageFromSearch")
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                    .replace(R.id.replacer, mpdf)
+                    .commit();
         }
     };
 
