@@ -4,10 +4,19 @@
     android:layout_height="match_parent"
     android:inAnimation="@android:anim/fade_in"
     android:outAnimation="@android:anim/fade_out"
-    android:background="?attr/semi_transparent_divider_color"
+    android:background="?attr/background_color"
     android:id="@+id/flipper">
 
-
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/wait_icon"
+        android:src="?attr/loading_icon_resource"
+        android:scaleX="2.0"
+        android:scaleY="2.0"
+        android:layout_gravity="center"
+        android:contentDescription="@string/loading" />
+    
     <com.adonai.manman.views.PassiveSlidingPane
         android:id="@+id/sliding_pane"
         android:layout_width="match_parent"
