@@ -58,4 +58,5 @@
     <string name="find_next">Найти следующий</string>
     <string name="close_search">Закрыть окно поиска</string>
     <string name="find_previous">Найти предыдущий</string>
+    <string name="cant_parse_some_files">Can\'t parse some files</string>
 </resources>

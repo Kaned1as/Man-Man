@@ -59,4 +59,5 @@
     <string name="find_next">Find next</string>
     <string name="find_previous">Find previous</string>
     <string name="close_search">Close search bar</string>
+    <string name="cant_parse_some_files">Can\'t parse some files</string>
 </resources>

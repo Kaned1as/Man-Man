@@ -19,7 +19,9 @@ import android.widget.ListView;
 import android.widget.SearchView;
 
 import com.adonai.manman.adapters.LocalArchiveArrayAdapter;
+import com.adonai.manman.entities.RetrievedLocalManPage;
 import com.adonai.manman.misc.AbstractNetworkAsyncLoader;
+import com.adonai.manman.misc.EntryExtractor;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -53,11 +55,11 @@ public class ManLocalArchiveFragment extends Fragment implements SharedPreferenc
 
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            File data = (File) parent.getItemAtPosition(position);
+            RetrievedLocalManPage data = (RetrievedLocalManPage) parent.getItemAtPosition(position);
             if(data == null) { // header is present, start config tool
                 showFolderSettingsDialog();
             } else {
-                ManPageDialogFragment mpdf = ManPageDialogFragment.newInstance(data.getName(), data.getAbsolutePath());
+                ManPageDialogFragment mpdf = ManPageDialogFragment.newInstance(data);
                 getFragmentManager()
                         .beginTransaction()
                         .addToBackStack("PageFromLocalArchive")
@@ -132,23 +134,20 @@ public class ManLocalArchiveFragment extends Fragment implements SharedPreferenc
         }
     }
 
-    private class LocalArchiveParserCallback implements LoaderManager.LoaderCallbacks<List<File>> {
-        @Override
-        public Loader<List<File>> onCreateLoader(int i, Bundle bundle) {
-            return new AbstractNetworkAsyncLoader<List<File>>(getActivity()) {
-                Set<String> mFolderList;
 
-                @Override
-                protected void onForceLoad() {
-                    Utils.showToastFromAnyThread(getActivity(), R.string.scanning_folders);
-                    super.onForceLoad();
-                }
+    private class LocalArchiveParserCallback implements LoaderManager.LoaderCallbacks<List<RetrievedLocalManPage>> {
+        @Override
+        public Loader<List<RetrievedLocalManPage>> onCreateLoader(int i, Bundle bundle) {
+            return new AbstractNetworkAsyncLoader<List<RetrievedLocalManPage>>(getActivity()) {
+                
+                private Set<String> mFolderList;
+                private EntryExtractor extractor = new EntryExtractor();
 
                 @NonNull
                 @Override
-                public List<File> loadInBackground() {
+                public List<RetrievedLocalManPage> loadInBackground() {
                     mFolderList = mPreferences.getStringSet(MainPagerActivity.FOLDER_LIST_KEY, new HashSet<String>());
-                    List<File> result = new ArrayList<>();
+                    List<RetrievedLocalManPage> result = new ArrayList<>();
                     for(String path : mFolderList) {
                         File targetedFolder = new File(path);
                         if(targetedFolder.exists() && targetedFolder.isDirectory()) { // paranoid check, we already checked in dialog!
@@ -160,24 +159,26 @@ public class ManLocalArchiveFragment extends Fragment implements SharedPreferenc
                     return result;
                 }
 
-                public void walkFileTree(File directoryRoot, List<File> resultList) {
+                public void walkFileTree(File directoryRoot, List<RetrievedLocalManPage> resultList) {
                     File[] list = directoryRoot.listFiles();
                     if(list == null) // unknown, happens on some devices
                         return;
 
-                    for (File f : list) {
-                        if (f.isDirectory()) {
-                            walkFileTree(f, resultList);
-                        } else if(f.getName().toLowerCase().endsWith(".gz")) { // take only gzipped files
-                            resultList.add(f);
+                    for (File file : list) {
+                        // directory, recurse in
+                        if (file.isDirectory()) {
+                            walkFileTree(file, resultList);
+                            return;
                         }
+                        // extract from archives or just handle
+                        extractor.retrieveManPages(file, resultList);
                     }
                 }
             };
         }
 
         @Override
-        public void onLoadFinished(Loader<List<File>> loader, List<File> manPageFiles) {
+        public void onLoadFinished(Loader<List<RetrievedLocalManPage>> loader, List<RetrievedLocalManPage> manPageFiles) {
             if(mLocalPageList.getHeaderViewsCount() > 0) {
                 mLocalPageList.removeHeaderView(mLocalPageList.getChildAt(0));
             }
@@ -194,7 +195,7 @@ public class ManLocalArchiveFragment extends Fragment implements SharedPreferenc
         }
 
         @Override
-        public void onLoaderReset(Loader<List<File>> loader) {
+        public void onLoaderReset(Loader<List<RetrievedLocalManPage>> loader) {
 
         }
     }

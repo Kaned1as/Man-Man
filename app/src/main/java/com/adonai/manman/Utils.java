@@ -7,15 +7,21 @@ import android.content.res.Resources;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.util.TypedValue;
 import android.widget.Toast;
 
 import com.adonai.manman.entities.ManSectionIndex;
 import com.adonai.manman.entities.ManSectionItem;
+import com.j256.simplemagic.ContentInfo;
+import com.j256.simplemagic.ContentInfoUtil;
+import com.j256.simplemagic.ContentType;
 
 import org.jsoup.nodes.Document;
 import org.mozilla.universalchardet.UniversalDetector;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -35,6 +41,8 @@ import java.util.zip.GZIPInputStream;
  * @author Adonai
  */
 public class Utils {
+
+    private static final ContentInfoUtil MIME_DETECTOR = new ContentInfoUtil();
 
     /**
      * Converts |-delimited string array from resources to hash map
@@ -112,19 +120,33 @@ public class Utils {
         return doc.html().replace("<body>", "<body>" + htmlContent); // ugly hack, huh? Well, why don't you come up with something?
     }
 
-    public static String detectEncodingOfArchive(File gzipped) throws IOException {
-        FileInputStream fis = new FileInputStream(gzipped);
-        GZIPInputStream gis = new GZIPInputStream(fis);
+    public static String detectEncodingOfArchive(BufferedInputStream bis) throws IOException {
         byte[] buf = new byte[4096];
-
+        bis.mark(Integer.MAX_VALUE);
         UniversalDetector detector = new UniversalDetector(null);
         int read;
-        while ((read = gis.read(buf)) > 0 && !detector.isDone()) {
+        while ((read = bis.read(buf)) > 0 && !detector.isDone()) {
             detector.handleData(buf, 0, read);
         }
         detector.dataEnd();
-        gis.close();
+        bis.reset();
 
         return detector.getDetectedCharset();
+    }
+    
+    public static ContentType getMimeSubtype(BufferedInputStream bis) throws IOException{
+        bis.mark(16535);
+        ContentInfo ci = MIME_DETECTOR.findMatch(bis);
+        bis.reset();
+        
+        if(ci == null)
+            return ContentType.OTHER;
+        
+        if(ci.getContentType() == ContentType.OTHER && !TextUtils.isEmpty(ci.getMimeType())) {
+            if(ci.getMimeType().startsWith("application/x-tar"))
+                return ContentType.TAR;
+        }
+        
+        return ci.getContentType();
     }
 }

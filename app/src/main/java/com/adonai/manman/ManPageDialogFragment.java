@@ -39,6 +39,7 @@ import android.widget.ViewFlipper;
 
 import com.adonai.manman.database.DbProvider;
 import com.adonai.manman.entities.ManPage;
+import com.adonai.manman.entities.RetrievedLocalManPage;
 import com.adonai.manman.misc.AbstractNetworkAsyncLoader;
 import com.adonai.manman.parser.Man2Html;
 import com.squareup.okhttp.OkHttpClient;
@@ -50,7 +51,9 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -73,10 +76,12 @@ public class ManPageDialogFragment extends Fragment {
 
     private static final String PARAM_ADDRESS = "param.address";
     private static final String PARAM_NAME = "param.name";
+    private static final String PARAM_PAGE = "param.page";
 
     private RetrieveManPageCallback manPageCallback = new RetrieveManPageCallback();
     private String mAddressUrl;
     private String mCommandName;
+    private RetrievedLocalManPage mManPage;
 
     private LinearLayout mLinkContainer;
     private SlidingPaneLayout mSlider;
@@ -98,6 +103,15 @@ public class ManPageDialogFragment extends Fragment {
         fragment.setArguments(args);
         return fragment;
     }
+    
+    @NonNull
+    public static ManPageDialogFragment newInstance(RetrievedLocalManPage retrieved) {
+        ManPageDialogFragment fragment = new ManPageDialogFragment();
+        Bundle args = new Bundle();
+        args.putSerializable(PARAM_PAGE, retrieved);
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     public ManPageDialogFragment() {
         // mandatory empty public constructor
@@ -109,6 +123,7 @@ public class ManPageDialogFragment extends Fragment {
         if(getArguments() != null) {
             mAddressUrl = getArguments().getString(PARAM_ADDRESS);
             mCommandName = getArguments().getString(PARAM_NAME);
+            mManPage = (RetrievedLocalManPage) getArguments().getSerializable(PARAM_PAGE);
         }
     }
 
@@ -185,22 +200,19 @@ public class ManPageDialogFragment extends Fragment {
                 @Override
                 public ManPage loadInBackground() {
                     // handle special case when it's a local file
-                    if(mAddressUrl.startsWith("/")) { // TODO: rewrite with URI
+                    if(mManPage != null) {
                         try {
-                            File input = new File(mAddressUrl);
-                            String charset = Utils.detectEncodingOfArchive(input);
-                            FileInputStream fis = new FileInputStream(input);
-                            GZIPInputStream gis = new GZIPInputStream(fis);
-                            BufferedReader br = charset == null ? new BufferedReader(new InputStreamReader(gis)) : new BufferedReader(new InputStreamReader(gis, charset));
+                            BufferedInputStream bais = new BufferedInputStream(mManPage.getContent());
+                            String charset = Utils.detectEncodingOfArchive(bais);
+                            BufferedReader br = charset == null 
+                                    ? new BufferedReader(new InputStreamReader(bais)) 
+                                    : new BufferedReader(new InputStreamReader(bais, charset));
                             Man2Html parser = new Man2Html(br);
-                            ManPage result = new ManPage(input.getName(), "file://" + mAddressUrl);
+                            ManPage result = new ManPage(mManPage.getCommandName(), mManPage.getParentEntry());
                             result.setWebContent(parser.getHtml()); // we're not using it in DB!
                             // no side pane with links for now
                             br.close(); // closes all the IS hierarchy
                             return result;
-                        } catch (FileNotFoundException e) {
-                            Log.e("Man Man", "Filesystem", e);
-                            Toast.makeText(getActivity(), R.string.file_not_found, Toast.LENGTH_SHORT).show();
                         } catch (IOException e) {
                             Log.e("Man Man", "Filesystem", e);
                             Toast.makeText(getActivity(), R.string.wrong_file_format, Toast.LENGTH_SHORT).show();

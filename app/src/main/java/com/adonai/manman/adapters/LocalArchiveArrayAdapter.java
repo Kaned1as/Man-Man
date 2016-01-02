@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.adonai.manman.R;
+import com.adonai.manman.entities.RetrievedLocalManPage;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -23,11 +24,11 @@ import java.util.List;
  * @see java.io.File
  * @author Adonai
  */
-public class LocalArchiveArrayAdapter extends ArrayAdapter<File> {
-    private List<File> originals;
-    private List<File> filtered;
+public class LocalArchiveArrayAdapter extends ArrayAdapter<RetrievedLocalManPage> {
+    private List<RetrievedLocalManPage> originals;
+    private List<RetrievedLocalManPage> filtered;
 
-    public LocalArchiveArrayAdapter(Context context, int resource, int textViewResourceId, List<File> objects) {
+    public LocalArchiveArrayAdapter(Context context, int resource, int textViewResourceId, List<RetrievedLocalManPage> objects) {
         super(context, resource, textViewResourceId, objects);
         originals = objects;
         filtered = objects;
@@ -39,21 +40,21 @@ public class LocalArchiveArrayAdapter extends ArrayAdapter<File> {
     }
 
     @Override
-    public File getItem(int position) {
+    public RetrievedLocalManPage getItem(int position) {
         return filtered.get(position);
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        final File current = getItem(position);
-        String effectiveName = current.getName().replaceAll("\\.gz$", "").replaceAll("\\.\\d$", "");
+        final RetrievedLocalManPage current = getItem(position);
+        String effectiveName = current.getCommandName();
         View root = super.getView(position, convertView, parent);
 
         TextView command = (TextView) root.findViewById(R.id.command_name_label);
         command.setText(effectiveName);
 
         TextView url = (TextView) root.findViewById(R.id.command_description_label);
-        url.setText(current.getParent());
+        url.setText(current.getParentEntry());
 
         ImageView popup = (ImageView) root.findViewById(R.id.popup_menu);
         popup.setVisibility(View.GONE); // save for future, hide for now
@@ -74,9 +75,9 @@ public class LocalArchiveArrayAdapter extends ArrayAdapter<File> {
                     return fr;
                 }
 
-                List<File> tempFilteredValues = new ArrayList<>();
-                for(File f : originals) {
-                    if(f.getName().startsWith(constraint.toString())) {
+                List<RetrievedLocalManPage> tempFilteredValues = new ArrayList<>();
+                for(RetrievedLocalManPage f : originals) {
+                    if(f.getCommandName().startsWith(constraint.toString())) {
                         tempFilteredValues.add(f);
                     }
                 }
@@ -89,7 +90,7 @@ public class LocalArchiveArrayAdapter extends ArrayAdapter<File> {
             @SuppressWarnings("unchecked")
             @Override
             protected void publishResults(CharSequence constraint, FilterResults results) {
-                filtered = (List<File>) results.values;
+                filtered = (List<RetrievedLocalManPage>) results.values;
                 notifyDataSetChanged();
             }
         };
