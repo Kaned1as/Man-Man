@@ -202,7 +202,7 @@ public class ManPageDialogFragment extends Fragment {
                     // handle special case when it's a local file
                     if(mManPage != null) {
                         try {
-                            BufferedInputStream bais = new BufferedInputStream(mManPage.getContent());
+                            BufferedInputStream bais = new BufferedInputStream(new ByteArrayInputStream(mManPage.getContent()));
                             String charset = Utils.detectEncodingOfArchive(bais);
                             BufferedReader br = charset == null 
                                     ? new BufferedReader(new InputStreamReader(bais)) 

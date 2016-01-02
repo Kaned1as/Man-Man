@@ -10,6 +10,7 @@ import com.j256.simplemagic.ContentType;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.xz.XZCompressorInputStream;
+import org.apache.commons.compress.utils.IOUtils;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -134,7 +135,7 @@ public class EntryExtractor {
                 if(tarEntry.isFile()) {
                     BufferedInputStream entrySubStream = new BufferedInputStream(tis);
                     ContentType detected = Utils.getMimeSubtype(entrySubStream);
-                    performExtract(parentName, tarEntry.getName(), entrySubStream, detected, toPopulate);
+                    performExtract(parentName + " - " + name, tarEntry.getName(), entrySubStream, detected, toPopulate);
                 }
             }
         }
@@ -181,7 +182,7 @@ public class EntryExtractor {
             RetrievedLocalManPage manPage = new RetrievedLocalManPage();
             manPage.setParentEntry(parentName);
             manPage.setCommandName(name);
-            manPage.setContent(is);
+            manPage.setContent(IOUtils.toByteArray(is));
             toPopulate.add(manPage);
         }
     }

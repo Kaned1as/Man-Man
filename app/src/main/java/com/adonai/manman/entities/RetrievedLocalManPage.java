@@ -2,7 +2,6 @@ package com.adonai.manman.entities;
 
 import android.support.annotation.NonNull;
 
-import java.io.InputStream;
 import java.io.Serializable;
 
 /**
@@ -12,7 +11,7 @@ public final class RetrievedLocalManPage implements Comparable<RetrievedLocalMan
     
     private String commandName;
     private String parentEntry;
-    private InputStream content;
+    private byte[] content;
 
     public String getCommandName() {
         return commandName;
@@ -30,11 +29,11 @@ public final class RetrievedLocalManPage implements Comparable<RetrievedLocalMan
         this.parentEntry = parentEntry;
     }
 
-    public InputStream getContent() {
+    public byte[] getContent() {
         return content;
     }
 
-    public void setContent(InputStream content) {
+    public void setContent(byte[] content) {
         this.content = content;
     }
 

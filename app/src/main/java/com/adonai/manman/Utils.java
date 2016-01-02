@@ -17,10 +17,12 @@ import com.j256.simplemagic.ContentInfo;
 import com.j256.simplemagic.ContentInfoUtil;
 import com.j256.simplemagic.ContentType;
 
+import org.apache.commons.compress.utils.IOUtils;
 import org.jsoup.nodes.Document;
 import org.mozilla.universalchardet.UniversalDetector;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -28,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -43,6 +46,9 @@ import java.util.zip.GZIPInputStream;
 public class Utils {
 
     private static final ContentInfoUtil MIME_DETECTOR = new ContentInfoUtil();
+    static {
+        MIME_DETECTOR.setFileReadSize(386);
+    }
 
     /**
      * Converts |-delimited string array from resources to hash map
@@ -133,11 +139,34 @@ public class Utils {
 
         return detector.getDetectedCharset();
     }
-    
-    public static ContentType getMimeSubtype(BufferedInputStream bis) throws IOException{
-        bis.mark(16535);
+
+    /**
+     * File content type detector with additional checks for tar archives and troff man files
+     * @param bis input stream supporting mark, non null
+     * @return content type detected. OTHER in case if nothing found
+     * @throws IOException on error while reading
+     */
+    @NonNull
+    public static ContentType getMimeSubtype(@NonNull BufferedInputStream bis) throws IOException {
+        bis.mark(8192);
         ContentInfo ci = MIME_DETECTOR.findMatch(bis);
         bis.reset();
+        
+        {
+            // try to match troff lines
+            byte[] cached = new byte[1024];
+            bis.read(cached);
+            bis.reset();
+
+            BufferedReader sr = new BufferedReader(new StringReader(new String(cached)));
+            String line;
+            while ((line = sr.readLine()) != null) {
+                if (line.contains("nroff")
+                        || line.toLowerCase().startsWith(".sh synopsis")
+                        || line.toLowerCase().startsWith(".th "))
+                    return ContentType.TROFF;
+            }
+        }
         
         if(ci == null)
             return ContentType.OTHER;

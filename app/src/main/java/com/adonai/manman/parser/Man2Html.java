@@ -29,9 +29,10 @@ public class Man2Html {
 
     private enum Command {
         TH(true), SH(true), PP(true), RS, RE,       // headers, titles
+        NM, ND,
         TP(true), IP(true),                         // special triggers
         B, I, BR, BI,                               // font directives
-        fi, ie, el, nh, ad, sp(true);               // conditionals and stuff...
+        FI, IE, EL, NH, AD, SP(true);               // conditionals and stuff...
 
         private boolean stopsIndentation;
 
@@ -124,7 +125,7 @@ public class Man2Html {
         }
 
         try {
-            Command command = Command.valueOf(firstWord);
+            Command command = Command.valueOf(firstWord.toUpperCase());
             if(command.stopsIndentation) {
                 if(linesBeforeIndent == 0) { // we were indenting right now, reset
                     result.append("</dd></dl>");
@@ -139,7 +140,7 @@ public class Man2Html {
                     }
                     break;
                 case PP: // paragraph
-                case sp: // line break
+                case SP: // line break
                     if(insideParagraph) {
                         result.append("</p>");
                     }
@@ -148,9 +149,16 @@ public class Man2Html {
                     result.append("<p>");
                     break;
                 case SH: // sub header
+                case NM: // name
                     List<String> subHeaderArgs = parseQuotedCommandArguments(lineAfterCommand);
                     if(!subHeaderArgs.isEmpty()) {
                         result.append("<h2>").append(parseTextField(subHeaderArgs.get(0))).append("</h2>");
+                    }
+                    break;
+                case ND: // name desc
+                    List<String> nameDescArgs = parseQuotedCommandArguments(lineAfterCommand);
+                    if(!nameDescArgs.isEmpty()) {
+                        result.append("<h2>").append(parseTextField(nameDescArgs.get(0))).append("</h2>");
                     }
                     break;
                 case RS: // indent start
@@ -196,7 +204,7 @@ public class Man2Html {
                     }
                     linesBeforeIndent = 0;
                     break;
-                case fi: // re-enable margins (not used, just print what we have)
+                case FI: // re-enable margins (not used, just print what we have)
                     result.append(" ").append(parseTextField(lineAfterCommand));
                     break;
             }
