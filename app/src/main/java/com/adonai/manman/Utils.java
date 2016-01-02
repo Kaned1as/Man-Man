@@ -152,7 +152,7 @@ public class Utils {
         ContentInfo ci = MIME_DETECTOR.findMatch(bis);
         bis.reset();
         
-        {
+        { // HACK
             // try to match troff lines
             byte[] cached = new byte[1024];
             bis.read(cached);

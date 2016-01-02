@@ -52,7 +52,16 @@ public class EntryExtractor {
             Log.e("Man Man", "Filesystem", e);
         }
     }
-    
+
+    /**
+     * This function is called by all the extractors in case they can't handle some inner stream
+     * @param parentName name of parent entry (e.g. name of folder where archive is)
+     * @param name name of entry that is currently parsed (e.g. name of archive)
+     * @param is input stream that is currently parsed
+     * @param type type of input stream that was detected by previous parser
+     * @param toPopulate final list of retrieved pages that was provided by loader
+     * @throws IOException in case of any stream errors
+     */
     private static void performExtract(@NonNull String parentName,
                                        @NonNull String name,
                                        @NonNull InputStream is, 
@@ -67,9 +76,22 @@ public class EntryExtractor {
     }
 
     interface Extractor {
-        
+
+        /**
+         * Returns true if the extractor can handle this content type
+         * @param type content type of stream that should be parsed
+         * @return true if and only if parser can handle this type of stream
+         */
         boolean isResponsibleFor(ContentType type);
-        
+
+        /**
+         * Parse archive and populate provided list with retrieved entries (or hand it over to another parser)
+         * @param parentName name of parent entry (e.g. name of archive)
+         * @param entryName name of entry that is currently parsed (e.g. name of tar archive entry)
+         * @param is input stream that should be parsed
+         * @param toPopulate final list of retrieved pages that was provided by loader
+         * @throws IOException in case of any stream errors
+         */
         void parse(@NonNull String parentName, 
                    @NonNull String entryName, 
                    @NonNull InputStream is, 
