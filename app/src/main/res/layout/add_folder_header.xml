@@ -17,10 +17,20 @@
 
     <ImageView
         android:layout_marginTop="25dp"
+        android:layout_marginBottom="25dp"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:layout_gravity="center_horizontal"
         android:src="@drawable/ic_settings"
         android:tint="?attr/text_color"
         android:contentDescription="@string/settings"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="@string/local_storage_warning"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center" />
+    
 </LinearLayout>

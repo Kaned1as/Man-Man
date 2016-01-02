@@ -39,7 +39,7 @@
     <string name="copied">Скопировано:</string>
     <string name="delete">Удалить</string>
     <string name="filter_local_storage">Фильтр локальных манов…</string>
-    <string name="no_folders_in_local_storage">Нет файлов *.gz в отслеживаемых каталогах</string>
+    <string name="no_folders_in_local_storage">Нет файлов руководств в отслеживаемых каталогах</string>
     <string name="app_theme">Тема оформления</string>
     <string name="app_theme_summary">Применяется после перезагрузки приложения</string>
     <string name="dark_theme">Темная</string>
@@ -59,4 +59,5 @@
     <string name="close_search">Закрыть окно поиска</string>
     <string name="find_previous">Найти предыдущий</string>
     <string name="cant_parse_some_files">Can\'t parse some files</string>
+    <string name="local_storage_warning">Предупреждение: не помещайте большие архивы в локальное хранилище - обработка может быть очень долгой и вызвать нехватку памяти</string>
 </resources>
