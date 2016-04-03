@@ -41,6 +41,7 @@ import com.adonai.manman.database.DbProvider;
 import com.adonai.manman.entities.ManPage;
 import com.adonai.manman.misc.AbstractNetworkAsyncLoader;
 import com.adonai.manman.parser.Man2Html;
+import com.adonai.manman.views.PassiveSlidingPane;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -79,7 +80,7 @@ public class ManPageDialogFragment extends Fragment {
     private String mCommandName;
 
     private LinearLayout mLinkContainer;
-    private SlidingPaneLayout mSlider;
+    private PassiveSlidingPane mSlider;
     private ViewFlipper mFlipper;
     private WebView mContent;
 
@@ -116,22 +117,23 @@ public class ManPageDialogFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         setHasOptionsMenu(true);
-        
+
         View root = inflater.inflate(R.layout.fragment_man_page_show, container, false);
         mLinkContainer = (LinearLayout) root.findViewById(R.id.link_list);
-        mSlider = (SlidingPaneLayout) root.findViewById(R.id.sliding_pane);
         mFlipper = (ViewFlipper) root.findViewById(R.id.flipper);
         mContent = (WebView) root.findViewById(R.id.man_content_web);
         mContent.setWebViewClient(new ManPageChromeClient());
         mContent.getSettings().setJavaScriptEnabled(true);
-        
+        mSlider = (PassiveSlidingPane) root.findViewById(R.id.sliding_pane);
+        mSlider.setTrackedView(mContent);
+
         // search-specific
         mSearchContainer = (LinearLayout) root.findViewById(R.id.search_bar_layout);
         mSearchEdit = (EditText) mSearchContainer.findViewById(R.id.search_edit);
         mCloseSearchBar = (ImageView) mSearchContainer.findViewById(R.id.close_search_bar);
         mFindNext = (ImageView) mSearchContainer.findViewById(R.id.find_next_occurrence);
         mFindPrevious = (ImageView) mSearchContainer.findViewById(R.id.find_previous_occurrence);
-        
+
         mCloseSearchBar.setOnClickListener(new SearchBarCloser());
         mSearchEdit.addTextChangedListener(new SearchExecutor());
         mFindNext.setOnClickListener(new SearchFurtherExecutor(true));
@@ -152,7 +154,7 @@ public class ManPageDialogFragment extends Fragment {
         InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(mContent.getWindowToken(), 0);
     }
-    
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);

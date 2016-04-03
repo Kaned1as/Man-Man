@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.v4.widget.SlidingPaneLayout;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.View;
 
 /**
  * Extension for sliding pane layout class
@@ -14,6 +15,8 @@ import android.view.MotionEvent;
 public class PassiveSlidingPane extends SlidingPaneLayout {
 
     private static final int LEFT = -1;
+
+    private View mTrackedView;
 
     public PassiveSlidingPane(Context context) {
         super(context);
@@ -33,12 +36,16 @@ public class PassiveSlidingPane extends SlidingPaneLayout {
     private void init() {
     }
 
+    public void setTrackedView(View v) {
+        mTrackedView = v;
+    }
+
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         if(isOpen()) // we're open, do whatever we want
             return super.onInterceptTouchEvent(ev);
-        else if(getChildCount() > 1) {
-            if (getChildAt(1).canScrollHorizontally(LEFT)) { // if we can scroll left in child, don't even try to open pane!
+        else if(mTrackedView != null) {
+            if (mTrackedView.canScrollHorizontally(LEFT)) { // if we can scroll left in child, don't even try to open pane!
                 return false;
             }
         }
