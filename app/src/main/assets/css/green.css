@@ -24,7 +24,7 @@ button,html,input,select,textarea{
 body{
 	margin: 5pt;
 	background-color: #000000;
-	color: #00ff00;
+	color: #00cc00;
 }
 
 .in-doc{
@@ -231,7 +231,7 @@ var{
 }
 
 a h2, a h3{
-	color:#ccc
+	color:#00ff00
 }
 
 a{

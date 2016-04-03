@@ -1,63 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="?attr/item_background_resource"
-    android:descendantFocusability="blocksDescendants"
-    android:padding="10dp">
+    android:layout_height="match_parent">
 
-    <ImageView
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:id="@+id/popup_menu"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:tint="?attr/mask_color"
-        android:src="@drawable/ic_menu_moreoverflow_normal_holo"
-
-        android:contentDescription="@string/popup_menu"/>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="@string/placeholder_text"
-        android:textColor="?attr/text_color"
-        android:id="@+id/command_name_label"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:maxEms="15"
-        android:layout_toStartOf="@id/popup_menu"
-        android:layout_toLeftOf="@id/popup_menu" />
-
-    <TextView
+    <android.support.v7.widget.CardView
+        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="@string/placeholder_text"
-        android:textColor="?attr/text_color"
-        android:id="@+id/command_chapter_label"
-        android:layout_below="@+id/command_name_label"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="5dp"
-        android:maxEms="15"
-        android:layout_toStartOf="@id/popup_menu"
-        android:layout_toLeftOf="@id/popup_menu" />
+        android:layout_height="match_parent"
+        android:layout_margin="5dp"
+        android:foreground="?android:attr/selectableItemBackground">
 
-    <com.adonai.manman.views.NonClickableWebView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="@string/placeholder_text"
-        android:id="@+id/description_text_web"
-        android:layout_below="@+id/command_chapter_label"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="5dp"
-        android:visibility="gone"
-        android:scaleType="center"/>
+        <RelativeLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:descendantFocusability="blocksDescendants"
+            android:padding="10dp">
 
-</RelativeLayout>
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:id="@+id/popup_menu"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:src="@drawable/abc_ic_menu_moreoverflow_mtrl_alpha"
+
+                android:contentDescription="@string/popup_menu"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/placeholder_text"
+                android:id="@+id/command_name_label"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:maxEms="15"
+                android:layout_toStartOf="@id/popup_menu"
+                android:layout_toLeftOf="@id/popup_menu" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="@string/placeholder_text"
+                android:id="@+id/command_chapter_label"
+                android:layout_below="@+id/command_name_label"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginTop="5dp"
+                android:maxEms="15"
+                android:layout_toStartOf="@id/popup_menu"
+                android:layout_toLeftOf="@id/popup_menu" />
+
+            <com.adonai.manman.views.NonClickableWebView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/placeholder_text"
+                android:id="@+id/description_text_web"
+                android:layout_below="@+id/command_chapter_label"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginTop="5dp"
+                android:visibility="gone"
+                android:scaleType="center"/>
+
+        </RelativeLayout>
+
+    </android.support.v7.widget.CardView>
+
+</FrameLayout>

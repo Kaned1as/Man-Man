@@ -1,33 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="horizontal"
-    android:background="?attr/item_background_resource"
-    android:descendantFocusability="blocksDescendants"
-    android:padding="10dp"
-    android:divider="?attr/vertical_divider_resource"
-    android:dividerPadding="5dp"
-    android:showDividers="middle">
+    android:layout_height="match_parent">
 
-    <TextView
-        android:layout_width="0dp"
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="?attr/text_color"
-        android:text="@string/placeholder_text"
-        android:id="@+id/chapter_index_label"
-        android:gravity="center"
-        android:layout_weight="1"/>
+        android:layout_margin="5dp"
+        android:foreground="?android:attr/selectableItemBackground">
 
-    <TextView
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="@string/placeholder_text"
-        android:textColor="?attr/text_color"
-        android:id="@+id/chapter_name_label"
-        android:gravity="center"
-        android:layout_weight="3"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:descendantFocusability="blocksDescendants"
+            android:padding="10dp"
+            android:divider="?attr/vertical_divider_resource"
+            android:dividerPadding="5dp"
+            android:showDividers="middle">
 
-</LinearLayout>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="@string/placeholder_text"
+                android:id="@+id/chapter_index_label"
+                android:gravity="center"
+                android:layout_weight="1"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="@string/placeholder_text"
+                android:id="@+id/chapter_name_label"
+                android:gravity="center"
+                android:layout_weight="3"/>
+
+        </LinearLayout>
+
+    </android.support.v7.widget.CardView>
+
+</FrameLayout>

@@ -21,7 +21,7 @@
         android:scaleY="0.8"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:tint="?text_color"
+        android:tint="?attr/tint_inverse"
         android:layout_gravity="center_vertical"
         android:contentDescription="@string/add"/>
 

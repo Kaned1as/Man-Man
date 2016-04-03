@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -11,8 +12,11 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,7 +32,7 @@ import com.astuetz.PagerSlidingTabStrip;
  * @author Adonai
  */
 @SuppressWarnings("FieldCanBeLocal")
-public class MainPagerActivity extends ActionBarActivity {
+public class MainPagerActivity extends AppCompatActivity {
 
     public static String FOLDER_LIST_KEY = "folder.list";
 
@@ -43,6 +47,7 @@ public class MainPagerActivity extends ActionBarActivity {
     public final static String BACK_BUTTON_NOTIFY = "back.button.pressed";
 
     private ViewPager mPager;
+    private Toolbar mActionBar;
     private DonateHelper mDonateHelper;
 
     @Override
@@ -58,6 +63,9 @@ public class MainPagerActivity extends ActionBarActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_pager);
+
+        mActionBar = (Toolbar) findViewById(R.id.app_toolbar);
+        setSupportActionBar(mActionBar);
 
         mPager = (ViewPager) findViewById(R.id.page_holder);
         mPager.setAdapter(new ManFragmentPagerAdapter(getSupportFragmentManager()));
@@ -160,7 +168,7 @@ public class MainPagerActivity extends ActionBarActivity {
         // Inflate the about message contents
         View messageView = getLayoutInflater().inflate(R.layout.about_dialog, null, false);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setIcon(R.drawable.ic_launcher_small);
+        builder.setIcon(R.drawable.ic_launcher_notification_icon);
         builder.setTitle(R.string.app_name);
         builder.setView(messageView);
         builder.create();
