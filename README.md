@@ -21,5 +21,40 @@ In progress
 
 Updating
 -----------
-I consider this app as stable now, 
+I consider this app as stable now,
 so if you want any additional features to be included, please create an enhancement issue here
+
+
+P.S. Regarding offline mode
+-----------
+While current implementation lacks some important features, 
+I'd like to clarify on how to properly organize directory structure for this to work.
+Basically this is identical to how Linux distributions place their man files in `/usr/share/man` directory.
+The structure of directories you should point a scanner too should look like this:
+```
+├── man1
+│   ├── chage.1.gz
+│   ├── checkXML.1.gz
+│   ├── checkXML5.1.gz
+│   ├── expiry.1.gz
+│   ├── gpasswd.1.gz
+│   ├── swappo.1.gz
+│   └── xml2pot.1.gz
+├── man3
+│   ├── getspnam.3.gz
+│   └── shadow.3.gz
+├── man5
+│   ├── faillog.5.gz
+│   └── suauth.5.gz
+├── man6
+│   └── kpat.6.gz
+├── man7
+│   ├── qt5options.7.gz
+│   └── qtoptions.7.gz
+└── man8
+    ├── chgpasswd.8.gz
+    ├── userdel.8.gz
+    └── usermod.8.gz
+```
+
+Man Man will recursively scan all the nested dirs and find appropriate (i.e. gzipped TROFF format) files
