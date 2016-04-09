@@ -46,6 +46,8 @@ import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -76,6 +78,7 @@ public class ManPageDialogFragment extends Fragment {
     private static final String PARAM_NAME = "param.name";
 
     private RetrieveManPageCallback manPageCallback = new RetrieveManPageCallback();
+    private File mLocalArchive;
     private String mAddressUrl;
     private String mCommandName;
 
@@ -117,6 +120,8 @@ public class ManPageDialogFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         setHasOptionsMenu(true);
+
+        mLocalArchive = new File(getActivity().getCacheDir(), "manpages.tar.gz");
 
         View root = inflater.inflate(R.layout.fragment_man_page_show, container, false);
         mLinkContainer = (LinearLayout) root.findViewById(R.id.link_list);
@@ -209,6 +214,31 @@ public class ManPageDialogFragment extends Fragment {
                             Toast.makeText(getActivity(), R.string.wrong_file_format, Toast.LENGTH_SHORT).show();
                         }
                         return null; // no further querying
+                    }
+
+                    if(mAddressUrl.startsWith("local:")) { // local man archive
+                        try {
+                            GZIPInputStream gzis = new GZIPInputStream(new FileInputStream(mLocalArchive));
+                            TarArchiveInputStream tis = new TarArchiveInputStream(gzis);
+                            TarArchiveEntry tarEntry;
+                            while ((tarEntry = tis.getNextTarEntry()) != null) {
+                                if(tarEntry.isFile() && tarEntry.getName().equals(mAddressUrl.substring(7))) {
+                                    // this is it
+                                    GZIPInputStream entryGis = new GZIPInputStream(tis); // entry is gzipped
+                                    BufferedReader br = new BufferedReader(new InputStreamReader(entryGis));
+                                    Man2Html parser = new Man2Html(br);
+                                    Document parsed = parser.getDoc();
+                                    ManPage result = new ManPage(tarEntry.getName(), mAddressUrl);
+                                    result.setLinks(getLinks(parsed.select("div.man-page").first()));
+                                    result.setWebContent(parsed.html());
+                                    br.close(); // closes all the IS hierarchy
+                                    return result;
+                                }
+                            }
+                            tis.close();
+                        } catch (IOException e) {
+                            Toast.makeText(getActivity(), R.string.wrong_file_format, Toast.LENGTH_SHORT).show();
+                        }
                     }
 
                     try { // query cache database for corresponding command

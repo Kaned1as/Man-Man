@@ -44,6 +44,7 @@ public class MainPagerActivity extends AppCompatActivity {
     final static int LOCAL_PACKAGE_LOADER           = 5;
 
     public final static String DB_CHANGE_NOTIFY = "database.updated";
+    public final static String LOCAL_CHANGE_NOTIFY = "locals.updated";
     public final static String BACK_BUTTON_NOTIFY = "back.button.pressed";
 
     private ViewPager mPager;

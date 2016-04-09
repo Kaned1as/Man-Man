@@ -7,6 +7,12 @@
         android:title="@string/clear_cache"
         android:summary="@string/clear_cache_sum"/>
 
+    <Preference
+        android:icon="@android:drawable/ic_menu_delete"
+        android:key="delete.local.archive"
+        android:title="@string/delete_local_archive"
+        android:summary="@string/delete_local_archive_sum"/>
+
     <ListPreference
         android:icon="@android:drawable/ic_menu_gallery"
         android:key="app.theme"

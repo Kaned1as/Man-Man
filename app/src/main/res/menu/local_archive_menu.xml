@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:compat="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/folder_settings"
+        android:title="@string/folders"
+        android:icon="@drawable/ic_settings"
+        compat:showAsAction="never"/>
+
+    <item
+        android:id="@+id/download_archive"
+        android:title="@string/download_archive"
+        android:icon="@drawable/ic_cloud_download_white_48dp"
+        compat:showAsAction="never"/>
+
+</menu>

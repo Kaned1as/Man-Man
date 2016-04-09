@@ -7,10 +7,13 @@ import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.support.v4.content.LocalBroadcastManager;
+import android.widget.Toast;
 
 import com.adonai.manman.MainPagerActivity;
 import com.adonai.manman.R;
 import com.adonai.manman.database.DbProvider;
+
+import java.io.File;
 
 /**
  * Fragment for showing and managing global preferences
@@ -41,6 +44,18 @@ public class GlobalPrefsFragment extends PreferenceFragment {
                         LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(new Intent(MainPagerActivity.DB_CHANGE_NOTIFY));
                     }
                 }).create().show();
+                return true;
+            }
+        });
+
+        final File localArchive = new File(getActivity().getCacheDir(), "manpages.tar.gz");
+        findPreference("delete.local.archive").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                if (localArchive.delete()) {
+                    LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(new Intent(MainPagerActivity.LOCAL_CHANGE_NOTIFY));
+                    Toast.makeText(getActivity(), R.string.deleted, Toast.LENGTH_SHORT).show();
+                }
                 return true;
             }
         });

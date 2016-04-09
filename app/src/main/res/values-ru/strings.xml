@@ -59,4 +59,14 @@
     <string name="find_next">Найти следующее</string>
     <string name="find_previous">Найти предыдущее</string>
     <string name="close_search">Закрыть поиск</string>
+    <string name="download_archive">Скачать архив (35MB)</string>
+    <string name="downloading">Загрузка…</string>
+    <string name="no_archive_on_server">No archive found on server! Please create issue on development page!</string>
+    <string name="please_wait">Пожалуйста, подождите…</string>
+    <string name="error_parsing_local_archive">Ошибка разбора локального архива!</string>
+    <string name="already_downloaded">Уже скачано!</string>
+    <string name="confirm_action_load_archive">Размер архива 35Мб. Уверены, что хотите скачать сейчас?</string>
+    <string name="delete_local_archive">Удалить локальный архив</string>
+    <string name="delete_local_archive_sum">Это действие удалит загруженный архив локальных страниц (не влияет на локально добавленные страницы с сдкарты). Помогает если необходимо уменьшить размер приложения на внутренней памяти.</string>
+    <string name="deleted">Удалено!</string>
 </resources>

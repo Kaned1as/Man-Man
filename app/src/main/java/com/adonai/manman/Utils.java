@@ -65,6 +65,19 @@ public class Utils {
         });
     }
 
+    public static void showToastFromAnyThread(final Activity target, final String toShow) {
+        // can't show a toast from a thread without looper
+        if(target == null) // probably called from detached fragment (app hidden)
+            return;
+
+        target.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(target, toShow, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     public static List<ManSectionIndex> createIndexer(List<ManSectionItem> items) {
         List<ManSectionIndex> indexes = new ArrayList<>(26); // a guess
         char lastLetter = 0; // EOF is never encountered
