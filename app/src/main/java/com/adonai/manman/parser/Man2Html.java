@@ -1,6 +1,7 @@
 package com.adonai.manman.parser;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.adonai.manman.Utils;
 
@@ -271,7 +272,8 @@ public class Man2Html {
                     break;
             }
         } catch (IllegalArgumentException iae) {
-            // unimplemented control, skip...
+            Log.w(Utils.MM_TAG, "Man2Html - unimplemented control", iae);
+            // skip...
         }
     }
 

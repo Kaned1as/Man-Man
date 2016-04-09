@@ -189,7 +189,7 @@ public class ManChaptersFragment extends Fragment {
                         if(DbProvider.getHelper().getManChaptersDao().queryForFirst(query) != null) // we have it in cache
                             return new ManPageContentsResult(DbProvider.getHelper().getManChaptersDao(), query, index);
                     } catch (SQLException e) {
-                        Log.e("Man Man", "Database", e);
+                        Log.e(Utils.MM_TAG, "Exception while querying for cached pages", e);
                         Utils.showToastFromAnyThread(getActivity(), R.string.database_retrieve_error);
                     }
 
@@ -238,7 +238,7 @@ public class ManChaptersFragment extends Fragment {
                             return msItems;
                         }
                     } catch (Exception e) {
-                        Log.e("Man Man", "Network", e);
+                        Log.e(Utils.MM_TAG, "Exception while loading man pages from network", e);
                         // can't show a toast from a thread without looper
                         Utils.showToastFromAnyThread(getActivity(), R.string.connection_error);
                     }
@@ -265,7 +265,7 @@ public class ManChaptersFragment extends Fragment {
                             }
                         });
                     } catch (SQLException e) {
-                        Log.e("Man Man", "Database", e);
+                        Log.e(Utils.MM_TAG, "Exception while saving cached page to DB", e);
                         // can't show a toast from a thread without looper
                         Utils.showToastFromAnyThread(getActivity(), R.string.database_save_error);
                     }

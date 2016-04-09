@@ -36,6 +36,8 @@ import java.util.zip.GZIPInputStream;
  */
 public class Utils {
 
+    public final static String MM_TAG = "Man Man";
+
     /**
      * Converts |-delimited string array from resources to hash map
      * @param context context to retrieve resources from

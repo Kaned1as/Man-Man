@@ -207,10 +207,10 @@ public class ManPageDialogFragment extends Fragment {
                             br.close(); // closes all the IS hierarchy
                             return result;
                         } catch (FileNotFoundException e) {
-                            Log.e("Man Man", "Filesystem", e);
+                            Log.e(Utils.MM_TAG, "File with man page was not found in local folder", e);
                             Toast.makeText(getActivity(), R.string.file_not_found, Toast.LENGTH_SHORT).show();
                         } catch (IOException e) {
-                            Log.e("Man Man", "Filesystem", e);
+                            Log.e(Utils.MM_TAG, "Exception while loading man page file from local folder", e);
                             Toast.makeText(getActivity(), R.string.wrong_file_format, Toast.LENGTH_SHORT).show();
                         }
                         return null; // no further querying
@@ -237,6 +237,7 @@ public class ManPageDialogFragment extends Fragment {
                             }
                             tis.close();
                         } catch (IOException e) {
+                            Log.e(Utils.MM_TAG, "Error while loading man page from local archive", e);
                             Toast.makeText(getActivity(), R.string.wrong_file_format, Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -247,7 +248,7 @@ public class ManPageDialogFragment extends Fragment {
                             return cached;
                         }
                     } catch (RuntimeException e) { // it's RuntimeExceptionDao, so catch runtime exceptions
-                        Log.e("Man Man", "Database", e);
+                        Log.e(Utils.MM_TAG, "Exception while querying the DB", e);
                         Utils.showToastFromAnyThread(getActivity(), R.string.database_retrieve_error);
                     }
 
@@ -276,7 +277,7 @@ public class ManPageDialogFragment extends Fragment {
                             return toCache;
                         }
                     } catch (IOException e) {
-                        Log.e("Man Man", "Database", e);
+                        Log.e(Utils.MM_TAG, "Exception while saving cached page to DB", e);
                         // can't show a toast from a thread without looper
                         Utils.showToastFromAnyThread(getActivity(), R.string.connection_error);
                     }

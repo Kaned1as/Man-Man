@@ -104,7 +104,7 @@ public class ManPageCacheFragment extends Fragment implements AdapterView.OnItem
                         PreparedQuery<ManPage> query = DbProvider.getHelper().getManPagesDao().queryBuilder().where().like("name", "%" + mSearchCache.getQuery().toString() + "%").prepare();
                         return DbProvider.getHelper().getManPagesDao().query(query);
                     } catch (SQLException e) {
-                        Log.e("Man Man", "Database", e);
+                        Log.e(Utils.MM_TAG, "Exception while querying DB for cached page", e);
                         Utils.showToastFromAnyThread(getActivity(), R.string.database_retrieve_error);
                     }
                     return null;

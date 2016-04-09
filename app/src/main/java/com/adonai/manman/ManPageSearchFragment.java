@@ -152,7 +152,7 @@ public class ManPageSearchFragment extends Fragment {
                             return mJsonConverter.fromJson(result, SearchResultList.class);
                         }
                     } catch (IOException e) {
-                        Log.e("Man Man", "Network", e);
+                        Log.e(Utils.MM_TAG, "Error while loading search of commands from network", e);
                         // can't show a toast from a thread without looper
                         Utils.showToastFromAnyThread(getActivity(), R.string.connection_error);
                     }
@@ -207,7 +207,7 @@ public class ManPageSearchFragment extends Fragment {
                             return response.body().string();
                         }
                     } catch (IOException e) {
-                        Log.e("Man Man", "Network", e);
+                        Log.e(Utils.MM_TAG, "Error while retrieving one-liner from network", e);
                         // can't show a toast from a thread without looper
                         Utils.showToastFromAnyThread(getActivity(), R.string.connection_error);
                     }
@@ -386,7 +386,7 @@ public class ManPageSearchFragment extends Fragment {
                                                         });
                                                     }
                                                 } catch (IOException e) {
-                                                    Log.e("Man Man", "Network", e);
+                                                    Log.e(Utils.MM_TAG, "Error while trying to download a description for command", e);
                                                     // can't show a toast from a thread without looper
                                                     // show error and change drawable back to normal
                                                     getActivity().runOnUiThread(new Runnable() {

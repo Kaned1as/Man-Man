@@ -17,6 +17,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -228,6 +229,7 @@ public class ManLocalArchiveFragment extends Fragment implements SharedPreferenc
                         }
                         tis.close();
                     } catch (IOException e) {
+                        Log.e(Utils.MM_TAG, "Exception while parsing local archive", e);
                         Utils.showToastFromAnyThread(getActivity(), R.string.error_parsing_local_archive);
                     }
                 }
@@ -334,6 +336,7 @@ public class ManLocalArchiveFragment extends Fragment implements SharedPreferenc
                     fos.close();
                     cis.close();
                 } catch (IOException e) {
+                    Log.e(Utils.MM_TAG, "Exception while downloading man pages archive", e);
                     possibleEncountered = e;
                     publishProgress(-1L);
                 }

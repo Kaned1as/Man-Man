@@ -34,18 +34,18 @@ import com.astuetz.PagerSlidingTabStrip;
 @SuppressWarnings("FieldCanBeLocal")
 public class MainPagerActivity extends AppCompatActivity {
 
-    public static String FOLDER_LIST_KEY = "folder.list";
+    public static final String FOLDER_LIST_KEY = "folder.list";
 
-    final static int SEARCH_COMMAND_LOADER          = 0;
-    final static int SEARCH_ONELINER_LOADER         = 1;
-    final static int MAN_PAGE_RETRIEVER_LOADER      = 2;
-    final static int CONTENTS_RETRIEVER_LOADER      = 3;
-    final static int CACHE_RETRIEVER_LOADER         = 4;
-    final static int LOCAL_PACKAGE_LOADER           = 5;
+    static final int SEARCH_COMMAND_LOADER          = 0;
+    static final int SEARCH_ONELINER_LOADER         = 1;
+    static final int MAN_PAGE_RETRIEVER_LOADER      = 2;
+    static final int CONTENTS_RETRIEVER_LOADER      = 3;
+    static final int CACHE_RETRIEVER_LOADER         = 4;
+    static final int LOCAL_PACKAGE_LOADER           = 5;
 
-    public final static String DB_CHANGE_NOTIFY = "database.updated";
-    public final static String LOCAL_CHANGE_NOTIFY = "locals.updated";
-    public final static String BACK_BUTTON_NOTIFY = "back.button.pressed";
+    public static final String DB_CHANGE_NOTIFY = "database.updated";
+    public static final String LOCAL_CHANGE_NOTIFY = "locals.updated";
+    public static final String BACK_BUTTON_NOTIFY = "back.button.pressed";
 
     private ViewPager mPager;
     private Toolbar mActionBar;
