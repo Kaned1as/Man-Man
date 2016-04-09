@@ -92,8 +92,6 @@ public class ManChaptersFragment extends Fragment {
             Bundle args = new Bundle();
             args.putString(CHAPTER_INDEX, item.getKey());
             // show progressbar under actionbar
-            mProgress.setIndeterminate(false);
-            mProgress.setProgress(0);
             mProgress.show();
             getLoaderManager().restartLoader(MainPagerActivity.CONTENTS_RETRIEVER_LOADER, args, mContentRetrieveCallback);
         }
@@ -371,17 +369,30 @@ public class ManChaptersFragment extends Fragment {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            int progress = transferred * 100 / length;
-                            mProgress.setProgress(progress);
-                            if (length <= 0 || progress == 100) { // if no length provided or download is complete
-                                mProgress.setIndeterminate(true);
-                                shouldCount = false; // don't count further, it's pointless
+                            if (length <= 0) { // if no length provided
+                                stopCounting();
+                                return;
                             }
+
+                            int progress = transferred * 100 / length;
+                            if (progress == 100) { // download is complete
+                                stopCounting();
+                                return;
+                            }
+
+                            mProgress.setIndeterminate(false);
+                            mProgress.setProgress(progress);
                         }
                     });
                 }
             }
             return res;
+        }
+
+        // don't count further, show only animation
+        private void stopCounting() {
+            mProgress.setIndeterminate(true);
+            shouldCount = false;
         }
     }
 

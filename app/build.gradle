@@ -53,16 +53,18 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:support-v4:23.2.1'                     // support library (ViewPager etc.)
-    compile 'com.android.support:appcompat-v7:23.2.1'                   // support library (material design)
-    compile 'com.android.support:cardview-v7:23.2.1'                    // support library (material design)
-    compile 'com.android.support:design:23.2.1'                         // support library (material design)
-    compile 'com.astuetz:pagerslidingtabstrip:1.0.1'                    // header tabs bar
+    compile 'com.android.support:support-v4:23.3.0'                     // support library (ViewPager etc.)
+    compile 'com.android.support:appcompat-v7:23.3.0'                   // support library (material design)
+    compile 'com.android.support:cardview-v7:23.3.0'                    // support library (material design)
+    compile 'com.android.support:design:23.3.0'                         // support library (material design)
+    compile 'com.jpardogo.materialtabstrip:library:1.1.0'               // header tabs bar
     compile 'com.github.castorflex.smoothprogressbar:library:1.1.0'     // progressbar on chapter load
     compile 'com.j256.ormlite:ormlite-android:4.48'                     // ORM for man pages
     compile 'com.google.code.gson:gson:2.6.2'                           // Json (De)Serializer
     compile 'org.jsoup:jsoup:1.8.3'                                     // html DOM parser
-    compile 'org.ccil.cowan.tagsoup:tagsoup:1.2.1'                        // html SAX parser
+    compile 'org.ccil.cowan.tagsoup:tagsoup:1.2.1'                      // html SAX parser
     compile 'com.googlecode.juniversalchardet:juniversalchardet:1.0.3'  // file encoding detector
-    compile 'com.squareup.okhttp:okhttp:2.3.0'
+    compile 'com.squareup.okhttp:okhttp:2.7.1'                          // good android http client
+
+    testCompile 'junit:junit:4.12'
 }
