@@ -195,9 +195,10 @@ public class ManPageDialogFragment extends Fragment {
                             GZIPInputStream gis = new GZIPInputStream(fis);
                             BufferedReader br = charset == null ? new BufferedReader(new InputStreamReader(gis)) : new BufferedReader(new InputStreamReader(gis, charset));
                             Man2Html parser = new Man2Html(br);
+                            Document parsed = parser.getDoc();
                             ManPage result = new ManPage(input.getName(), "file://" + mAddressUrl);
-                            result.setWebContent(parser.getHtml()); // we're not using it in DB!
-                            // no side pane with links for now
+                            result.setLinks(getLinks(parsed.select("div.man-page").first()));
+                            result.setWebContent(parsed.html());
                             br.close(); // closes all the IS hierarchy
                             return result;
                         } catch (FileNotFoundException e) {
@@ -228,26 +229,21 @@ public class ManPageDialogFragment extends Fragment {
                             String result = response.body().string();
                             Document root = Jsoup.parse(result, mAddressUrl);
                             Element man = root.select("div.man-page").first();
-                            if (man != null) { // it's actually a man page
-                                String webContent = man.html();
-                                // retrieve links
-                                Elements links = man.select("a[href*=#]");
-                                TreeSet<String> linkContainer = new TreeSet<>();
-                                for (Element link : links) {
-                                    if (!TextUtils.isEmpty(link.text()) && link.attr("href").contains("#" + link.text())) { // it's like <a href="http://ex.com/#a">-x</a>
-                                        linkContainer.add(link.text());
-                                    }
-                                }
-
-                                // save to DB for caching
-                                ManPage toCache = new ManPage(mCommandName, mAddressUrl);
-                                toCache.setLinks(linkContainer);
-                                toCache.setWebContent(webContent);
-                                DbProvider.getHelper().getManPagesDao().createIfNotExists(toCache);
-                                LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(new Intent(MainPagerActivity.DB_CHANGE_NOTIFY));
-
-                                return toCache;
+                            if (man == null) { // not actually a man page
+                                return null;
                             }
+
+                            String webContent = man.html();
+                            TreeSet<String> linkContainer = getLinks(man);
+
+                            // save to DB for caching
+                            ManPage toCache = new ManPage(mCommandName, mAddressUrl);
+                            toCache.setLinks(linkContainer);
+                            toCache.setWebContent(webContent);
+                            DbProvider.getHelper().getManPagesDao().createIfNotExists(toCache);
+                            LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(new Intent(MainPagerActivity.DB_CHANGE_NOTIFY));
+
+                            return toCache;
                         }
                     } catch (IOException e) {
                         Log.e("Man Man", "Database", e);
@@ -255,6 +251,19 @@ public class ManPageDialogFragment extends Fragment {
                         Utils.showToastFromAnyThread(getActivity(), R.string.connection_error);
                     }
                     return null;
+                }
+
+                // retrieve link set from manpage
+                @NonNull
+                private TreeSet<String> getLinks(Element man) {
+                    Elements links = man.select("a[href*=#]");
+                    TreeSet<String> linkContainer = new TreeSet<>();
+                    for (Element link : links) {
+                        if (!TextUtils.isEmpty(link.text()) && link.attr("href").contains("#" + link.text())) { // it's like <a href="http://ex.com/#a">-x</a>
+                            linkContainer.add(link.text());
+                        }
+                    }
+                    return linkContainer;
                 }
             };
         }

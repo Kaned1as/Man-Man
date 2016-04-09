@@ -2,12 +2,25 @@ package com.adonai.manman.parser;
 
 import android.support.annotation.NonNull;
 
+import com.adonai.manman.Utils;
+
+import org.jsoup.Jsoup;
 import org.jsoup.helper.StringUtil;
+import org.jsoup.nodes.Attributes;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.parser.Tag;
+import org.jsoup.select.Elements;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * Simple (quick & draft) TROFF to HTML parser
@@ -21,6 +34,8 @@ import java.util.List;
  */
 public class Man2Html {
 
+    private static final String OPTION_PATTERN = "^--?[a-zA-Z-=]+$";
+
     private enum FontState {
         NORMAL,
         BOLD,
@@ -28,10 +43,16 @@ public class Man2Html {
     }
 
     private enum Command {
-        TH(true), SH(true), PP(true), RS, RE,       // headers, titles
-        TP(true), IP(true),                         // special triggers
-        B, I, BR, BI,                               // font directives
-        fi, ie, el, nh, ad, sp(true);               // conditionals and stuff...
+        TH(true),                               // Title line
+        SH(true),                               // Section
+        PP(true), LP(true), P(true),            // Paragraph
+        RS,                                     // Relative margin indent start
+        RE,                                     // Relative margin indent end
+        TP(true),                               // Paragraph with hanging tag
+        IP(true),                               // Indented paragraph with optional hanging tag
+        B, I, BR, BI,                           // font directives
+        ie, el, nh, ad, sp(true),               // conditionals and stuff...
+        nf, fi;                                 // stop/start output filling (works like <pre> tag)
 
         private boolean stopsIndentation;
 
@@ -52,6 +73,8 @@ public class Man2Html {
 
     private FontState fontState = FontState.NORMAL;
     private boolean insideParagraph;
+    private boolean insideSection;
+    private boolean insidePreformatted;
     private int linesBeforeIndent = -1; // 0 == we're indenting right now
 
     public Man2Html(BufferedReader source) {
@@ -65,9 +88,30 @@ public class Man2Html {
      */
     @NonNull
     public String getHtml() throws IOException {
+        doParse();
+        return postprocessInDocLinks(result).html();
+    }
+
+    /**
+     * @see #getHtml()
+     */
+    @NonNull
+    public Document getDoc() throws IOException {
+        doParse();
+        return postprocessInDocLinks(result);
+    }
+
+    private void doParse() throws IOException {
         result.append("<html><body>");
         String line;
         while((line = source.readLine()) != null) {
+            while (line.endsWith("\\")) { // take next line too
+                String line2;
+                if((line2 = source.readLine()) != null) {
+                    line = line.substring(0, line.length() - 2) + line2;
+                }
+            }
+
             if(isControl(line)) {
                 evaluateCommand(line);
             } else {
@@ -78,7 +122,6 @@ public class Man2Html {
         if(insideParagraph)
             result.append("</p>");
         result.append("</body></html>");
-        return result.toString();
     }
 
     /**
@@ -135,10 +178,14 @@ public class Man2Html {
                 case TH: // table header
                     List<String> titleArgs = parseQuotedCommandArguments(lineAfterCommand);
                     if(!titleArgs.isEmpty()) {  // take only name of command
+                        result.append("<div class='man-page'>"); // it'd be better to close it somehow...
                         result.append("<h1>").append(parseTextField(titleArgs.get(0))).append("</h1>");
                     }
+
                     break;
                 case PP: // paragraph
+                case LP:
+                case P:
                 case sp: // line break
                     if(insideParagraph) {
                         result.append("</p>");
@@ -148,10 +195,18 @@ public class Man2Html {
                     result.append("<p>");
                     break;
                 case SH: // sub header
+                    if(insideSection) {
+                        result.append("</div>");
+                    }
                     List<String> subHeaderArgs = parseQuotedCommandArguments(lineAfterCommand);
                     if(!subHeaderArgs.isEmpty()) {
-                        result.append("<h2>").append(parseTextField(subHeaderArgs.get(0))).append("</h2>");
+                        String shName = parseTextField(subHeaderArgs.get(0));
+                        result.append("<div id='").append(shName).append("' class='section'>")
+                                .append("<h2>")
+                                  .append("<a href='#").append(shName).append("'>").append(shName).append("</a>")
+                                .append("</h2>");
                     }
+                    insideSection = true;
                     break;
                 case RS: // indent start
                     result.append("<dl><dd>");
@@ -160,7 +215,17 @@ public class Man2Html {
                     result.append("</dd></dl>");
                     break;
                 case BI:
-                    result.append(" ").append("<b><i>").append(parseTextField(lineAfterCommand)).append("</i></b>").append(" ");
+                    result.append(" ").append("<b><i>");
+                    if(insidePreformatted && lineAfterCommand.contains("\"")) { // function specification?
+                        List<String> args = parseQuotedCommandArguments(lineAfterCommand);
+                        for(String arg : args) {
+                            result.append(arg);
+                        }
+                        result.append("</i></b>").append("\n");
+                    } else {
+                        result.append(parseTextField(lineAfterCommand));
+                        result.append("</i></b>").append(" ");
+                    }
                     break;
                 case B: // bold
                     result.append(" ").append("<b>").append(parseTextField(lineAfterCommand)).append("</b>").append(" ");
@@ -196,7 +261,12 @@ public class Man2Html {
                     }
                     linesBeforeIndent = 0;
                     break;
-                case fi: // re-enable margins (not used, just print what we have)
+                case nf:
+                    result.append("<pre>");
+                    insidePreformatted = true;
+                    break;
+                case fi:
+                    result.append("</pre>");
                     result.append(" ").append(parseTextField(lineAfterCommand));
                     break;
             }
@@ -223,6 +293,44 @@ public class Man2Html {
             results.add(str);
         }
         return results;
+    }
+
+    /**
+     * Post-process already ready output. Adds mankier.com-like links for page, cleans html output
+     * like closing tags, pretty-print etc. This is the only function dependant on Jsoup, get rid
+     * of it if you want clean experience without mankier.com-related changes.
+     * @param sb string builde containing ready for post-processing page.
+     * @return String representing ready page.
+     */
+    private Document postprocessInDocLinks(StringBuilder sb) {
+        // process OPTIONS section
+        Document doc = Jsoup.parse(sb.toString());
+        Elements options = doc.select(String.format("div#OPTIONS > p > b:matches(%1$s), div#OPTIONS > dl > dt > b:matches(%1$s)", OPTION_PATTERN));
+        Set<String> availableOptions = new HashSet<>(options.size());
+        for(Element option : options) {
+            Element anchor = new Element(Tag.valueOf("a"), doc.baseUri());
+            anchor.attr("href", "#" + option.ownText());
+            anchor.attr("id", option.ownText());
+            anchor.addClass("in-doc");
+            anchor.appendChild(option.clone());
+
+            option.replaceWith(anchor);
+            availableOptions.add(option.ownText());
+        }
+
+        // process other references (don't put id on them)
+        Elements optionMentions = doc.select(String.format("b:matches(%s)", OPTION_PATTERN));
+        for(Element option : optionMentions) {
+            if(availableOptions.contains(option.ownText())) {
+                Element anchor = new Element(Tag.valueOf("a"), doc.baseUri());
+                anchor.attr("href", "#" + option.ownText());
+                anchor.addClass("in-doc");
+                anchor.appendChild(option.clone());
+
+                option.replaceWith(anchor);
+            }
+        }
+        return doc;
     }
 
     /**
@@ -301,6 +409,9 @@ public class Man2Html {
             }
         }
         output.append(HtmlEscaper.escapeHtml(tempTextBuffer)); // add all from temp buffer if remaining
+        if(insidePreformatted) { // newlines should be preserved
+            output.append("\n");
+        }
         return output.toString();
     }
 
