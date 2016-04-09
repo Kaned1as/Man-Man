@@ -67,3 +67,8 @@
 # Signature and Annotation are already handled above by GSON
 
 ##---------------End: proguard configuration for OkHttp -------
+
+##---------------Begin: proguard configuration for Apache Compress ------
+-dontwarn org.apache.commons.compress.compressors.**
+-dontwarn org.apache.commons.compress.archivers.**
+##---------------End: proguard configuration for Apache Compress -------
