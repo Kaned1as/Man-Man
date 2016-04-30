@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <string name="app_name" tools:ignore="Typos" translatable="false">Man Man</string>
     <string name="action_settings">Ajustes</string>
     <string name="search">Buscar</string>
     <string name="explain">Explicar</string>
@@ -70,4 +69,6 @@
     <string name="delete_local_archive">Eliminar archivo local descargado</string>
     <string name="delete_local_archive_sum">Esto eliminará el archivo permanentemente (las páginas que agregaste manualmente a la tarjeta de memoria no se verán afectadas). Esto puede ser útil si quieres reducir el espacio privado ocupado por esta aplicación.</string>
     <string name="deleted">¡Eliminado!</string>
+    <string name="donate_via_paypal">Donar a través de Paypal…</string>
+    <string name="donations_alert_dialog_no_browser">No se encontró navegador!</string>
 </resources>
