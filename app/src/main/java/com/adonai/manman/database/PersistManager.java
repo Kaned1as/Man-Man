@@ -18,7 +18,7 @@ import java.sql.SQLException;
 /**
  * Helper class for managing OrmLite database and DAOs
  *
- * @author Adonai
+ * @author Oleg Chernovskiy
  */
 public class PersistManager extends OrmLiteSqliteOpenHelper {
     private static final String TAG = PersistManager.class.getSimpleName();

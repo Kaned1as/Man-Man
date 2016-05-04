@@ -54,7 +54,7 @@ import java.util.regex.Pattern;
  * Fragment to show search results in a handy list view
  * All loaders for search content are implemented here
  *
- * @author Adonai
+ * @author Oleg Chernovskiy
  */
 public class ManPageSearchFragment extends Fragment {
 

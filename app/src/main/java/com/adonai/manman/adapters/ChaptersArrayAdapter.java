@@ -18,7 +18,7 @@ import java.util.Map;
  * The array is retrieved via {@link com.adonai.manman.Utils#parseStringArray(android.content.Context, int)}
  * and stored in {@link com.adonai.manman.ManChaptersFragment#mCachedChapters}
  *
- * @author Adonai
+ * @author Oleg Chernovskiy
  */
 public class ChaptersArrayAdapter extends ArrayAdapter<Map.Entry<String, String>> {
 

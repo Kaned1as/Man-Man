@@ -34,7 +34,7 @@ import java.util.List;
  * Fragment to show cached man pages list
  * These pages can be viewed without touching the network
  *
- * @author Adonai
+ * @author Oleg Chernovskiy
  */
 public class ManPageCacheFragment extends Fragment implements AdapterView.OnItemClickListener {
 

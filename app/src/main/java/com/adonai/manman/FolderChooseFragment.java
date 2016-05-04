@@ -26,7 +26,7 @@ import java.util.Set;
  * Each folder is parsed recursively to retrieve list of man pages afterwards
  *
  * @see com.adonai.manman.ManLocalArchiveFragment
- * @author Adonai
+ * @author Oleg Chernovskiy
  */
 public class FolderChooseFragment extends DialogFragment {
 

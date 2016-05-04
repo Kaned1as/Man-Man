@@ -53,7 +53,7 @@ import java.util.zip.GZIPInputStream;
 /**
  * Fragment for uploading and parsing local man page distributions
  *
- * @author Adonai
+ * @author Oleg Chernovskiy
  */
 public class ManLocalArchiveFragment extends Fragment implements SharedPreferences.OnSharedPreferenceChangeListener {
 

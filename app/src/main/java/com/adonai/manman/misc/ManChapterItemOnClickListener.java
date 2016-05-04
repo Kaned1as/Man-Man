@@ -17,7 +17,7 @@ import com.adonai.manman.entities.ManSectionItem;
  *
  * @see com.adonai.manman.adapters.ChapterContentsArrayAdapter
  * @see com.adonai.manman.adapters.ChapterContentsCursorAdapter
- * @author Adonai
+ * @author Oleg Chernovskiy
 */
 public class ManChapterItemOnClickListener implements View.OnClickListener {
     private final ManSectionItem current;

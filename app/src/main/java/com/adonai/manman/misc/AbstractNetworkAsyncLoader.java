@@ -8,7 +8,7 @@ import android.support.v4.content.AsyncTaskLoader;
  * <a href="http://www.androiddesignpatterns.com/2012/08/implementing-loaders.html">Implementing loaders</a>
  * blog post
  *
- * @author Adonai
+ * @author Oleg Chernovskiy
  */
 public abstract class AbstractNetworkAsyncLoader<D> extends AsyncTaskLoader<D> {
 

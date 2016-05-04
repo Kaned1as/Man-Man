@@ -25,7 +25,7 @@ import java.util.List;
  * A helper fragment responsible for picking folders of local manpage archives for further parsing
  * Returns selected folder on successful completion via ResultFolderListener interface
  *
- * @author Adonai
+ * @author Oleg Chernovskiy
  * @see com.adonai.manman.FolderChooseFragment
  */
 public class FolderAddDialog extends DialogFragment implements DialogInterface.OnClickListener, AdapterView.OnItemClickListener {

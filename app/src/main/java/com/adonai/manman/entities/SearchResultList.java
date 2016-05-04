@@ -7,7 +7,7 @@ import java.util.List;
  * Contains several search results or null if no results found
  *
  * @see com.google.gson.Gson
- * @author Adonai
+ * @author Oleg Chernovskiy
  */
 @SuppressWarnings("UnusedDeclaration") // reflection in Gson
 public class SearchResultList {

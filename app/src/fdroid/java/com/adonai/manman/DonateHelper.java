@@ -12,7 +12,7 @@ import android.widget.Toast;
  * Another implementation of donate class with direct paypal bindings
  * It's diverged from `release` one because Google forbids any payment methods in its applications but Google Wallet
  *
- * @author Adonai
+ * @author Oleg Chernovskiy
  */
 public class DonateHelper {
     private Activity mActivity;

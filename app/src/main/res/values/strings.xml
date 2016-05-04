@@ -19,9 +19,9 @@
     <string name="database_retrieve_error">Cannot retrieve data from database</string>
     <string name="cache_search">Filter cache…</string>
     <string name="app_description">Man Man is a free (as in freedom) tool for man page search, load and save</string>
-    <string name="app_author"><![CDATA[Author: Adonai Elohim <algonkvel@gmail.com>]]></string>
+    <string name="app_author"><![CDATA[Author: Oleg Chernovskiy <algonkvel@gmail.com>]]></string>
     <string name="app_credits"><![CDATA[Credits: All content is being loaded from www.mankier.com, author is Jackson Pauls <jackson@mankier.com>]]></string>
-    <string name="app_license"><![CDATA[Copyright © 2014 Adonai\nThis program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>.]]></string>
+    <string name="app_license"><![CDATA[Copyright © 2014 Oleg Chernovskiy\nThis program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>.]]></string>
     <string name="about">About</string>
     <string name="donate">Donate…</string>
     <string name="completed">Completed!</string>

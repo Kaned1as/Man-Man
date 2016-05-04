@@ -21,7 +21,7 @@ import java.util.List;
  *
  * @see android.widget.ArrayAdapter
  * @see java.io.File
- * @author Adonai
+ * @author Oleg Chernovskiy
  */
 public class LocalArchiveArrayAdapter extends ArrayAdapter<File> {
     private List<File> originals;

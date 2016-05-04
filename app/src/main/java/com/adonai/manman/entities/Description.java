@@ -4,7 +4,7 @@ package com.adonai.manman.entities;
  * Object representing answer on description API-call
  *
  * @see com.google.gson.Gson
- * @author Adonai
+ * @author Oleg Chernovskiy
  */
 @SuppressWarnings("UnusedDeclaration") // reflection in Gson
 public class Description {

@@ -18,7 +18,7 @@ import java.io.File;
 /**
  * Fragment for showing and managing global preferences
  *
- * @author Adonai
+ * @author Oleg Chernovskiy
  */
 public class GlobalPrefsFragment extends PreferenceFragment {
 

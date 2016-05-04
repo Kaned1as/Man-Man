@@ -27,7 +27,7 @@ import com.adonai.manman.R;
  *
  * Original author should be Chris Banes
  *
- * @author Adonai
+ * @author Oleg Chernovskiy
  */
 public class ProgressBarWrapper {
 

@@ -29,7 +29,7 @@ import com.astuetz.PagerSlidingTabStrip;
 /**
  * Main activity where everything takes place
  *
- * @author Adonai
+ * @author Oleg Chernovskiy
  */
 @SuppressWarnings("FieldCanBeLocal")
 public class MainPagerActivity extends AppCompatActivity {

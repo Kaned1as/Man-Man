@@ -28,7 +28,7 @@ import java.util.List;
  *
  * @see android.widget.ArrayAdapter
  * @see com.adonai.manman.entities.ManPage
- * @author Adonai
+ * @author Oleg Chernovskiy
  */
 public class CachedCommandsArrayAdapter extends ArrayAdapter<ManPage> {
 

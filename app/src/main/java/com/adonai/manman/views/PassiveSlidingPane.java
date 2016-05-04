@@ -10,7 +10,7 @@ import android.view.View;
  * Extension for sliding pane layout class
  * Don't even dare to take control over touch events if slidable view (webview actually) can be scrolled!
  *
- * @author Adonai
+ * @author Oleg Chernovskiy
  */
 public class PassiveSlidingPane extends SlidingPaneLayout {
 

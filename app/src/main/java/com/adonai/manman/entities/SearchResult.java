@@ -4,7 +4,7 @@ package com.adonai.manman.entities;
  * Object representing one of search results in corresponding API call
  *
  * @see com.google.gson.Gson
- * @author Adonai
+ * @author Oleg Chernovskiy
  */
 @SuppressWarnings("UnusedDeclaration") // reflection in Gson
 public class SearchResult {

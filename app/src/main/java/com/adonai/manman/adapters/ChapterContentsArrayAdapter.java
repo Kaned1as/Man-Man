@@ -25,7 +25,7 @@ import java.util.List;
  *
  * @see android.widget.ArrayAdapter
  * @see com.adonai.manman.entities.ManSectionItem
- * @author Adonai
+ * @author Oleg Chernovskiy
  */
 public class ChapterContentsArrayAdapter extends ArrayAdapter<ManSectionItem> implements SectionIndexer {
     private final List<ManSectionIndex> indexes;

@@ -10,7 +10,7 @@ import android.webkit.WebView;
 /**
  * Helper class created to workaround issues with WebViews in ListView items
  *
- * @author Adonai
+ * @author Oleg Chernovskiy
  */
 public class NonClickableWebView extends WebView {
     public NonClickableWebView(Context context) {

@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Activity for holding and showing preference fragments
  *
- * @author Adonai
+ * @author Oleg Chernovskiy
  */
 public class PreferencesActivity extends PreferenceActivity {
 

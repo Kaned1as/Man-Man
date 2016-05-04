@@ -9,7 +9,7 @@ import com.j256.ormlite.table.DatabaseTable;
  * Object represents an item in browse-chapter page of mankier.com
  *
  * It also serves as DB entity-mirroring class
- * @author Adonai
+ * @author Oleg Chernovskiy
  */
 @DatabaseTable(tableName = "man_chapters")
 @SuppressWarnings("UnusedDeclaration") // reflection in Gson

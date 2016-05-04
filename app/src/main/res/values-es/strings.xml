@@ -18,9 +18,9 @@
     <string name="database_retrieve_error">No se pudo obtener información de la base de datos</string>
     <string name="cache_search">Filtrar caché…</string>
     <string name="app_description">Man Man es una herramienta libre para buscar, cargar y guardar páginas man</string>
-    <string name="app_author"><![CDATA[Autor: Adonai Elohim <algonkvel@gmail.com>]]></string>
+    <string name="app_author"><![CDATA[Autor: Oleg Chernovskiy <algonkvel@gmail.com>]]></string>
     <string name="app_credits"><![CDATA[Creditoss: Todo el contenido es cargado desde www.mankier.com, su autor es Jackson Pauls <jackson@mankier.com>]]></string>
-    <string name="app_license"><![CDATA[Copyright © 2014 Adonai\nEste programa es software libre: puedes redistribuirlo y/o modificarlo bajo los términos de la Licencia Pública General de GNU publicada por la Free Software Foundation, ya sea la version 3 de la licencia, o (si así lo prefieres) una versión posterior. Este programa se distribuye con la esperanza de que sea útil, pero SIN NINGUNA GARANTÍA; nisiquiera la garantia de COMERCIABILIDAD implícita or USO PARA UN PROPÓSITO PARTICULAR. Para más información, consulta la Licencia Pública de GNU. Debes haber recibido una copia de la licencia con este programa. De no ser así, revisa en <http://www.gnu.org/licenses/>.]]></string>
+    <string name="app_license"><![CDATA[Copyright © 2014 Oleg Chernovskiy\nEste programa es software libre: puedes redistribuirlo y/o modificarlo bajo los términos de la Licencia Pública General de GNU publicada por la Free Software Foundation, ya sea la version 3 de la licencia, o (si así lo prefieres) una versión posterior. Este programa se distribuye con la esperanza de que sea útil, pero SIN NINGUNA GARANTÍA; nisiquiera la garantia de COMERCIABILIDAD implícita or USO PARA UN PROPÓSITO PARTICULAR. Para más información, consulta la Licencia Pública de GNU. Debes haber recibido una copia de la licencia con este programa. De no ser así, revisa en <http://www.gnu.org/licenses/>.]]></string>
     <string name="about">Acerca de</string>
     <string name="donate">Donar…</string>
     <string name="completed">¡Completado!</string>

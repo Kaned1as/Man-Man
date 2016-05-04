@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
  * the amount of specific code in man is limited to titles, names, descriptions, character specials, font style.
  * Thus this converter focuses on man contents and does not implement such things as registers/evaluations/tables etc.
  *
- * @author Adonai
+ * @author Oleg Chernovskiy
  */
 public class Man2Html {
 

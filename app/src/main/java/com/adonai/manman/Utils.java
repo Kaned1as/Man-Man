@@ -32,7 +32,7 @@ import java.util.zip.GZIPInputStream;
 /**
  * Utility class for wrapping useful static functions
  *
- * @author Adonai
+ * @author Oleg Chernovskiy
  */
 public class Utils {
 

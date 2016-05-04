@@ -17,7 +17,7 @@ import java.sql.SQLException;
  * This task could be achieved using just ArrayAdapter with OrmLite query results
  * but for some chapters with 15000 commands in them it takes too much time
  *
- * @author Adonai
+ * @author Oleg Chernovskiy
  */
 public abstract class OrmLiteCursorAdapter<T> extends BaseAdapter {
 

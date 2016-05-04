@@ -26,7 +26,7 @@ import java.util.List;
  * The data retrieval is done through {@link com.adonai.manman.ManChaptersFragment.RetrieveContentsCallback}
  *
  * @see OrmLiteCursorAdapter
- * @author Adonai
+ * @author Oleg Chernovskiy
  */
 public class ChapterContentsCursorAdapter extends OrmLiteCursorAdapter<ManSectionItem> implements SectionIndexer {
     private final List<ManSectionIndex> indexes;

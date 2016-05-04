@@ -69,7 +69,7 @@ import java.util.zip.GZIPInputStream;
  * Retrieves info from DB (if cached) or network (if not)
  *
  * @see com.adonai.manman.entities.ManPage
- * @author Adonai
+ * @author Oleg Chernovskiy
  */
 public class ManPageDialogFragment extends Fragment {
     private static final String USER_LEARNED_SLIDER = "user.learned.slider";

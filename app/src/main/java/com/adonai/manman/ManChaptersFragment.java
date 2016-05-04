@@ -58,7 +58,7 @@ import java.util.zip.GZIPInputStream;
  * Fragment to show table of contents and navigate into it
  * Note: works slower that just search!
  *
- * @author Adonai
+ * @author Oleg Chernovskiy
  */
 @SuppressWarnings("FieldCanBeLocal")
 public class ManChaptersFragment extends Fragment {

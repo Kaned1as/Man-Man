@@ -5,7 +5,7 @@ import android.support.annotation.NonNull;
 /**
  * Helper class to deal with GROFF special characters
  *
- * @author Adonai
+ * @author Oleg Chernovskiy
  */
 public class SpecialsHandler {
 
