@@ -3,18 +3,13 @@ package com.adonai.manman;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -54,13 +49,7 @@ public class MainPagerActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // should set theme prior to instantiating compat actionbar etc.
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        final String theme = prefs.getString("app.theme", "light");
-        switch (theme) {
-            case "light": setTheme(R.style.Light); break;
-            case "dark": setTheme(R.style.Dark); break;
-            case "green": setTheme(R.style.Green); break;
-        }
+        Utils.setupTheme(this);
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_pager);

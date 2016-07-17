@@ -142,4 +142,14 @@ public class Utils {
 
         return detector.getDetectedCharset();
     }
+
+    public static void setupTheme(Activity activity) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
+        final String theme = prefs.getString("app.theme", "light");
+        switch (theme) {
+            case "light": activity.setTheme(R.style.Light); break;
+            case "dark": activity.setTheme(R.style.Dark); break;
+            case "green": activity.setTheme(R.style.Green); break;
+        }
+    }
 }

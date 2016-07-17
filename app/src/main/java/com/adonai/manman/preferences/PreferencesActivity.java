@@ -2,8 +2,12 @@ package com.adonai.manman.preferences;
 
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
+import android.preference.PreferenceFragment;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 
 import com.adonai.manman.R;
+import com.adonai.manman.Utils;
 
 import java.util.List;
 
@@ -12,25 +16,29 @@ import java.util.List;
  *
  * @author Oleg Chernovskiy
  */
-public class PreferencesActivity extends PreferenceActivity {
+public class PreferencesActivity extends AppCompatActivity {
+
+    private Toolbar mActionBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setTheme(android.R.style.Theme_Holo);
+        // should set theme prior to instantiating compat actionbar etc.
+        Utils.setupTheme(this);
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_preferences);
+
+        mActionBar = (Toolbar) findViewById(R.id.app_toolbar);
+        setSupportActionBar(mActionBar);
+
+        getFragmentManager().beginTransaction().replace(R.id.content_frame, new MainPreferences()).commit();
     }
 
-    @Override
-    protected boolean isValidFragment(String fragmentName) {
-        return true;
-    }
-
-    /**
-     * Populate the activity with the top-level headers.
-     */
-    @Override
-    public void onBuildHeaders(List<Header> target) {
-        loadHeadersFromResource(R.xml.global_prefs_headers, target);
+    public static class MainPreferences extends PreferenceFragment {
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            addPreferencesFromResource(R.xml.global_prefs);
+        }
     }
 
 }
