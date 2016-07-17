@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="donate_via_paypal">Donar a través de Paypal…</string>
+    <string name="donations_alert_dialog_no_browser">No se encontró navegador!</string>
+</resources>
