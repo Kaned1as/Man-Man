@@ -46,7 +46,6 @@
     <string name="dark_theme">Oscuro</string>
     <string name="green_theme">Scr1pt Kiddie</string>
     <string name="local_storage">Local</string>
-    <string name="folders">Carpetas</string>
     <string name="watched_folders">Carpetas a observar</string>
     <string name="select_folder">Selecciona una carpeta</string>
     <string name="select">Seleccionar</string>

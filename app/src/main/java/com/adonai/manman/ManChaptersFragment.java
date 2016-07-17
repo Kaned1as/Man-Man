@@ -223,8 +223,8 @@ public class ManChaptersFragment extends Fragment {
                             if(response.header("Content-Length") != null) {
                                 is = new GZIPInputStream(
                                         new CountingInputStream(response.body().byteStream(),
-                                                (int) response.body().contentLength()),
-                                                (int) response.body().contentLength());
+                                            (int) response.body().contentLength()),
+                                        (int) response.body().contentLength());
                             } else {
                                 is = new GZIPInputStream(new CountingInputStream(response.body().byteStream(),
                                         (int) response.body().contentLength()));

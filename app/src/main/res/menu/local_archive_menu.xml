@@ -4,14 +4,16 @@
 
     <item
         android:id="@+id/folder_settings"
-        android:title="@string/folders"
+        android:title="@string/watched_folders"
         android:icon="@drawable/ic_settings"
+        android:orderInCategory="100"
         compat:showAsAction="never"/>
 
     <item
         android:id="@+id/download_archive"
         android:title="@string/download_archive"
         android:icon="@drawable/ic_cloud_download_white_48dp"
+        android:orderInCategory="101"
         compat:showAsAction="never"/>
 
 </menu>

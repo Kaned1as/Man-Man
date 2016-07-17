@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -31,6 +32,7 @@ import android.widget.Toast;
 
 import com.adonai.manman.adapters.LocalArchiveArrayAdapter;
 import com.adonai.manman.misc.AbstractNetworkAsyncLoader;
+import com.adonai.manman.views.ProgressBarWrapper;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -66,8 +68,11 @@ public class ManLocalArchiveFragment extends Fragment implements SharedPreferenc
 
     private ListView mLocalPageList;
     private SearchView mSearchLocalPage;
+    private ProgressBarWrapper mProgress; // TODO: move progress bar to activity (and duplicate in chapters fragment too)
     private BroadcastReceiver mBroadcastHandler = new LocalArchiveBroadcastReceiver();
     private LocalArchiveParserCallback mLocalArchiveParseCallback = new LocalArchiveParserCallback();
+
+    private boolean loadedOnce = false;
 
     /**
      * Click listener for loading man page from selected archive file (or show config if no folders are present)
@@ -131,6 +136,7 @@ public class ManLocalArchiveFragment extends Fragment implements SharedPreferenc
         mLocalPageList.setOnItemClickListener(mManArchiveClickListener);
         mSearchLocalPage = (SearchView) root.findViewById(R.id.local_search_edit);
         mSearchLocalPage.setOnQueryTextListener(new FilterLocalStorage());
+        mProgress = new ProgressBarWrapper(getActivity());
 
         getLoaderManager().initLoader(MainPagerActivity.LOCAL_PACKAGE_LOADER, null, mLocalArchiveParseCallback);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mBroadcastHandler, new IntentFilter(MainPagerActivity.LOCAL_CHANGE_NOTIFY));
@@ -139,13 +145,24 @@ public class ManLocalArchiveFragment extends Fragment implements SharedPreferenc
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        mPreferences.unregisterOnSharedPreferenceChangeListener(this);
+    public void onConfigurationChanged(Configuration newConfig) {
+        mProgress.onOrientationChanged();
     }
 
-    private void showFolderSettingsDialog() {
-        new FolderChooseFragment().show(getFragmentManager(), "FolderListFragment");
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(getUserVisibleHint() && !loadedOnce) { // user just moved to this fragment
+            getLoaderManager().getLoader(MainPagerActivity.LOCAL_PACKAGE_LOADER).onContentChanged();
+            loadedOnce = true;
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mProgress.hide();
+        mPreferences.unregisterOnSharedPreferenceChangeListener(this);
     }
 
     @Override
@@ -155,17 +172,21 @@ public class ManLocalArchiveFragment extends Fragment implements SharedPreferenc
     }
 
     @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        // don't show it if we already have archive
+        menu.findItem(R.id.download_archive).setVisible(!mLocalArchive.exists());
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.folder_settings:
                 showFolderSettingsDialog();
                 return true;
             case R.id.download_archive:
-                if(mLocalArchive.exists()) {
-                    Toast.makeText(getActivity(), R.string.already_downloaded, Toast.LENGTH_SHORT).show();
-                    return true;
-                }
                 downloadArchive();
+                return true;
 
         }
         return super.onOptionsItemSelected(item);
@@ -178,6 +199,10 @@ public class ManLocalArchiveFragment extends Fragment implements SharedPreferenc
         }
     }
 
+    private void showFolderSettingsDialog() {
+        new FolderChooseFragment().show(getFragmentManager(), "FolderListFragment");
+    }
+
     private class LocalArchiveParserCallback implements LoaderManager.LoaderCallbacks<List<File>> {
         @Override
         public Loader<List<File>> onCreateLoader(int i, Bundle bundle) {
@@ -185,9 +210,8 @@ public class ManLocalArchiveFragment extends Fragment implements SharedPreferenc
                 Set<String> mFolderList;
 
                 @Override
-                protected void onForceLoad() {
-                    //Utils.showToastFromAnyThread(getActivity(), R.string.scanning_folders);
-                    super.onForceLoad();
+                protected void onStartLoading() {
+                    // shouldn't to anything, this loader is started when user moves to this fragment
                 }
 
                 @NonNull
@@ -205,6 +229,13 @@ public class ManLocalArchiveFragment extends Fragment implements SharedPreferenc
 
                     // results from local archive, if exists
                     if(mLocalArchive.exists()) {
+                        // show progress bar
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mProgress.show();
+                            }
+                        });
                         // it's a tar-gzipped archive with standard structure
                         populateWithLocal(result);
                     }
@@ -247,6 +278,12 @@ public class ManLocalArchiveFragment extends Fragment implements SharedPreferenc
                         }
                     }
                 }
+
+                @Override
+                public void deliverResult(List<File> data) {
+                    mProgress.hide();
+                    super.deliverResult(data);
+                }
             };
         }
 
@@ -277,7 +314,7 @@ public class ManLocalArchiveFragment extends Fragment implements SharedPreferenc
     }
 
     /**
-     * Load archive to app data folder from my github releases page
+     * Load archive to app data folder from my GitHub releases page
      */
     private void downloadArchive() {
         if(mLocalArchive.exists()) {
