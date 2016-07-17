@@ -69,4 +69,6 @@
     <string name="delete_local_archive">Удалить локальный архив</string>
     <string name="delete_local_archive_sum">Это действие удалит загруженный архив локальных страниц (не влияет на локально добавленные страницы с сдкарты). Помогает если необходимо уменьшить размер приложения на внутренней памяти.</string>
     <string name="deleted">Удалено!</string>
+    <string name="default_tab">Вкладка по-умолчанию</string>
+    <string name="default_tab_summary">Вкладка, открываемая при запуске приложения</string>
 </resources>

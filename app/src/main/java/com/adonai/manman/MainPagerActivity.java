@@ -3,7 +3,9 @@ package com.adonai.manman;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -65,6 +67,11 @@ public class MainPagerActivity extends AppCompatActivity {
         // setting up vending
         mDonateHelper = new DonateHelper(this);
         DbProvider.setHelper(this);
+
+        // applying default tab
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        final String index = prefs.getString("app.default.tab", "0");
+        mPager.setCurrentItem(Integer.valueOf(index));
     }
 
     @Override

@@ -21,4 +21,12 @@
         android:entries="@array/preference_themes_titles"
         android:entryValues="@array/preference_themes_values" />
 
+    <ListPreference
+        android:icon="@android:drawable/ic_menu_view"
+        android:key="app.default.tab"
+        android:title="@string/default_tab"
+        android:summary="@string/default_tab_summary"
+        android:entries="@array/preference_default_tab_entries"
+        android:entryValues="@array/preference_default_tab_values" />
+
 </PreferenceScreen>

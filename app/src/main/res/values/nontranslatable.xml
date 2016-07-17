@@ -25,4 +25,16 @@
         <item>dark</item>
         <item>green</item>
     </string-array>
+    <string-array name="preference_default_tab_entries" translatable="false">
+        <item>@string/search</item>
+        <item>@string/contents</item>
+        <item>@string/cached</item>
+        <item>@string/local_storage</item>
+    </string-array>
+    <string-array name="preference_default_tab_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
 </resources>

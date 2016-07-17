@@ -69,4 +69,6 @@
     <string name="delete_local_archive">Eliminar archivo local descargado</string>
     <string name="delete_local_archive_sum">Esto eliminará el archivo permanentemente (las páginas que agregaste manualmente a la tarjeta de memoria no se verán afectadas). Esto puede ser útil si quieres reducir el espacio privado ocupado por esta aplicación.</string>
     <string name="deleted">¡Eliminado!</string>
+    <string name="default_tab">Default tab</string>
+    <string name="default_tab_summary">Default tab on application start</string>
 </resources>

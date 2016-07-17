@@ -70,4 +70,6 @@
     <string name="delete_local_archive">Delete downloaded local archive</string>
     <string name="delete_local_archive_sum">Deletes downloaded archive permanently (but none of your locally added pages from sdcard will be affected). This may be helpful if you want to reduce this app private size.</string>
     <string name="deleted">Deleted!</string>
+    <string name="default_tab">Default tab</string>
+    <string name="default_tab_summary">Default tab on application start</string>
 </resources>
