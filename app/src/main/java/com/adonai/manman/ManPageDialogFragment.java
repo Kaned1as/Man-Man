@@ -15,7 +15,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.widget.SlidingPaneLayout;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -46,23 +45,27 @@ import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import org.apache.commons.compress.utils.IOUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 /**
  * Dialog fragment for showing web page with man content
@@ -121,7 +124,7 @@ public class ManPageDialogFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         setHasOptionsMenu(true);
 
-        mLocalArchive = new File(getActivity().getCacheDir(), "manpages.tar.gz");
+        mLocalArchive = new File(getActivity().getCacheDir(), "manpages.zip");
 
         View root = inflater.inflate(R.layout.fragment_man_page_show, container, false);
         mLinkContainer = (LinearLayout) root.findViewById(R.id.link_list);
@@ -218,24 +221,19 @@ public class ManPageDialogFragment extends Fragment {
 
                     if(mAddressUrl.startsWith("local:")) { // local man archive
                         try {
-                            GZIPInputStream gzis = new GZIPInputStream(new FileInputStream(mLocalArchive));
-                            TarArchiveInputStream tis = new TarArchiveInputStream(gzis);
-                            TarArchiveEntry tarEntry;
-                            while ((tarEntry = tis.getNextTarEntry()) != null) {
-                                if(tarEntry.isFile() && tarEntry.getName().equals(mAddressUrl.substring(7))) {
-                                    // this is it
-                                    GZIPInputStream entryGis = new GZIPInputStream(tis); // entry is gzipped
-                                    BufferedReader br = new BufferedReader(new InputStreamReader(entryGis));
-                                    Man2Html parser = new Man2Html(br);
-                                    Document parsed = parser.getDoc();
-                                    ManPage result = new ManPage(tarEntry.getName(), mAddressUrl);
-                                    result.setLinks(getLinks(parsed.select("div.man-page").first()));
-                                    result.setWebContent(parsed.html());
-                                    br.close(); // closes all the IS hierarchy
-                                    return result;
-                                }
-                            }
-                            tis.close();
+                            ZipFile zip = new ZipFile(mLocalArchive);
+                            ZipEntry zEntry = zip.getEntry(mAddressUrl.substring(7));
+                            InputStream is =  zip.getInputStream(zEntry);
+                            // can't use java's standard GZIPInputStream around zip IS because of inflating issue
+                            GzipCompressorInputStream gis = new GzipCompressorInputStream(is); // manpage files are .gz
+                            BufferedReader br = new BufferedReader(new InputStreamReader(gis));
+                            Man2Html parser = new Man2Html(br);
+                            Document parsed = parser.getDoc();
+                            ManPage result = new ManPage(zEntry.getName(), mAddressUrl);
+                            result.setLinks(getLinks(parsed.select("div.man-page").first()));
+                            result.setWebContent(parsed.html());
+                            br.close(); // closes all the IS hierarchy
+                            return result;
                         } catch (IOException e) {
                             Log.e(Utils.MM_TAG, "Error while loading man page from local archive", e);
                             Toast.makeText(getActivity(), R.string.wrong_file_format, Toast.LENGTH_SHORT).show();

@@ -12,8 +12,8 @@ android {
         applicationId "com.adonai.manman"
         minSdkVersion 14
         targetSdkVersion 22
-        versionCode 152
-        versionName "1.5.2"
+        versionCode 153
+        versionName "1.5.3"
     }
 
     signingConfigs {
@@ -69,6 +69,6 @@ dependencies {
     compile 'org.ccil.cowan.tagsoup:tagsoup:1.2.1'                      // html SAX parser
     compile 'com.googlecode.juniversalchardet:juniversalchardet:1.0.3'  // file encoding detector
     compile 'com.squareup.okhttp:okhttp:2.7.1'                          // good android http client
-    compile 'org.apache.commons:commons-compress:1.10'                  // uncompress lib (to parse downloaded archive)
+    compile 'org.apache.commons:commons-compress:1.10'                  // uncompress lib (for archives)
     testCompile 'junit:junit:4.12'
 }

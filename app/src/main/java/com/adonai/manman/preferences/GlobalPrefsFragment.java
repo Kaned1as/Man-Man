@@ -48,7 +48,7 @@ public class GlobalPrefsFragment extends PreferenceFragment {
             }
         });
 
-        final File localArchive = new File(getActivity().getCacheDir(), "manpages.tar.gz");
+        final File localArchive = new File(getActivity().getCacheDir(), "manpages.zip");
         findPreference("delete.local.archive").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {

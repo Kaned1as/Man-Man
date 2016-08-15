@@ -28,7 +28,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SearchView;
-import android.widget.Toast;
 
 import com.adonai.manman.adapters.LocalArchiveArrayAdapter;
 import com.adonai.manman.misc.AbstractNetworkAsyncLoader;
@@ -37,20 +36,19 @@ import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.utils.CountingInputStream;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 /**
  * Fragment for uploading and parsing local man page distributions
@@ -59,7 +57,7 @@ import java.util.zip.GZIPInputStream;
  */
 public class ManLocalArchiveFragment extends Fragment implements SharedPreferences.OnSharedPreferenceChangeListener {
 
-    private static final String LOCAL_ARCHIVE_URL = "https://github.com/Adonai/Man-Man/releases/download/1.4.0/manpages.tar.gz";
+    private static final String LOCAL_ARCHIVE_URL = "https://github.com/Adonai/Man-Man/releases/download/1.6.0/manpages.zip";
 
     private File mLocalArchive;
     private boolean mUserAgreedToDownload;
@@ -126,7 +124,7 @@ public class ManLocalArchiveFragment extends Fragment implements SharedPreferenc
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         setHasOptionsMenu(true);
 
-        mLocalArchive = new File(getActivity().getCacheDir(), "manpages.tar.gz");
+        mLocalArchive = new File(getActivity().getCacheDir(), "manpages.zip");
 
         mPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         mPreferences.registerOnSharedPreferenceChangeListener(this);
@@ -247,25 +245,22 @@ public class ManLocalArchiveFragment extends Fragment implements SharedPreferenc
 
                 private void populateWithLocal(List<File> result) {
                     try {
-                        GZIPInputStream gzis = new GZIPInputStream(new FileInputStream(mLocalArchive));
-                        TarArchiveInputStream tis = new TarArchiveInputStream(gzis);
-                        TarArchiveEntry tarEntry;
-                        while ((tarEntry = tis.getNextTarEntry()) != null) {
-                            if(tarEntry.isDirectory())
+                        ZipFile zip = new ZipFile(mLocalArchive);
+                        Enumeration<? extends ZipEntry> entries = zip.entries();
+                        while (entries.hasMoreElements()) {
+                            ZipEntry zEntry = entries.nextElement();
+                            if(zEntry.isDirectory())
                                 continue;
 
-                            if(tarEntry.isFile()) {
-                                result.add(new File("local:", tarEntry.getName()));
-                            }
+                            result.add(new File("local:", zEntry.getName()));
                         }
-                        tis.close();
                     } catch (IOException e) {
                         Log.e(Utils.MM_TAG, "Exception while parsing local archive", e);
                         Utils.showToastFromAnyThread(getActivity(), R.string.error_parsing_local_archive);
                     }
                 }
 
-                public void walkFileTree(File directoryRoot, List<File> resultList) {
+                private void walkFileTree(File directoryRoot, List<File> resultList) {
                     File[] list = directoryRoot.listFiles();
                     if(list == null) // unknown, happens on some devices
                         return;
