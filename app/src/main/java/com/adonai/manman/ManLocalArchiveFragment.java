@@ -70,8 +70,6 @@ public class ManLocalArchiveFragment extends Fragment implements SharedPreferenc
     private BroadcastReceiver mBroadcastHandler = new LocalArchiveBroadcastReceiver();
     private LocalArchiveParserCallback mLocalArchiveParseCallback = new LocalArchiveParserCallback();
 
-    private boolean loadedOnce = false;
-
     /**
      * Click listener for loading man page from selected archive file (or show config if no folders are present)
      * <br/>
@@ -148,15 +146,6 @@ public class ManLocalArchiveFragment extends Fragment implements SharedPreferenc
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        if(getUserVisibleHint() && !loadedOnce) { // user just moved to this fragment
-            getLoaderManager().getLoader(MainPagerActivity.LOCAL_PACKAGE_LOADER).onContentChanged();
-            loadedOnce = true;
-        }
-    }
-
-    @Override
     public void onDestroyView() {
         super.onDestroyView();
         mProgress.hide();
@@ -206,11 +195,6 @@ public class ManLocalArchiveFragment extends Fragment implements SharedPreferenc
         public Loader<List<File>> onCreateLoader(int i, Bundle bundle) {
             return new AbstractNetworkAsyncLoader<List<File>>(getActivity()) {
                 Set<String> mFolderList;
-
-                @Override
-                protected void onStartLoading() {
-                    // shouldn't to anything, this loader is started when user moves to this fragment
-                }
 
                 @NonNull
                 @Override
