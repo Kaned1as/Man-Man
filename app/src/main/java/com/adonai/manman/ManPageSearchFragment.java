@@ -15,6 +15,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.text.Html;
+import android.text.Spanned;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -39,12 +41,16 @@ import com.adonai.manman.misc.AbstractNetworkAsyncLoader;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -325,6 +331,9 @@ public class ManPageSearchFragment extends Fragment {
     }
 
     private class SearchResultArrayAdapter extends ArrayAdapter<SearchResult> {
+
+        private Map<SearchResult, Spanned> cachedDescs = new HashMap<>(5);
+
         public SearchResultArrayAdapter(SearchResultList data) {
             super(getActivity(), R.layout.search_list_item, R.id.command_name_label, data.getResults());
         }
@@ -334,94 +343,110 @@ public class ManPageSearchFragment extends Fragment {
             View root = super.getView(position, convertView, parent);
             final SearchResult searchRes = getItem(position);
             final Pair<String, String> nameAndIndex = getNameChapterFromResult(searchRes);
-            if(nameAndIndex != null) {
-                // extract needed data
-                String chapterName = cachedChapters.get(nameAndIndex.second);
-
-                TextView command = (TextView) root.findViewById(R.id.command_name_label);
-                command.setText(nameAndIndex.first);
-                TextView chapter = (TextView) root.findViewById(R.id.command_chapter_label);
-                chapter.setText(chapterName);
-                final WebView description = (WebView) root.findViewById(R.id.description_text_web);
-                description.setBackgroundColor(0);
-                description.setVisibility(View.GONE);
-                final ImageView descriptionRequest = (ImageView) root.findViewById(R.id.popup_menu);
-
-                // download a description on question mark click
-                descriptionRequest.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(final View v) {
-                        PopupMenu pm = new PopupMenu(getActivity(), v);
-                        pm.inflate(R.menu.search_item_popup);
-                        pm.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                            @Override
-                            public boolean onMenuItemClick(MenuItem item) {
-                                switch (item.getItemId()) {
-                                    case R.id.load_description_popup_menu_item:
-                                        descriptionRequest.setImageResource(Utils.getThemedResource(getActivity(), R.attr.loading_icon_resource));
-                                        final String descriptionCommand = nameAndIndex.first + "." + nameAndIndex.second;
-                                        // run desc download in another thread...
-                                        Thread thr = new Thread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                try {
-                                                    String address = URLEncoder.encode(descriptionCommand, "UTF-8");
-                                                    OkHttpClient client = new OkHttpClient();
-                                                    Request request = new Request.Builder().url(SEARCH_DESCRIPTION_PREFIX + address).build();
-                                                    Response response = client.newCall(request).execute();
-                                                    if (response.isSuccessful()) {
-                                                        String result = response.body().string();
-                                                        final Description descAnswer = mJsonConverter.fromJson(result, Description.class);
-                                                        // load description back into listview
-                                                        getActivity().runOnUiThread(new Runnable() {
-                                                            @SuppressLint("SetJavaScriptEnabled")
-                                                            @Override
-                                                            public void run() {
-                                                                descriptionRequest.setImageResource(R.drawable.abc_ic_menu_moreoverflow_mtrl_alpha);
-                                                                description.getSettings().setJavaScriptEnabled(true);
-                                                                String styledHtml = Utils.getWebWithCss(getActivity(), descAnswer.getUrl(), descAnswer.getHtmlDescription());
-                                                                description.loadDataWithBaseURL(descAnswer.getUrl(), styledHtml, "text/html", "UTF-8", descAnswer.getUrl());
-                                                                description.setVisibility(View.VISIBLE);
-                                                            }
-                                                        });
-                                                    }
-                                                } catch (IOException e) {
-                                                    Log.e(Utils.MM_TAG, "Error while trying to download a description for command", e);
-                                                    // can't show a toast from a thread without looper
-                                                    // show error and change drawable back to normal
-                                                    getActivity().runOnUiThread(new Runnable() {
-                                                        @Override
-                                                        public void run() {
-                                                            Toast.makeText(getActivity(), R.string.connection_error, Toast.LENGTH_SHORT).show();
-                                                            descriptionRequest.setImageResource(R.drawable.abc_ic_menu_moreoverflow_mtrl_alpha);
-                                                        }
-                                                    });
-                                                }
-                                            }
-                                        }, "DescriptionAsyncRetrieve");
-                                        thr.start();
-                                        return true;
-                                    case R.id.share_link_popup_menu_item:
-                                        Intent sendIntent = new Intent(Intent.ACTION_SEND);
-                                        sendIntent.setType("text/plain");
-                                        sendIntent.putExtra(Intent.EXTRA_TITLE, nameAndIndex.first);
-                                        sendIntent.putExtra(Intent.EXTRA_TEXT, searchRes.getUrl());
-                                        startActivity(Intent.createChooser(sendIntent, getString(R.string.share_link)));
-                                        return true;
-                                    case R.id.copy_link_popup_menu_item:
-                                        ClipboardManager clipboard = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
-                                        Toast.makeText(getActivity().getApplicationContext(), getString(R.string.copied) + " " + searchRes.getUrl(), Toast.LENGTH_SHORT).show();
-                                        clipboard.setPrimaryClip(ClipData.newPlainText(nameAndIndex.first, searchRes.getUrl()));
-                                        return true;
-                                }
-                                return false;
-                            }
-                        });
-                        pm.show();
-                    }
-                });
+            if(nameAndIndex == null) {
+                return root; // error parsing command, should not happen
             }
+
+            String chapterName = cachedChapters.get(nameAndIndex.second);
+
+            TextView command = (TextView) root.findViewById(R.id.command_name_label);
+            command.setText(nameAndIndex.first);
+            TextView chapter = (TextView) root.findViewById(R.id.command_chapter_label);
+            chapter.setText(chapterName);
+            final TextView description = (TextView) root.findViewById(R.id.description_text_web);
+            description.setBackgroundColor(0);
+            description.setVisibility(cachedDescs.containsKey(searchRes) ? View.VISIBLE : View.GONE);
+            if(cachedDescs.containsKey(searchRes)) {
+                description.setText(cachedDescs.get(searchRes));
+            }
+
+            // download a description on question mark click
+            final ImageView descriptionRequest = (ImageView) root.findViewById(R.id.popup_menu);
+            descriptionRequest.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(final View v) {
+                    PopupMenu pm = new PopupMenu(getActivity(), v);
+                    pm.inflate(R.menu.search_item_popup);
+                    if (cachedDescs.containsKey(searchRes)) { // hide description setting if we already loaded it
+                        pm.getMenu().findItem(R.id.load_description_popup_menu_item).setVisible(false);
+                    }
+
+                    pm.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                        @Override
+                        public boolean onMenuItemClick(MenuItem item) {
+                            switch (item.getItemId()) {
+                                case R.id.load_description_popup_menu_item:
+                                    descriptionRequest.setImageResource(Utils.getThemedResource(getActivity(), R.attr.loading_icon_resource));
+                                    final String descriptionCommand = nameAndIndex.first + "." + nameAndIndex.second;
+                                    loadDescriptionForItem(descriptionCommand, descriptionRequest, description, searchRes);
+                                    return true;
+                                case R.id.share_link_popup_menu_item:
+                                    Intent sendIntent = new Intent(Intent.ACTION_SEND);
+                                    sendIntent.setType("text/plain");
+                                    sendIntent.putExtra(Intent.EXTRA_TITLE, nameAndIndex.first);
+                                    sendIntent.putExtra(Intent.EXTRA_TEXT, searchRes.getUrl());
+                                    startActivity(Intent.createChooser(sendIntent, getString(R.string.share_link)));
+                                    return true;
+                                case R.id.copy_link_popup_menu_item:
+                                    ClipboardManager clipboard = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
+                                    Toast.makeText(getActivity().getApplicationContext(), getString(R.string.copied) + " " + searchRes.getUrl(), Toast.LENGTH_SHORT).show();
+                                    clipboard.setPrimaryClip(ClipData.newPlainText(nameAndIndex.first, searchRes.getUrl()));
+                                    return true;
+                            }
+                            return false;
+                        }
+                    });
+                    pm.show();
+                }
+            });
+
             return root;
         }
+
+        private void loadDescriptionForItem(String descriptionCommand,
+                                            final ImageView descriptionRequest,
+                                            final TextView description,
+                                            final SearchResult searchRes) {
+            try {
+                String address = URLEncoder.encode(descriptionCommand, "UTF-8");
+                OkHttpClient client = new OkHttpClient();
+                client.getDispatcher().setMaxRequests(5); // run desc download in another thread...
+                Request request = new Request.Builder().url(SEARCH_DESCRIPTION_PREFIX + address).build();
+                client.newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(Request request, IOException e) {
+                        descriptionRequest.setImageResource(R.drawable.abc_ic_menu_overflow_material);
+                        Utils.showToastFromAnyThread(getActivity(), e.getLocalizedMessage());
+                    }
+
+                    @Override
+                    public void onResponse(Response response) throws IOException {
+                        if (response.isSuccessful()) {
+                            String result = response.body().string();
+                            final Description descAnswer = mJsonConverter.fromJson(result, Description.class);
+                            description.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    descriptionRequest.setImageResource(R.drawable.abc_ic_menu_overflow_material);
+                                    String styledHtml = Utils.getWebWithCss(getActivity(), descAnswer.getUrl(), descAnswer.getHtmlDescription());
+                                    //noinspection deprecation - we have old platforms to support
+                                    Spanned span = Html.fromHtml(styledHtml);
+                                    description.setText(span);
+                                    description.setVisibility(View.VISIBLE);
+                                    cachedDescs.put(searchRes, span);
+                                }
+                            });
+                        }
+                    }
+                });
+            } catch (IOException e) {
+                Log.e(Utils.MM_TAG, "Error while trying to download a description for command", e);
+                // can't show a toast from a thread without looper
+                // show error and change drawable back to normal
+                Toast.makeText(getActivity(), R.string.connection_error, Toast.LENGTH_SHORT).show();
+                descriptionRequest.setImageResource(R.drawable.abc_ic_menu_overflow_material);
+            }
+        }
     }
+
 }

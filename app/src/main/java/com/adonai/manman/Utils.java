@@ -8,6 +8,8 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.TypedValue;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import com.adonai.manman.entities.ManSectionIndex;
@@ -150,6 +152,16 @@ public class Utils {
             case "light": activity.setTheme(R.style.Light); break;
             case "dark": activity.setTheme(R.style.Dark); break;
             case "green": activity.setTheme(R.style.Green); break;
+        }
+    }
+
+    public static class HideKeyboardOnFocusLost implements View.OnFocusChangeListener {
+        @Override
+        public void onFocusChange(View view, boolean hasFocus) {
+            if (!hasFocus) {
+                InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            }
         }
     }
 }

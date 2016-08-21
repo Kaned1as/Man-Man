@@ -142,6 +142,7 @@ public class ManLocalArchiveFragment extends Fragment implements SharedPreferenc
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
         mProgress.onOrientationChanged();
     }
 

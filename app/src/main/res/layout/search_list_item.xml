@@ -25,8 +25,7 @@
                 android:layout_alignParentTop="true"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentRight="true"
-                android:src="@drawable/abc_ic_menu_moreoverflow_mtrl_alpha"
-
+                android:src="@drawable/abc_ic_menu_overflow_material"
                 android:contentDescription="@string/popup_menu"/>
 
             <TextView
@@ -55,10 +54,10 @@
                 android:layout_toStartOf="@id/popup_menu"
                 android:layout_toLeftOf="@id/popup_menu" />
 
-            <com.adonai.manman.views.NonClickableWebView
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textAppearance="?android:attr/textAppearanceSmall"
                 android:text="@string/placeholder_text"
                 android:id="@+id/description_text_web"
                 android:layout_below="@+id/command_chapter_label"
