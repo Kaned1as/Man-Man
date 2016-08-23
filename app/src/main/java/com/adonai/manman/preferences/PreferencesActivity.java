@@ -30,15 +30,7 @@ public class PreferencesActivity extends AppCompatActivity {
         mActionBar = (Toolbar) findViewById(R.id.app_toolbar);
         setSupportActionBar(mActionBar);
 
-        getFragmentManager().beginTransaction().replace(R.id.content_frame, new MainPreferences()).commit();
-    }
-
-    public static class MainPreferences extends PreferenceFragment {
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.global_prefs);
-        }
+        getFragmentManager().beginTransaction().replace(R.id.content_frame, new GlobalPrefsFragment()).commit();
     }
 
 }
