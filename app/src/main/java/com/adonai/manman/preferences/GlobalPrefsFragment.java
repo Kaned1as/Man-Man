@@ -34,13 +34,7 @@ public class GlobalPrefsFragment extends PreferenceFragment {
                         .setNegativeButton(android.R.string.no, null).setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        if (DbProvider.getHelper() == null) { // main activity is paused, so DB is released, should bind
-                            DbProvider.setHelper(getActivity());
-                            DbProvider.getHelper().clearAllTables();
-                            DbProvider.releaseHelper();
-                        } else { // not paused
-                            DbProvider.getHelper().clearAllTables();
-                        }
+                        DbProvider.getHelper().clearAllTables();
                         LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(new Intent(MainPagerActivity.DB_CHANGE_NOTIFY));
                     }
                 }).create().show();

@@ -18,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.adonai.manman.database.DbProvider;
 import com.adonai.manman.preferences.PreferencesActivity;
@@ -66,7 +67,6 @@ public class MainPagerActivity extends AppCompatActivity {
 
         // setting up vending
         mDonateHelper = new DonateHelper(this);
-        DbProvider.setHelper(this);
 
         // applying default tab
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -193,7 +193,6 @@ public class MainPagerActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        DbProvider.releaseHelper();
         mDonateHelper.handleActivityDestroy();
     }
 }

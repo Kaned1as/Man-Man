@@ -314,6 +314,7 @@ public class ManChaptersFragment extends Fragment {
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
         mProgress.onOrientationChanged();
     }
 
@@ -333,6 +334,12 @@ public class ManChaptersFragment extends Fragment {
         if(getUserVisibleHint() && mListView.getOnItemClickListener() == mCommandClickListener) {
             LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mBroadcastHandler, new IntentFilter(MainPagerActivity.BACK_BUTTON_NOTIFY));
         }
+    }
+
+    @Override
+    public void onDestroy() { // if application is forcibly closed
+        super.onDestroy();
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mBroadcastHandler);
     }
 
     /**
