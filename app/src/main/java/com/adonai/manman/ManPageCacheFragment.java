@@ -77,6 +77,8 @@ public class ManPageCacheFragment extends Fragment implements AdapterView.OnItem
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        mSearchCache.clearFocus(); // otherwise we have to click "back" twice
+
         ManPage manPage = (ManPage) parent.getItemAtPosition(position);
         ManPageDialogFragment mpdf = ManPageDialogFragment.newInstance(manPage.getName(), manPage.getUrl());
         getFragmentManager()

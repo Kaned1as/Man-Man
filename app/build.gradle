@@ -9,10 +9,10 @@ android {
     }
     defaultConfig {
         applicationId "com.adonai.manman"
-        minSdkVersion 14
+        minSdkVersion 21
         targetSdkVersion 23
-        versionCode 161
-        versionName "1.6.1"
+        versionCode 162
+        versionName "1.6.2"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
@@ -55,10 +55,10 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:support-v4:24.1.1'                     // support library (ViewPager etc.)
-    compile 'com.android.support:appcompat-v7:24.1.1'                   // support library (material design)
-    compile 'com.android.support:cardview-v7:24.1.1'                    // support library (material design)
-    compile 'com.android.support:design:24.1.1'                         // support library (material design)
+    compile 'com.android.support:support-v4:24.2.1'                     // support library (ViewPager etc.)
+    compile 'com.android.support:appcompat-v7:24.2.1'                   // support library (material design)
+    compile 'com.android.support:cardview-v7:24.2.1'                    // support library (material design)
+    compile 'com.android.support:design:24.2.1'                         // support library (material design)
     compile 'com.jpardogo.materialtabstrip:library:1.1.0'               // header tabs bar
     compile 'com.github.castorflex.smoothprogressbar:library:1.1.0'     // progressbar on chapter load
     compile 'com.j256.ormlite:ormlite-android:4.48'                     // ORM for man pages
@@ -69,10 +69,12 @@ dependencies {
     compile 'com.squareup.okhttp:okhttp:2.7.1'                          // good android http client
     compile 'org.apache.commons:commons-compress:1.10'                  // uncompress lib (for archives)
 
+    testCompile 'junit:junit:4.12'
+
     androidTestCompile 'junit:junit:4.12'
     androidTestCompile 'org.awaitility:awaitility:2.0.0'                        // useful wait-for-condition
     // androidTestCompile 'org.mockito:mockito-core:1.10.19'
-    androidTestCompile 'com.android.support:support-annotations:24.1.1'
+    androidTestCompile 'com.android.support:support-annotations:24.2.1'
     androidTestCompile 'com.android.support.test:runner:0.5'
     androidTestCompile 'com.android.support.test:rules:0.5'
     androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.2'  // UI testing lib

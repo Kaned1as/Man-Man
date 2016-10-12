@@ -12,7 +12,7 @@
         android:gravity="center"
         android:padding="5dip"
         android:text="@string/placeholder_text"
-        android:singleLine="true"
+        android:maxLines="1"
         android:textStyle="bold" />
 
     <ListView

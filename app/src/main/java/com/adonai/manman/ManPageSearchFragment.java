@@ -88,6 +88,8 @@ public class ManPageSearchFragment extends Fragment {
     private AdapterView.OnItemClickListener mCommandClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            mSearchView.clearFocus(); // otherwise we have to click "back" twice
+
             SearchResult sr = (SearchResult) parent.getItemAtPosition(position);
             Pair<String, String> nameChapter = getNameChapterFromResult(sr);
             if (nameChapter != null) {
@@ -311,6 +313,7 @@ public class ManPageSearchFragment extends Fragment {
             super(getActivity(), R.layout.search_list_item, R.id.command_name_label, objects);
         }
 
+        @NonNull
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             final View root = super.getView(position, convertView, parent);
@@ -338,6 +341,7 @@ public class ManPageSearchFragment extends Fragment {
             super(getActivity(), R.layout.search_list_item, R.id.command_name_label, data.getResults());
         }
 
+        @NonNull
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
             View root = super.getView(position, convertView, parent);

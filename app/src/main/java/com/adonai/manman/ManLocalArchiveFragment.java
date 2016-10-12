@@ -82,6 +82,8 @@ public class ManLocalArchiveFragment extends Fragment implements SharedPreferenc
 
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            mSearchLocalPage.clearFocus(); // otherwise we have to click "back" twice
+
             File data = (File) parent.getItemAtPosition(position);
             if(data == null) { // header is present, start config tool
                 switch (position) {

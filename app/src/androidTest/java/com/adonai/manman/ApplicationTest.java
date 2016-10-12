@@ -2,6 +2,7 @@ package com.adonai.manman;
 
 
 import android.app.Activity;
+import android.support.test.espresso.IdlingPolicies;
 import android.support.test.filters.LargeTest;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
@@ -67,6 +68,11 @@ public class ApplicationTest {
             }
         };
         activity.runOnUiThread(wakeUpDevice);
+    }
+
+    @Before
+    public void espressoPreconditions() {
+        IdlingPolicies.setMasterPolicyTimeout(10, TimeUnit.MINUTES);
     }
 
     @Test
@@ -159,7 +165,7 @@ public class ApplicationTest {
         onView(withText(android.R.string.ok)).perform(click());
 
         // wait for local archive to load
-        await().atMost(2, TimeUnit.MINUTES).until(new Callable<Boolean>() {
+        await().atMost(10, TimeUnit.MINUTES).until(new Callable<Boolean>() {
             @Override
             public Boolean call() throws Exception {
                 final ListView searchList = (ListView) act.findViewById(R.id.local_storage_page_list);

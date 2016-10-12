@@ -257,7 +257,7 @@ public class ManPageDialogFragment extends Fragment {
                         if (response.isSuccessful()) {
                             String result = response.body().string();
                             Document root = Jsoup.parse(result, mAddressUrl);
-                            Element man = root.select("div.man-page").first();
+                            Element man = root.select("div.man-page, main").first();
                             if (man == null) { // not actually a man page
                                 return null;
                             }
