@@ -15,6 +15,12 @@ Features
 - Supports caching of man pages that were previously accessed
 - Supports loading and viewing troff files from local man archive
 
+Donate
+--------
+
+[<img alt="Patreon Page" src="https://s3.amazonaws.com/patreon_public_assets/toolbox/patreon.png" height="100"/>](https://www.patreon.com/kanedias)
+
+
 In progress
 -----------
 - Page actions (multiple load to cache, cache purging, favorites etc.)

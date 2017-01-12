@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 24
-    buildToolsVersion "24.0.1"
+    buildToolsVersion '25.0.0'
 
     dexOptions {
         javaMaxHeapSize "2g"
@@ -11,8 +11,8 @@ android {
         applicationId "com.adonai.manman"
         minSdkVersion 21
         targetSdkVersion 23
-        versionCode 162
-        versionName "1.6.2"
+        versionCode 163
+        versionName "1.6.3"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
