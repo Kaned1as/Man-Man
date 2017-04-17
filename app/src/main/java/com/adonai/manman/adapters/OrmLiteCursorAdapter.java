@@ -9,6 +9,7 @@ import com.j256.ormlite.dao.CloseableIterator;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.stmt.PreparedQuery;
 
+import java.io.IOException;
 import java.sql.SQLException;
 
 /**
@@ -44,7 +45,7 @@ public abstract class OrmLiteCursorAdapter<T> extends BaseAdapter {
         try {
             Cursor cur = getRawCursor();
             cur.moveToPosition(position);
-            return mQuery.mapRow(new AndroidDatabaseResults(cur, mCursor.getRawResults().getObjectCache()));
+            return mQuery.mapRow(new AndroidDatabaseResults(cur, mCursor.getRawResults().getObjectCacheForRetrieve(), false));
         } catch (SQLException e) {
             return null;
         }
@@ -66,7 +67,7 @@ public abstract class OrmLiteCursorAdapter<T> extends BaseAdapter {
             }
 
             mCursor = mDao.iterator(mQuery);
-        } catch (SQLException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }

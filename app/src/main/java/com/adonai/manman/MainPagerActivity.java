@@ -36,10 +36,11 @@ public class MainPagerActivity extends AppCompatActivity {
 
     static final int SEARCH_COMMAND_LOADER          = 0;
     static final int SEARCH_ONELINER_LOADER         = 1;
-    static final int MAN_PAGE_RETRIEVER_LOADER      = 2;
-    static final int CONTENTS_RETRIEVER_LOADER      = 3;
-    static final int CACHE_RETRIEVER_LOADER         = 4;
-    static final int LOCAL_PACKAGE_LOADER           = 5;
+    static final int MAN_PAGE_RETRIEVER_LOADER      = 2; // final man page retriever
+    static final int CHAPTER_RETRIEVER_LOADER       = 3; // chapter contents retriever
+    static final int PACKAGE_RETRIEVER_LOADER       = 4; // package contents retriever
+    static final int CACHE_RETRIEVER_LOADER         = 5; // cached pages retriever
+    static final int LOCAL_PACKAGE_LOADER           = 6; // local archive retriever
 
     public static final String DB_CHANGE_NOTIFY = "database.updated";
     public static final String LOCAL_CHANGE_NOTIFY = "locals.updated";

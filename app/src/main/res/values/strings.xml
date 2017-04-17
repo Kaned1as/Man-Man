@@ -71,4 +71,5 @@
     <string name="deleted">Deleted!</string>
     <string name="default_tab">Default tab</string>
     <string name="default_tab_summary">Default tab on application start</string>
+    <string name="select_command">Select command</string>
 </resources>

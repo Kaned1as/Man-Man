@@ -41,16 +41,11 @@ import com.adonai.manman.misc.AbstractNetworkAsyncLoader;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
+import okhttp3.*;
 
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -414,17 +409,17 @@ public class ManPageSearchFragment extends Fragment {
             try {
                 String address = URLEncoder.encode(descriptionCommand, "UTF-8");
                 OkHttpClient client = new OkHttpClient();
-                client.getDispatcher().setMaxRequests(5); // run desc download in another thread...
+                client.dispatcher().setMaxRequests(5); // run desc download in another thread...
                 Request request = new Request.Builder().url(SEARCH_DESCRIPTION_PREFIX + address).build();
                 client.newCall(request).enqueue(new Callback() {
                     @Override
-                    public void onFailure(Request request, IOException e) {
+                    public void onFailure(Call request, IOException e) {
                         descriptionRequest.setImageResource(R.drawable.abc_ic_menu_overflow_material);
                         Utils.showToastFromAnyThread(getActivity(), e.getLocalizedMessage());
                     }
 
                     @Override
-                    public void onResponse(Response response) throws IOException {
+                    public void onResponse(Call request, Response response) throws IOException {
                         if (response.isSuccessful()) {
                             String result = response.body().string();
                             final Description descAnswer = mJsonConverter.fromJson(result, Description.class);

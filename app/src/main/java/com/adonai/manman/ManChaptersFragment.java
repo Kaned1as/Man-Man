@@ -1,10 +1,7 @@
 package com.adonai.manman;
 
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.*;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -14,14 +11,13 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.FrameLayout;
-import android.widget.ListView;
+import android.widget.*;
 
 import com.adonai.manman.adapters.ChapterContentsArrayAdapter;
 import com.adonai.manman.adapters.ChapterContentsCursorAdapter;
@@ -30,17 +26,18 @@ import com.adonai.manman.database.DbProvider;
 import com.adonai.manman.entities.ManSectionIndex;
 import com.adonai.manman.entities.ManSectionItem;
 import com.adonai.manman.misc.AbstractNetworkAsyncLoader;
-import com.adonai.manman.misc.ManSectionExtractor;
 import com.adonai.manman.views.ProgressBarWrapper;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.misc.TransactionManager;
 import com.j256.ormlite.stmt.PreparedQuery;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
-import org.ccil.cowan.tagsoup.Parser;
-import org.xml.sax.InputSource;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import java.io.FilterInputStream;
 import java.io.IOException;
@@ -53,6 +50,8 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.zip.GZIPInputStream;
 
+import static com.adonai.manman.Utils.MM_TAG;
+
 
 /**
  * Fragment to show table of contents and navigate into it
@@ -63,10 +62,12 @@ import java.util.zip.GZIPInputStream;
 @SuppressWarnings("FieldCanBeLocal")
 public class ManChaptersFragment extends Fragment {
     public final static String CHAPTER_INDEX = "chapter.index";
+    public final static String CHAPTER_PACKAGE = "chapter.package";
 
     public final static String CHAPTER_COMMANDS_PREFIX = "https://www.mankier.com";
 
-    private RetrieveContentsCallback mContentRetrieveCallback = new RetrieveContentsCallback();
+    private RetrieveChapterContentsCallback mContentRetrieveCallback = new RetrieveChapterContentsCallback();
+    private RetrievePackageContentsCallback mPackageRetrieveCallback = new RetrievePackageContentsCallback();
     private BroadcastReceiver mBroadcastHandler = new BackButtonBroadcastReceiver();
     private ChaptersArrayAdapter mChaptersAdapter;
 
@@ -75,13 +76,14 @@ public class ManChaptersFragment extends Fragment {
     private FrameLayout mFrame;
     private ListView mListView;
     private ProgressBarWrapper mProgress;
+
     /**
      * Click listener for selecting a chapter from the list.
      * Usable only when list view shows list of chapters
      * The request is then sent to the loader to load chapter data asynchronously
      * <br/>
      *
-     * @see ManChaptersFragment.RetrieveContentsCallback
+     * @see RetrieveChapterContentsCallback
      */
     private AdapterView.OnItemClickListener mChapterClickListener = new AdapterView.OnItemClickListener() {
 
@@ -93,29 +95,31 @@ public class ManChaptersFragment extends Fragment {
             args.putString(CHAPTER_INDEX, item.getKey());
             // show progressbar under actionbar
             mProgress.show();
-            getLoaderManager().restartLoader(MainPagerActivity.CONTENTS_RETRIEVER_LOADER, args, mContentRetrieveCallback);
+            getLoaderManager().restartLoader(MainPagerActivity.CHAPTER_RETRIEVER_LOADER, args, mContentRetrieveCallback);
         }
     };
+
     /**
-     * Click listener for selecting a command from the list.
-     * Usable only when list view shows list of commands
-     * New instance of {@link com.adonai.manman.ManPageDialogFragment} then created and shown
-     * for loading ful command man page
-     * <br/>
+     * Click listener for selecting a package from the list.
+     * Usable only when list view shows list of packages.
+     *
+     * After picking a package a list of commands will show up that user can choose from.
+     *
+     * New instance of {@link com.adonai.manman.ManPageDialogFragment} is then created and shown
+     * for loading full command man page.
      *
      */
-    private AdapterView.OnItemClickListener mCommandClickListener = new AdapterView.OnItemClickListener() {
+    private AdapterView.OnItemClickListener mPackageClickListener = new AdapterView.OnItemClickListener() {
 
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             ManSectionItem item = (ManSectionItem) parent.getItemAtPosition(position);
-            ManPageDialogFragment mpdf = ManPageDialogFragment.newInstance(item.getName(), item.getUrl());
-            getFragmentManager()
-                    .beginTransaction()
-                    .addToBackStack("PageFromSearch")
-                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                    .replace(R.id.replacer, mpdf)
-                    .commit();
+            Bundle args = new Bundle();
+            args.putString(CHAPTER_INDEX, item.getParentChapter());
+            args.putString(CHAPTER_PACKAGE, item.getUrl());
+            // show progressbar under actionbar
+            mProgress.show();
+            getLoaderManager().restartLoader(MainPagerActivity.PACKAGE_RETRIEVER_LOADER, args, mPackageRetrieveCallback);
         }
     };
 
@@ -145,7 +149,7 @@ public class ManChaptersFragment extends Fragment {
         mFrame = (FrameLayout) root.findViewById(R.id.chapter_fragment_frame);
 
         mProgress = new ProgressBarWrapper(getActivity());
-        getLoaderManager().initLoader(MainPagerActivity.CONTENTS_RETRIEVER_LOADER, Bundle.EMPTY, mContentRetrieveCallback);
+        getLoaderManager().initLoader(MainPagerActivity.CHAPTER_RETRIEVER_LOADER, Bundle.EMPTY, mContentRetrieveCallback);
         return root;
     }
 
@@ -155,9 +159,9 @@ public class ManChaptersFragment extends Fragment {
      * <br/>
      * The data is retrieved from local database (if cached there) or from network (if not)
      *
-     * @see com.adonai.manman.entities.ManSectionItem
+     * @see ManSectionItem
      */
-    private class RetrieveContentsCallback implements LoaderManager.LoaderCallbacks<ManPageContentsResult> {
+    private class RetrieveChapterContentsCallback implements LoaderManager.LoaderCallbacks<ManPageContentsResult> {
         @Override
         public Loader<ManPageContentsResult> onCreateLoader(int id, @NonNull final Bundle args) {
             return new AbstractNetworkAsyncLoader<ManPageContentsResult>(getActivity()) {
@@ -172,7 +176,7 @@ public class ManChaptersFragment extends Fragment {
                 /**
                  * Loads chapter page from DB or network asynchronously
                  *
-                 * @return list of commands with their descriptions and urls
+                 * @return list of packages with their descriptions and urls
                  * or null on error/no input provided
                  */
                 @Nullable
@@ -189,7 +193,7 @@ public class ManChaptersFragment extends Fragment {
                         if(DbProvider.getHelper().getManChaptersDao().queryForFirst(query) != null) // we have it in cache
                             return new ManPageContentsResult(DbProvider.getHelper().getManChaptersDao(), query, index);
                     } catch (SQLException e) {
-                        Log.e(Utils.MM_TAG, "Exception while querying for cached pages", e);
+                        Log.e(MM_TAG, "Exception while querying for cached pages", e);
                         Utils.showToastFromAnyThread(getActivity(), R.string.database_retrieve_error);
                     }
 
@@ -230,15 +234,16 @@ public class ManChaptersFragment extends Fragment {
                                         (int) response.body().contentLength()));
                             }
 
-                            final Parser parser = new Parser();
                             final List<ManSectionItem> msItems = new ArrayList<>(500);
-                            parser.setContentHandler(new ManSectionExtractor(index, msItems));
-                            parser.setFeature(Parser.namespacesFeature, false);
-                            parser.parse(new InputSource(is));
+                            Document doc = Jsoup.parse(is, "UTF-8", link);
+                            Elements rows = doc.select("div.section-index-content > table tr");
+                            for (Element row : rows) {
+                                msItems.add(sectionItemFromRow(index, row));
+                            }
                             return msItems;
                         }
                     } catch (Exception e) {
-                        Log.e(Utils.MM_TAG, "Exception while loading man pages from network", e);
+                        Log.e(MM_TAG, "Exception while loading man pages from network", e);
                         // can't show a toast from a thread without looper
                         Utils.showToastFromAnyThread(getActivity(), R.string.connection_error);
                     }
@@ -265,7 +270,7 @@ public class ManChaptersFragment extends Fragment {
                             }
                         });
                     } catch (SQLException e) {
-                        Log.e(Utils.MM_TAG, "Exception while saving cached page to DB", e);
+                        Log.e(MM_TAG, "Exception while saving cached page to DB", e);
                         // can't show a toast from a thread without looper
                         Utils.showToastFromAnyThread(getActivity(), R.string.database_save_error);
                     }
@@ -295,7 +300,7 @@ public class ManChaptersFragment extends Fragment {
                     mListView.setAdapter(new ChapterContentsArrayAdapter(getActivity(), R.layout.chapter_command_list_item, R.id.command_name_label, data.choiceList));
                 }
                 mListView.setFastScrollEnabled(true);
-                mListView.setOnItemClickListener(mCommandClickListener);
+                mListView.setOnItemClickListener(mPackageClickListener);
                 LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mBroadcastHandler, new IntentFilter(MainPagerActivity.BACK_BUTTON_NOTIFY));
             }
         }
@@ -304,6 +309,109 @@ public class ManChaptersFragment extends Fragment {
         public void onLoaderReset(Loader<ManPageContentsResult> loader) {
         }
 
+    }
+
+    /**
+     * Loader callback for async loading of clicked package's contents and showing them in a dialog afterwards
+     * <br/>
+     * The data is retrieved from local database (if cached there) or from network (if not)
+     *
+     * @see ManSectionItem
+     */
+    private class RetrievePackageContentsCallback implements LoaderManager.LoaderCallbacks<List<ManSectionItem>> {
+        @Override
+        public Loader<List<ManSectionItem>> onCreateLoader(int id, @NonNull final Bundle args) {
+            return new AbstractNetworkAsyncLoader<List<ManSectionItem>>(getActivity()) {
+
+                @Override
+                protected void onStartLoading() {
+                    if(args.containsKey(CHAPTER_INDEX)) {
+                        super.onStartLoading();
+                    }
+                }
+
+                /**
+                 * Loads package page from network asynchronously
+                 *
+                 * @return list of commands with their descriptions and urls
+                 * or null on error/no input provided
+                 */
+                @Nullable
+                @Override
+                public List<ManSectionItem> loadInBackground() {
+                    // retrieve package content
+                    String index = args.getString(CHAPTER_INDEX);
+                    String url = args.getString(CHAPTER_PACKAGE);
+                    if(!isStarted()) // task was cancelled
+                        return Collections.emptyList();
+
+                    OkHttpClient client = new OkHttpClient();
+                    Request request = new Request.Builder().url(url).build();
+                    try {
+                        Response response = client.newCall(request).execute();
+                        if (response.isSuccessful()) {
+                            String result = response.body().string();
+                            Document root = Jsoup.parse(result, CHAPTER_COMMANDS_PREFIX);
+                            Elements rows = root.select(String.format("caption:has(a[href=/%s/]) ~ tbody > tr", index));
+                            List<ManSectionItem> manPages = new ArrayList<>(rows.size());
+                            for (Element row : rows) {
+                                manPages.add(sectionItemFromRow(index, row));
+                            }
+                            return manPages;
+                        }
+                    } catch (IOException e) {
+                        Log.e(MM_TAG, "Exception while parsing package page " + url, e);
+                        return Collections.emptyList();
+                    }
+
+                    return Collections.emptyList();
+                }
+
+                @Override
+                public void deliverResult(List<ManSectionItem> data) {
+                    mProgress.hide();
+                    super.deliverResult(data);
+                }
+            };
+        }
+
+        @Override
+        public void onLoadFinished(Loader<List<ManSectionItem>> loader, List<ManSectionItem> data) {
+            final ArrayAdapter<ManSectionItem> adapter = new ChapterContentsArrayAdapter(getContext(),
+                    R.layout.chapter_command_list_item, R.id.command_name_label, data);
+            new AlertDialog.Builder(getContext())
+                    .setTitle(R.string.select_command)
+                    .setAdapter(adapter, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            ManSectionItem item = adapter.getItem(which);
+                            ManPageDialogFragment mpdf = ManPageDialogFragment.newInstance(item.getName(), item.getUrl());
+                            getFragmentManager()
+                                    .beginTransaction()
+                                    .addToBackStack("PageFromChapterPackage")
+                                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                                    .replace(R.id.replacer, mpdf)
+                                    .commit();
+                        }
+                    }).create().show();
+        }
+
+        @Override
+        public void onLoaderReset(Loader<List<ManSectionItem>> loader) {
+        }
+
+    }
+
+    @NonNull
+    private ManSectionItem sectionItemFromRow(String chapterIndex, Element row) {
+        Elements cells = row.select("td");
+        Element anchor = cells.first().child(0);
+        ManSectionItem msi = new ManSectionItem();
+        msi.setParentChapter(chapterIndex);
+        msi.setName(anchor.text());
+        msi.setUrl(CHAPTER_COMMANDS_PREFIX + anchor.attr("href"));
+        msi.setDescription(cells.last().text());
+        return msi;
     }
 
     @Override
@@ -322,7 +430,7 @@ public class ManChaptersFragment extends Fragment {
     public void onPause() {
         super.onPause();
         // if we're pausing this fragment and have active listener, we should no longer receive back button feedback
-        if(!getUserVisibleHint() && mListView.getOnItemClickListener() == mCommandClickListener) {
+        if(!getUserVisibleHint() && mListView.getOnItemClickListener() == mPackageClickListener) {
             LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mBroadcastHandler);
         }
     }
@@ -331,7 +439,7 @@ public class ManChaptersFragment extends Fragment {
     public void onResume() {
         super.onResume();
         // if we're resuming this fragment while in command list, we re-register to receive back button feedback
-        if(getUserVisibleHint() && mListView.getOnItemClickListener() == mCommandClickListener) {
+        if(getUserVisibleHint() && mListView.getOnItemClickListener() == mPackageClickListener) {
             LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mBroadcastHandler, new IntentFilter(MainPagerActivity.BACK_BUTTON_NOTIFY));
         }
     }
