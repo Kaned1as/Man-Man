@@ -8,6 +8,10 @@ android {
         javaMaxHeapSize "4g"
     }
 
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
+
     defaultConfig {
         applicationId "com.adonai.manman"
         minSdkVersion 21

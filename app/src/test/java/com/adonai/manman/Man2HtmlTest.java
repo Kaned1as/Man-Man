@@ -11,7 +11,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.StringWriter;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -23,7 +22,7 @@ public class Man2HtmlTest {
     public void testHtmlOutput() throws IOException {
         //FileInputStream fis = new FileInputStream("/usr/share/man/man1/systemctl.1.gz");
         //FileInputStream fis = new FileInputStream("/usr/share/man/man1/tar.1.gz");
-        FileInputStream fis = new FileInputStream("/usr/share/man/man2/mmap.2.gz");
+        FileInputStream fis = new FileInputStream("/usr/share/man/man8/sudo.8.gz");
         GZIPInputStream gis = new GZIPInputStream(fis);
         BufferedReader br = new BufferedReader(new InputStreamReader(gis));
         Man2Html m2h = new Man2Html(br);
@@ -35,5 +34,7 @@ public class Man2HtmlTest {
         OutputStreamWriter osw = new OutputStreamWriter(fos);
         osw.write(result);
         osw.close();
+
+        Runtime.getRuntime().exec("xdg-open " + homeDir + File.separator + "test.html");
     }
 }

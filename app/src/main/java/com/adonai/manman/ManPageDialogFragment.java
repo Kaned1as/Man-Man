@@ -356,11 +356,15 @@ public class ManPageDialogFragment extends Fragment {
             root.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mContent.loadUrl("javascript:(function(){" +
-                            "l=document.querySelector('a[href$=\"#" + link + "\"]');" +
-                            "e=document.createEvent('HTMLEvents');" +
-                            "e.initEvent('click',true,true);" +
-                            "l.dispatchEvent(e);" +
+                    mContent.loadUrl("javascript:(function() {\n" +
+                            "    var l = document.querySelector('a[href$=\"#" + link + "\"]');\n" +
+                            "    var event = new MouseEvent('click', {\n" +
+                            "        'view': window,\n" +
+                            "        'bubbles': true,\n" +
+                            "        'cancelable': true\n" +
+                            "    });" +
+                            "    console.log(l);\n" +
+                            "    l.dispatchEvent(event);\n" +
                             "})()");
                 }
             });

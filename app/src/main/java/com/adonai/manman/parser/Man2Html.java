@@ -7,20 +7,15 @@ import com.adonai.manman.Utils;
 
 import org.jsoup.Jsoup;
 import org.jsoup.helper.StringUtil;
-import org.jsoup.nodes.Attributes;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.nodes.Node;
 import org.jsoup.parser.Tag;
 import org.jsoup.select.Elements;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -44,15 +39,23 @@ public class Man2Html {
     }
 
     private enum Command {
-        TH(true),                               // Title line
-        SH(true),                               // Section
-        PP(true), LP(true), P(true),            // Paragraph
-        RS,                                     // Relative margin indent start
-        RE,                                     // Relative margin indent end
-        TP(true),                               // Paragraph with hanging tag
-        IP(true),                               // Indented paragraph with optional hanging tag
-        B, I, BR, BI,                           // font directives
-        ie, el, nh, ad, sp(true),               // conditionals and stuff...
+        th(true),                               // Set the title of the man page to `title` and the section to `section`
+        dt(true),                               // Set tabs every 0.5 inches
+        fl,                                     // Command-line options, prepend every word with dash
+        ar,                                     // Command-line argument
+        op,                                     // Optional argument (often paired with fl)
+        it,                                     // call macros on next line
+        bl,                                     // start of options indent
+        el,                                     // end of options indent
+        sh(true),
+        pp(true), lp(true), p(true),            // Paragraph
+        nm, nd,                                 // old name descriptors
+        rs,                                     // Relative margin indent start
+        re,                                     // Relative margin indent end
+        tp(true),                               // Paragraph with hanging tag
+        ip(true),                               // Indented paragraph with optional hanging tag
+        b, i, br, bi,                           // font directives
+        ie, nh, ad, sp(true),               // conditionals and stuff...
         nf, fi;                                 // stop/start output filling (works like <pre> tag)
 
         private boolean stopsIndentation;
@@ -72,7 +75,13 @@ public class Man2Html {
     private BufferedReader source;
     private StringBuilder result = new StringBuilder();
 
+    // state variables
     private FontState fontState = FontState.NORMAL;
+
+    private Command previousCommand;
+    private String previousLine;
+
+    private String manpageName;
     private boolean insideParagraph;
     private boolean insideSection;
     private boolean insidePreformatted;
@@ -107,9 +116,9 @@ public class Man2Html {
         String line;
         while((line = source.readLine()) != null) {
             while (line.endsWith("\\")) { // take next line too
-                String line2;
-                if((line2 = source.readLine()) != null) {
-                    line = line.substring(0, line.length() - 2) + line2;
+                String nextLine;
+                if((nextLine = source.readLine()) != null) {
+                    line = line.substring(0, line.length() - 2) + nextLine;
                 }
             }
 
@@ -119,6 +128,7 @@ public class Man2Html {
                 result.append(" ").append(parseTextField(line));
             }
             handleSpecialConditions();
+            previousLine = line;
         }
         if(insideParagraph)
             result.append("</p>");
@@ -168,7 +178,7 @@ public class Man2Html {
         }
 
         try {
-            Command command = Command.valueOf(firstWord);
+            Command command = Command.valueOf(firstWord.toLowerCase());
             if(command.stopsIndentation) {
                 if(linesBeforeIndent == 0) { // we were indenting right now, reset
                     result.append("</dd></dl>");
@@ -176,7 +186,8 @@ public class Man2Html {
                 }
             }
             switch (command) {
-                case TH: // table header
+                case th: // table header
+                case dt:
                     List<String> titleArgs = parseQuotedCommandArguments(lineAfterCommand);
                     if(!titleArgs.isEmpty()) {  // take only name of command
                         result.append("<div class='man-page'>"); // it'd be better to close it somehow...
@@ -184,9 +195,9 @@ public class Man2Html {
                     }
 
                     break;
-                case PP: // paragraph
-                case LP:
-                case P:
+                case pp: // paragraph
+                case lp:
+                case p:
                 case sp: // line break
                     if(insideParagraph) {
                         result.append("</p>");
@@ -195,7 +206,7 @@ public class Man2Html {
                     insideParagraph = true;
                     result.append("<p>");
                     break;
-                case SH: // sub header
+                case sh: // sub header
                     if(insideSection) {
                         result.append("</div>");
                     }
@@ -209,13 +220,53 @@ public class Man2Html {
                     }
                     insideSection = true;
                     break;
-                case RS: // indent start
-                    result.append("<dl><dd>");
+                case fl: {
+                    String options = parseTextField(lineAfterCommand);
+                    Pattern wordMatcher = Pattern.compile("\\w+");
+                    Matcher wMatcher = wordMatcher.matcher(options);
+                    String optionsDashed = wMatcher.replaceAll("-$0");
+                    result.append(" ").append(optionsDashed);
                     break;
-                case RE: // indent end
+                }
+                case op: {
+                    result.append(" [");
+                    String options = parseTextField(lineAfterCommand);
+                    boolean dashedOption = false, argument = false;
+                    for (String option : options.split(" ")) {
+                        if (option.equalsIgnoreCase(Command.fl.name())) {
+                            dashedOption = true;
+                            continue;
+                        }
+
+                        if (option.equalsIgnoreCase(Command.ar.name())) {
+                            argument = true;
+                            continue;
+                        }
+
+                        result.append(argument ? "<i>" : "")
+                                .append(dashedOption ? "-" : "")
+                                .append(option)
+                                .append(argument ? "</i>" : "");
+
+                        dashedOption = argument = false;
+                    }
+                    result.append("]");
+                    break;
+                }
+                case it:
+                    result.append("<dl><dd>");
+                    evaluateCommand("." + lineAfterCommand);
                     result.append("</dd></dl>");
                     break;
-                case BI:
+                case bl:
+                case rs: // indent start
+                    result.append("<dl><dd>");
+                    break;
+                case el:
+                case re: // indent end
+                    result.append("</dd></dl>");
+                    break;
+                case bi:
                     result.append(" ").append("<b><i>");
                     if(insidePreformatted && lineAfterCommand.contains("\"")) { // function specification?
                         List<String> args = parseQuotedCommandArguments(lineAfterCommand);
@@ -228,13 +279,31 @@ public class Man2Html {
                         result.append("</i></b>").append(" ");
                     }
                     break;
-                case B: // bold
+                case nm: {
+                    Pattern wordMatcher = Pattern.compile("\\w+");
+                    Matcher wMatcher = wordMatcher.matcher(lineAfterCommand);
+                    boolean commandNameFound = wMatcher.find();
+                    if (commandNameFound && StringUtil.isBlank(manpageName)) {
+                        manpageName = wMatcher.group();
+                    }
+
+                    if (isControl(previousLine)) {
+                        result.append("<br/>");
+                    }
+
+                    if (!commandNameFound && !StringUtil.isBlank(manpageName)) {
+                        lineAfterCommand = manpageName;
+                    }
+                }
+                // fall-through
+                case b: // bold
                     result.append(" ").append("<b>").append(parseTextField(lineAfterCommand)).append("</b>").append(" ");
                     break;
-                case I: // italic
+                case ar:
+                case i: // italic
                     result.append(" ").append("<i>").append(parseTextField(lineAfterCommand)).append("</i>").append(" ");
                     break;
-                case BR:
+                case br:
                     String[] words = lineAfterCommand.split(" ");
                     // first word is bold...
                     result.append(" ").append("<b>").append(parseTextField(words[0])).append("</b>");
@@ -244,10 +313,10 @@ public class Man2Html {
                         result.append(" ").append(parseTextField(words[i]));
                     }
                     break;
-                case TP: // indent after next line
+                case tp: // indent after next line
                     linesBeforeIndent = 2;
                     break;
-                case IP: // notation
+                case ip: // notation
                     if(lineAfterCommand.startsWith("\"")) { // quoted arg
                         if(!lineAfterCommand.startsWith("\"\"")) { // not empty (hack?)
                             List<String> notationArgs = parseQuotedCommandArguments(lineAfterCommand);
@@ -270,7 +339,12 @@ public class Man2Html {
                     result.append("</pre>");
                     result.append(" ").append(parseTextField(lineAfterCommand));
                     break;
+                case nd:
+                    result.append(" - ").append(parseTextField(lineAfterCommand));
+                    break;
             }
+
+            previousCommand = command;
         } catch (IllegalArgumentException iae) {
             Log.w(Utils.MM_TAG, "Man2Html - unimplemented control", iae);
             // skip...
