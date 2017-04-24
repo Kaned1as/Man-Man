@@ -185,169 +185,172 @@ public class Man2Html {
                     linesBeforeIndent = -1;
                 }
             }
-            switch (command) {
-                case th: // table header
-                case dt:
-                    List<String> titleArgs = parseQuotedCommandArguments(lineAfterCommand);
-                    if(!titleArgs.isEmpty()) {  // take only name of command
-                        result.append("<div class='man-page'>"); // it'd be better to close it somehow...
-                        result.append("<h1>").append(parseTextField(titleArgs.get(0))).append("</h1>");
-                    }
-
-                    break;
-                case pp: // paragraph
-                case lp:
-                case p:
-                case sp: // line break
-                    if(insideParagraph) {
-                        result.append("</p>");
-                    }
-
-                    insideParagraph = true;
-                    result.append("<p>");
-                    break;
-                case sh: // sub header
-                    if(insideSection) {
-                        result.append("</div>");
-                    }
-                    List<String> subHeaderArgs = parseQuotedCommandArguments(lineAfterCommand);
-                    if(!subHeaderArgs.isEmpty()) {
-                        String shName = parseTextField(subHeaderArgs.get(0));
-                        result.append("<div id='").append(shName).append("' class='section'>")
-                                .append("<h2>")
-                                  .append("<a href='#").append(shName).append("'>").append(shName).append("</a>")
-                                .append("</h2>");
-                    }
-                    insideSection = true;
-                    break;
-                case fl: {
-                    String options = parseTextField(lineAfterCommand);
-                    Pattern wordMatcher = Pattern.compile("\\w+");
-                    Matcher wMatcher = wordMatcher.matcher(options);
-                    String optionsDashed = wMatcher.replaceAll("-$0");
-                    result.append(" ").append(optionsDashed);
-                    break;
-                }
-                case op: {
-                    result.append(" [");
-                    String options = parseTextField(lineAfterCommand);
-                    boolean dashedOption = false, argument = false;
-                    for (String option : options.split(" ")) {
-                        if (option.equalsIgnoreCase(Command.fl.name())) {
-                            dashedOption = true;
-                            continue;
-                        }
-
-                        if (option.equalsIgnoreCase(Command.ar.name())) {
-                            argument = true;
-                            continue;
-                        }
-
-                        result.append(argument ? "<i>" : "")
-                                .append(dashedOption ? "-" : "")
-                                .append(option)
-                                .append(argument ? "</i>" : "");
-
-                        dashedOption = argument = false;
-                    }
-                    result.append("]");
-                    break;
-                }
-                case it:
-                    result.append("<dl><dd>");
-                    evaluateCommand("." + lineAfterCommand);
-                    result.append("</dd></dl>");
-                    break;
-                case bl:
-                case rs: // indent start
-                    result.append("<dl><dd>");
-                    break;
-                case el:
-                case re: // indent end
-                    result.append("</dd></dl>");
-                    break;
-                case bi:
-                    result.append(" ").append("<b><i>");
-                    if(insidePreformatted && lineAfterCommand.contains("\"")) { // function specification?
-                        List<String> args = parseQuotedCommandArguments(lineAfterCommand);
-                        for(String arg : args) {
-                            result.append(arg);
-                        }
-                        result.append("</i></b>").append("\n");
-                    } else {
-                        result.append(parseTextField(lineAfterCommand));
-                        result.append("</i></b>").append(" ");
-                    }
-                    break;
-                case nm: {
-                    Pattern wordMatcher = Pattern.compile("\\w+");
-                    Matcher wMatcher = wordMatcher.matcher(lineAfterCommand);
-                    boolean commandNameFound = wMatcher.find();
-                    if (commandNameFound && StringUtil.isBlank(manpageName)) {
-                        manpageName = wMatcher.group();
-                    }
-
-                    if (isControl(previousLine)) {
-                        result.append("<br/>");
-                    }
-
-                    if (!commandNameFound && !StringUtil.isBlank(manpageName)) {
-                        lineAfterCommand = manpageName;
-                    }
-                }
-                // fall-through
-                case b: // bold
-                    result.append(" ").append("<b>").append(parseTextField(lineAfterCommand)).append("</b>").append(" ");
-                    break;
-                case ar:
-                case i: // italic
-                    result.append(" ").append("<i>").append(parseTextField(lineAfterCommand)).append("</i>").append(" ");
-                    break;
-                case br:
-                    String[] words = lineAfterCommand.split(" ");
-                    // first word is bold...
-                    result.append(" ").append("<b>").append(parseTextField(words[0])).append("</b>");
-
-                    // others are regular
-                    for(int i = 1; i < words.length; ++i) {
-                        result.append(" ").append(parseTextField(words[i]));
-                    }
-                    break;
-                case tp: // indent after next line
-                    linesBeforeIndent = 2;
-                    break;
-                case ip: // notation
-                    if(lineAfterCommand.startsWith("\"")) { // quoted arg
-                        if(!lineAfterCommand.startsWith("\"\"")) { // not empty (hack?)
-                            List<String> notationArgs = parseQuotedCommandArguments(lineAfterCommand);
-                            if (!notationArgs.isEmpty()) {
-                                result.append("<dl><dt>").append(parseTextField(notationArgs.get(0))).append("</dt><dd>");
-                            }
-                        } else {
-                            result.append("<dl><dd>");
-                        }
-                    } else {
-                        result.append("<dl><dt>").append(parseTextField(lineAfterCommand)).append("</dt><dd>");
-                    }
-                    linesBeforeIndent = 0;
-                    break;
-                case nf:
-                    result.append("<pre>");
-                    insidePreformatted = true;
-                    break;
-                case fi:
-                    result.append("</pre>");
-                    result.append(" ").append(parseTextField(lineAfterCommand));
-                    break;
-                case nd:
-                    result.append(" - ").append(parseTextField(lineAfterCommand));
-                    break;
-            }
-
+            executeCommand(command, lineAfterCommand);
             previousCommand = command;
         } catch (IllegalArgumentException iae) {
             Log.w(Utils.MM_TAG, "Man2Html - unimplemented control", iae);
             // skip...
+        }
+    }
+
+    private void executeCommand(Command command, String lineAfterCommand) {
+        switch (command) {
+            case th: // table header
+            case dt:
+                List<String> titleArgs = parseQuotedCommandArguments(lineAfterCommand);
+                if(!titleArgs.isEmpty()) {  // take only name of command
+                    result.append("<div class='man-page'>"); // it'd be better to close it somehow...
+                    result.append("<h1>").append(parseTextField(titleArgs.get(0))).append("</h1>");
+                }
+
+                break;
+            case pp: // paragraph
+            case lp:
+            case p:
+            case sp: // line break
+                if(insideParagraph) {
+                    result.append("</p>");
+                }
+
+                insideParagraph = true;
+                result.append("<p>");
+                break;
+            case sh: // sub header
+                if(insideSection) {
+                    result.append("</div>");
+                }
+                List<String> subHeaderArgs = parseQuotedCommandArguments(lineAfterCommand);
+                if(!subHeaderArgs.isEmpty()) {
+                    String shName = parseTextField(subHeaderArgs.get(0));
+                    result.append("<div id='").append(shName).append("' class='section'>")
+                            .append("<h2>")
+                              .append("<a href='#").append(shName).append("'>").append(shName).append("</a>")
+                            .append("</h2>");
+                }
+                insideSection = true;
+                break;
+            case fl: {
+                String options = parseTextField(lineAfterCommand);
+                Pattern wordMatcher = Pattern.compile("\\w+");
+                Matcher wMatcher = wordMatcher.matcher(options);
+                String optionsDashed = wMatcher.replaceAll("-$0");
+                result.append(" ").append(optionsDashed);
+                break;
+            }
+            case op: {
+                result.append(" [");
+                String options = parseTextField(lineAfterCommand);
+                boolean dashedOption = false, argument = false;
+                for (String option : options.split(" ")) {
+                    if (option.equalsIgnoreCase(Command.fl.name())) {
+                        dashedOption = true;
+                        continue;
+                    }
+
+                    if (option.equalsIgnoreCase(Command.ar.name())) {
+                        argument = true;
+                        continue;
+                    }
+
+                    result.append(argument ? "<i>" : "")
+                            .append(dashedOption ? "-" : "")
+                            .append(option)
+                            .append(argument ? "</i>" : "");
+
+                    dashedOption = argument = false;
+                }
+                result.append("]");
+                break;
+            }
+            case it:
+                result.append("<dl><dd>");
+                evaluateCommand("." + lineAfterCommand);
+                result.append("</dd></dl>");
+                break;
+            case bl:
+            case rs: // indent start
+                result.append("<dl><dd>");
+                break;
+            case el:
+            case re: // indent end
+                result.append("</dd></dl>");
+                break;
+            case bi:
+                result.append(" ").append("<b><i>");
+                if(insidePreformatted && lineAfterCommand.contains("\"")) { // function specification?
+                    List<String> args = parseQuotedCommandArguments(lineAfterCommand);
+                    for(String arg : args) {
+                        result.append(arg);
+                    }
+                    result.append("</i></b>").append("\n");
+                } else {
+                    result.append(parseTextField(lineAfterCommand));
+                    result.append("</i></b>").append(" ");
+                }
+                break;
+            case nm: {
+                Pattern wordMatcher = Pattern.compile("\\w+");
+                Matcher wMatcher = wordMatcher.matcher(lineAfterCommand);
+                boolean commandNameFound = wMatcher.find();
+                if (commandNameFound && StringUtil.isBlank(manpageName)) {
+                    manpageName = wMatcher.group();
+                }
+
+                if (isControl(previousLine)) {
+                    result.append("<br/>");
+                }
+
+                if (!commandNameFound && !StringUtil.isBlank(manpageName)) {
+                    lineAfterCommand = manpageName;
+                }
+            }
+            // fall-through
+            case b: // bold
+                result.append(" ").append("<b>").append(parseTextField(lineAfterCommand)).append("</b>").append(" ");
+                break;
+            case ar:
+            case i: // italic
+                result.append(" ").append("<i>").append(parseTextField(lineAfterCommand)).append("</i>").append(" ");
+                break;
+            case br:
+                String[] words = lineAfterCommand.split(" ");
+                // first word is bold...
+                result.append(" ").append("<b>").append(parseTextField(words[0])).append("</b>");
+
+                // others are regular
+                for(int i = 1; i < words.length; ++i) {
+                    result.append(" ").append(parseTextField(words[i]));
+                }
+                break;
+            case tp: // indent after next line
+                linesBeforeIndent = 2;
+                break;
+            case ip: // notation
+                if(lineAfterCommand.startsWith("\"")) { // quoted arg
+                    if(!lineAfterCommand.startsWith("\"\"")) { // not empty (hack?)
+                        List<String> notationArgs = parseQuotedCommandArguments(lineAfterCommand);
+                        if (!notationArgs.isEmpty()) {
+                            result.append("<dl><dt>").append(parseTextField(notationArgs.get(0))).append("</dt><dd>");
+                        }
+                    } else {
+                        result.append("<dl><dd>");
+                    }
+                } else {
+                    result.append("<dl><dt>").append(parseTextField(lineAfterCommand)).append("</dt><dd>");
+                }
+                linesBeforeIndent = 0;
+                break;
+            case nf:
+                result.append("<pre>");
+                insidePreformatted = true;
+                break;
+            case fi:
+                result.append("</pre>");
+                result.append(" ").append(parseTextField(lineAfterCommand));
+                break;
+            case nd:
+                result.append(" - ").append(parseTextField(lineAfterCommand));
+                break;
         }
     }
 
