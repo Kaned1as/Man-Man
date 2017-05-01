@@ -33,7 +33,6 @@
     <string name="clear_cache_question">Вы уверены? Продолжение повлечет за собой удаление всей кэшированной информации!</string>
     <string name="settings">Настройки</string>
     <string name="popup_menu">Всплывающее меню</string>
-    <string name="load_description">Загрузить описание</string>
     <string name="copy_link">Копировать ссылку</string>
     <string name="share_link">Поделиться…</string>
     <string name="copied">Скопировано:</string>

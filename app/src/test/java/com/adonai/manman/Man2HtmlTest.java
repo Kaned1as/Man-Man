@@ -22,7 +22,8 @@ public class Man2HtmlTest {
     public void testHtmlOutput() throws IOException {
         //FileInputStream fis = new FileInputStream("/usr/share/man/man1/systemctl.1.gz");
         //FileInputStream fis = new FileInputStream("/usr/share/man/man1/tar.1.gz");
-        FileInputStream fis = new FileInputStream("/usr/share/man/man8/sudo.8.gz");
+        //FileInputStream fis = new FileInputStream("/usr/share/man/man8/sudo.8.gz");
+        FileInputStream fis = new FileInputStream("/usr/share/man/man1/grep.1.gz");
         GZIPInputStream gis = new GZIPInputStream(fis);
         BufferedReader br = new BufferedReader(new InputStreamReader(gis));
         Man2Html m2h = new Man2Html(br);

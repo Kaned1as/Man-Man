@@ -1,5 +1,8 @@
 package com.adonai.manman.entities;
 
+import com.google.gson.annotations.JsonAdapter;
+import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
 /**
@@ -11,8 +14,12 @@ import java.util.List;
  */
 @SuppressWarnings("UnusedDeclaration") // reflection in Gson
 public class SearchResultList {
+
+    @SerializedName("q")
     private String query;
+
     private boolean truncated;
+
     private List<SearchResult> results;
 
     public String getQuery() {

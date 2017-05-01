@@ -33,7 +33,6 @@
     <string name="clear_cache_question">¿Estás seguro? ¡Esto eliminará toda la información de la caché incluyendo páginas y capítulos!</string>
     <string name="settings">Ajustes</string>
     <string name="popup_menu">Menú emergente</string>
-    <string name="load_description">Cargar descripción</string>
     <string name="copy_link">Copiar enlace</string>
     <string name="share_link">Compartir enlace…</string>
     <string name="copied">Copiado:</string>

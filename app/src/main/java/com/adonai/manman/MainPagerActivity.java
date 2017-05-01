@@ -18,9 +18,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
-import com.adonai.manman.database.DbProvider;
 import com.adonai.manman.preferences.PreferencesActivity;
 import com.astuetz.PagerSlidingTabStrip;
 
@@ -114,7 +112,7 @@ public class MainPagerActivity extends AppCompatActivity {
                 case 1:
                     return ManChaptersFragment.newInstance();
                 case 2:
-                    return ManPageCacheFragment.newInstance();
+                    return ManCacheFragment.newInstance();
                 case 3:
                     return ManLocalArchiveFragment.newInstance();
             }

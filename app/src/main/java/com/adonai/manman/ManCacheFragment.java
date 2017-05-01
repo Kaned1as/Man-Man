@@ -36,7 +36,7 @@ import java.util.List;
  *
  * @author Oleg Chernovskiy
  */
-public class ManPageCacheFragment extends Fragment implements AdapterView.OnItemClickListener {
+public class ManCacheFragment extends Fragment implements AdapterView.OnItemClickListener {
 
     private CacheBrowseCallback mCacheBrowseCallback = new CacheBrowseCallback();
     private BroadcastReceiver mBroadcastHandler = new DbBroadcastReceiver();
@@ -45,14 +45,14 @@ public class ManPageCacheFragment extends Fragment implements AdapterView.OnItem
     private ListView mCacheList;
 
     @NonNull
-    public static ManPageCacheFragment newInstance() {
-        ManPageCacheFragment fragment = new ManPageCacheFragment();
+    public static ManCacheFragment newInstance() {
+        ManCacheFragment fragment = new ManCacheFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
     }
 
-    public ManPageCacheFragment() {
+    public ManCacheFragment() {
     }
 
     @NonNull

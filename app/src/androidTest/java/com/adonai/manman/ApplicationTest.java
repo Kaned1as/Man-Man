@@ -98,7 +98,7 @@ public class ApplicationTest {
 
         // click on "load description"
         onView(is(searchList.getChildAt(0).findViewById(R.id.popup_menu))).perform(click());
-        onView(withText(act.getResources().getString(R.string.load_description)))
+        onView(withText(act.getResources().getString(R.string.request_description)))
                 .inRoot(isPlatformPopup())
                 .perform(click());
 

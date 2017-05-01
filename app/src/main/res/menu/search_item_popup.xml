@@ -3,7 +3,7 @@
 
     <item
         android:id="@+id/load_description_popup_menu_item"
-        android:title="@string/load_description"/>
+        android:title="@string/request_description"/>
 
     <item
         android:id="@+id/copy_link_popup_menu_item"

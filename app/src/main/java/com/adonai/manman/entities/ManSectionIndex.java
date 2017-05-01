@@ -13,7 +13,7 @@ import com.j256.ormlite.table.DatabaseTable;
  * @author Oleg Chernovskiy
  */
 @DatabaseTable(tableName = "man_chapter_indexer")
-@SuppressWarnings("UnusedDeclaration") // reflection in Gson
+@SuppressWarnings("UnusedDeclaration") // OrmLite reflection restriction
 public class ManSectionIndex {
 
     public ManSectionIndex(char letter, int index, String parentChapter) {
@@ -22,7 +22,6 @@ public class ManSectionIndex {
         this.parentChapter = parentChapter;
     }
 
-    // for OrmLite reflection restriction
     public ManSectionIndex() {
     }
 

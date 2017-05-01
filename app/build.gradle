@@ -67,7 +67,7 @@ dependencies {
     compile 'com.jpardogo.materialtabstrip:library:1.1.1'               // header tabs bar
     compile 'com.github.castorflex.smoothprogressbar:library:1.1.0'     // progressbar on chapter load
     compile 'com.j256.ormlite:ormlite-android:5.0'                      // ORM for man pages
-    compile 'com.google.code.gson:gson:2.7'                             // Json (De)Serializer
+    compile 'com.google.code.gson:gson:2.8.0'                           // Json (De)Serializer
     compile 'org.jsoup:jsoup:1.10.2'                                    // html DOM parser
     compile 'com.googlecode.juniversalchardet:juniversalchardet:1.0.3'  // file encoding detector
     compile 'com.squareup.okhttp3:okhttp:3.6.0'                         // good android http client

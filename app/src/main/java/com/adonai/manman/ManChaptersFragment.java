@@ -59,7 +59,6 @@ import static com.adonai.manman.Utils.MM_TAG;
  *
  * @author Oleg Chernovskiy
  */
-@SuppressWarnings("FieldCanBeLocal")
 public class ManChaptersFragment extends Fragment {
     public final static String CHAPTER_INDEX = "chapter.index";
     public final static String CHAPTER_PACKAGE = "chapter.package";
@@ -150,6 +149,7 @@ public class ManChaptersFragment extends Fragment {
 
         mProgress = new ProgressBarWrapper(getActivity());
         getLoaderManager().initLoader(MainPagerActivity.CHAPTER_RETRIEVER_LOADER, Bundle.EMPTY, mContentRetrieveCallback);
+        getLoaderManager().initLoader(MainPagerActivity.PACKAGE_RETRIEVER_LOADER, Bundle.EMPTY, mPackageRetrieveCallback);
         return root;
     }
 
@@ -303,6 +303,9 @@ public class ManChaptersFragment extends Fragment {
                 mListView.setOnItemClickListener(mPackageClickListener);
                 LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mBroadcastHandler, new IntentFilter(MainPagerActivity.BACK_BUTTON_NOTIFY));
             }
+
+            // don't start this loader again on resume, it's one-shot
+            getLoaderManager().restartLoader(MainPagerActivity.CHAPTER_RETRIEVER_LOADER, Bundle.EMPTY, mPackageRetrieveCallback);
         }
 
         @Override
@@ -377,8 +380,9 @@ public class ManChaptersFragment extends Fragment {
 
         @Override
         public void onLoadFinished(Loader<List<ManSectionItem>> loader, List<ManSectionItem> data) {
+            // finished loading - show selector dialog to the user
             final ArrayAdapter<ManSectionItem> adapter = new ChapterContentsArrayAdapter(getContext(),
-                    R.layout.chapter_command_list_item, R.id.command_name_label, data);
+                    R.layout.package_command_list_item, R.id.command_name_label, data);
             new AlertDialog.Builder(getContext())
                     .setTitle(R.string.select_command)
                     .setAdapter(adapter, new DialogInterface.OnClickListener() {
@@ -394,6 +398,9 @@ public class ManChaptersFragment extends Fragment {
                                     .commit();
                         }
                     }).create().show();
+
+            // don't start this loader again on resume, it's one-shot
+            getLoaderManager().restartLoader(MainPagerActivity.PACKAGE_RETRIEVER_LOADER, Bundle.EMPTY, mPackageRetrieveCallback);
         }
 
         @Override

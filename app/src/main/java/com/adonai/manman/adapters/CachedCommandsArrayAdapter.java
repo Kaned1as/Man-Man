@@ -5,7 +5,6 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.adonai.manman.MainPagerActivity;
+import com.adonai.manman.ManCacheFragment;
 import com.adonai.manman.R;
 import com.adonai.manman.database.DbProvider;
 import com.adonai.manman.entities.ManPage;
@@ -25,7 +25,7 @@ import java.util.List;
 
 /**
  * Array adapter for showing cached commands in ListView
- * The data retrieval is done through {@link com.adonai.manman.ManPageCacheFragment.CacheBrowseCallback}
+ * The data retrieval is done through {@link ManCacheFragment.CacheBrowseCallback}
  *
  * @see android.widget.ArrayAdapter
  * @see com.adonai.manman.entities.ManPage

@@ -1,5 +1,6 @@
 package com.adonai.manman.entities;
 
+import com.adonai.manman.ManCacheFragment;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
@@ -14,11 +15,11 @@ import java.util.TreeSet;
  * as they can be retrieved from search page, not contents
  *
  * @see com.adonai.manman.ManPageDialogFragment
- * @see com.adonai.manman.ManPageCacheFragment
+ * @see ManCacheFragment
  * @author Oleg Chernovskiy
  */
 @DatabaseTable(tableName = "man_pages")
-@SuppressWarnings("UnusedDeclaration") // reflection in Gson
+@SuppressWarnings("UnusedDeclaration") // OrmLite reflection restriction
 public class ManPage {
 
     public ManPage(String name, String url) {
@@ -26,7 +27,6 @@ public class ManPage {
         this.url = url;
     }
 
-    // for OrmLite reflection restriction
     public ManPage() {
     }
 

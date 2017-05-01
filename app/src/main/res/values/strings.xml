@@ -34,7 +34,6 @@
     <string name="clear_cache_question">Are you sure? This will delete all the cached data including pages and chapters!</string>
     <string name="settings">Settings</string>
     <string name="popup_menu">Popup menu</string>
-    <string name="load_description">Load description</string>
     <string name="copy_link">Copy link</string>
     <string name="share_link">Share link…</string>
     <string name="copied">Copied:</string>

@@ -1,6 +1,5 @@
 package com.adonai.manman;
 
-import android.annotation.SuppressLint;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -24,7 +23,6 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
@@ -34,7 +32,7 @@ import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.adonai.manman.entities.Description;
+import com.adonai.manman.entities.ManPageInfo;
 import com.adonai.manman.entities.SearchResult;
 import com.adonai.manman.entities.SearchResultList;
 import com.adonai.manman.misc.AbstractNetworkAsyncLoader;
@@ -59,9 +57,9 @@ import java.util.regex.Pattern;
  */
 public class ManPageSearchFragment extends Fragment {
 
-    private final static String SEARCH_COMMAND_PREFIX = "https://www.mankier.com/api/mans/?q=";
-    private final static String SEARCH_ONE_LINER_PREFIX = "https://www.mankier.com/api/explain/?cols=80&q=";
-    private final static String SEARCH_DESCRIPTION_PREFIX = "https://www.mankier.com/api/mans/";
+    private final static String SEARCH_COMMAND_PREFIX = "https://www.mankier.com/api/v2/mans/?q=";
+    private final static String SEARCH_ONE_LINER_PREFIX = "https://www.mankier.com/api/v2/explain/?cols=80&q=";
+    private final static String SEARCH_DESCRIPTION_PREFIX = "https://www.mankier.com/api/v2/mans/";
 
     private final SearchLoaderCallback mSearchCommandCallback = new SearchLoaderCallback();
     private final SearchOneLinerLoaderCallback mSearchOneLinerCallback = new SearchOneLinerLoaderCallback();
@@ -84,18 +82,14 @@ public class ManPageSearchFragment extends Fragment {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             mSearchView.clearFocus(); // otherwise we have to click "back" twice
-
             SearchResult sr = (SearchResult) parent.getItemAtPosition(position);
-            Pair<String, String> nameChapter = getNameChapterFromResult(sr);
-            if (nameChapter != null) {
-                ManPageDialogFragment mpdf =  ManPageDialogFragment.newInstance(nameChapter.first, sr.getUrl());
-                getFragmentManager()
-                        .beginTransaction()
-                        .addToBackStack("PageFromSearch")
-                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                        .replace(R.id.replacer, mpdf)
-                        .commit();
-            }
+            ManPageDialogFragment mpdf =  ManPageDialogFragment.newInstance(sr.getName(), sr.getUrl());
+            getFragmentManager()
+                    .beginTransaction()
+                    .addToBackStack("PageFromSearch")
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                    .replace(R.id.replacer, mpdf)
+                    .commit();
         }
     };
 
@@ -130,6 +124,9 @@ public class ManPageSearchFragment extends Fragment {
         return root;
     }
 
+    /**
+     * Load search results for single word query (supposedly, command)
+     */
     private class SearchLoaderCallback implements LoaderManager.LoaderCallbacks<SearchResultList> {
 
         @Override
@@ -284,24 +281,6 @@ public class ManPageSearchFragment extends Fragment {
         }
     }
 
-    /**
-     * Search result text comes in form of &lt;command-name&gt;(&lt;chapter_index&gt;)
-     * so we should extract name and index explicitly
-     * @param sr search result to be parsed
-     * @return pair of command-name and chapter index or null if nothing matches
-     *         (actually doesn't happen)
-     */
-    @Nullable
-    private Pair<String, String> getNameChapterFromResult(SearchResult sr) {
-        String regex = "(.+)\\((.+)\\)";
-        Pattern parser = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
-        final Matcher matcher = parser.matcher(sr.getText());
-        if(matcher.find()) {
-            return Pair.create(matcher.group(1), matcher.group(2));
-        }
-        return null;
-    }
-
     private class OnelinerArrayAdapter extends ArrayAdapter<String> {
 
         public OnelinerArrayAdapter(String[] objects) {
@@ -330,7 +309,7 @@ public class ManPageSearchFragment extends Fragment {
 
     private class SearchResultArrayAdapter extends ArrayAdapter<SearchResult> {
 
-        private Map<SearchResult, Spanned> cachedDescs = new HashMap<>(5);
+        private Map<SearchResult, String> cachedDescs = new HashMap<>(5);
 
         public SearchResultArrayAdapter(SearchResultList data) {
             super(getActivity(), R.layout.search_list_item, R.id.command_name_label, data.getResults());
@@ -341,15 +320,11 @@ public class ManPageSearchFragment extends Fragment {
         public View getView(final int position, View convertView, ViewGroup parent) {
             View root = super.getView(position, convertView, parent);
             final SearchResult searchRes = getItem(position);
-            final Pair<String, String> nameAndIndex = getNameChapterFromResult(searchRes);
-            if(nameAndIndex == null) {
-                return root; // error parsing command, should not happen
-            }
 
-            String chapterName = cachedChapters.get(nameAndIndex.second);
+            String chapterName = cachedChapters.get(searchRes.getSection());
 
             TextView command = (TextView) root.findViewById(R.id.command_name_label);
-            command.setText(nameAndIndex.first);
+            command.setText(searchRes.getName());
             TextView chapter = (TextView) root.findViewById(R.id.command_chapter_label);
             chapter.setText(chapterName);
             final TextView description = (TextView) root.findViewById(R.id.description_text_web);
@@ -375,21 +350,21 @@ public class ManPageSearchFragment extends Fragment {
                         public boolean onMenuItemClick(MenuItem item) {
                             switch (item.getItemId()) {
                                 case R.id.load_description_popup_menu_item:
-                                    descriptionRequest.setImageResource(Utils.getThemedResource(getActivity(), R.attr.loading_icon_resource));
-                                    final String descriptionCommand = nameAndIndex.first + "." + nameAndIndex.second;
-                                    loadDescriptionForItem(descriptionCommand, descriptionRequest, description, searchRes);
+                                    description.setVisibility(View.VISIBLE);
+                                    description.setText(searchRes.getDescription());
+                                    cachedDescs.put(searchRes, searchRes.getDescription());
                                     return true;
                                 case R.id.share_link_popup_menu_item:
                                     Intent sendIntent = new Intent(Intent.ACTION_SEND);
                                     sendIntent.setType("text/plain");
-                                    sendIntent.putExtra(Intent.EXTRA_TITLE, nameAndIndex.first);
+                                    sendIntent.putExtra(Intent.EXTRA_TITLE, searchRes.getName());
                                     sendIntent.putExtra(Intent.EXTRA_TEXT, searchRes.getUrl());
                                     startActivity(Intent.createChooser(sendIntent, getString(R.string.share_link)));
                                     return true;
                                 case R.id.copy_link_popup_menu_item:
                                     ClipboardManager clipboard = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
                                     Toast.makeText(getActivity().getApplicationContext(), getString(R.string.copied) + " " + searchRes.getUrl(), Toast.LENGTH_SHORT).show();
-                                    clipboard.setPrimaryClip(ClipData.newPlainText(nameAndIndex.first, searchRes.getUrl()));
+                                    clipboard.setPrimaryClip(ClipData.newPlainText(searchRes.getName(), searchRes.getUrl()));
                                     return true;
                             }
                             return false;
@@ -400,51 +375,6 @@ public class ManPageSearchFragment extends Fragment {
             });
 
             return root;
-        }
-
-        private void loadDescriptionForItem(String descriptionCommand,
-                                            final ImageView descriptionRequest,
-                                            final TextView description,
-                                            final SearchResult searchRes) {
-            try {
-                String address = URLEncoder.encode(descriptionCommand, "UTF-8");
-                OkHttpClient client = new OkHttpClient();
-                client.dispatcher().setMaxRequests(5); // run desc download in another thread...
-                Request request = new Request.Builder().url(SEARCH_DESCRIPTION_PREFIX + address).build();
-                client.newCall(request).enqueue(new Callback() {
-                    @Override
-                    public void onFailure(Call request, IOException e) {
-                        descriptionRequest.setImageResource(R.drawable.abc_ic_menu_overflow_material);
-                        Utils.showToastFromAnyThread(getActivity(), e.getLocalizedMessage());
-                    }
-
-                    @Override
-                    public void onResponse(Call request, Response response) throws IOException {
-                        if (response.isSuccessful()) {
-                            String result = response.body().string();
-                            final Description descAnswer = mJsonConverter.fromJson(result, Description.class);
-                            description.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    descriptionRequest.setImageResource(R.drawable.abc_ic_menu_overflow_material);
-                                    String styledHtml = Utils.getWebWithCss(getActivity(), descAnswer.getUrl(), descAnswer.getHtmlDescription());
-                                    //noinspection deprecation - we have old platforms to support
-                                    Spanned span = Html.fromHtml(styledHtml);
-                                    description.setText(span);
-                                    description.setVisibility(View.VISIBLE);
-                                    cachedDescs.put(searchRes, span);
-                                }
-                            });
-                        }
-                    }
-                });
-            } catch (IOException e) {
-                Log.e(Utils.MM_TAG, "Error while trying to download a description for command", e);
-                // can't show a toast from a thread without looper
-                // show error and change drawable back to normal
-                Toast.makeText(getActivity(), R.string.connection_error, Toast.LENGTH_SHORT).show();
-                descriptionRequest.setImageResource(R.drawable.abc_ic_menu_overflow_material);
-            }
         }
     }
 

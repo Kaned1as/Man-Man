@@ -1,6 +1,8 @@
 package com.adonai.manman.parser;
 
 import android.support.annotation.NonNull;
+import android.support.v4.text.TextUtilsCompat;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.adonai.manman.Utils;
@@ -54,8 +56,8 @@ public class Man2Html {
         re,                                     // Relative margin indent end
         tp(true),                               // Paragraph with hanging tag
         ip(true),                               // Indented paragraph with optional hanging tag
-        b, i, br, bi,                           // font directives
-        ie, nh, ad, sp(true),               // conditionals and stuff...
+        b, i, br, bi, ri, rb, ir, ib,           // font directives
+        ie, nh, ad, sp(true),                   // conditionals and stuff...
         nf, fi;                                 // stop/start output filling (works like <pre> tag)
 
         private boolean stopsIndentation;
@@ -65,10 +67,6 @@ public class Man2Html {
 
         Command(boolean stopsIndentation) {
             this.stopsIndentation = stopsIndentation;
-        }
-
-        public boolean stopsIndentation() {
-            return stopsIndentation;
         }
     }
 
@@ -122,10 +120,13 @@ public class Man2Html {
                 }
             }
 
+            if(line.startsWith("'") || line.startsWith(".\\") || line.startsWith("\\\\"))
+                continue; // beginning of message or comment, skip...
+
             if(isControl(line)) {
                 evaluateCommand(line);
             } else {
-                result.append(" ").append(parseTextField(line));
+                result.append(" ").append(parseTextField(line, false));
             }
             handleSpecialConditions();
             previousLine = line;
@@ -158,9 +159,6 @@ public class Man2Html {
      * @param line whole line containing command + arguments
      */
     private void evaluateCommand(String line) {
-        if(line.startsWith("'") || line.startsWith(".\\"))
-            return; // beginning of message or comment, skip...
-
         if(line.length() < 2)
             return; // less than dot + 1 chars - it can't be command
 
@@ -200,7 +198,7 @@ public class Man2Html {
                 List<String> titleArgs = parseQuotedCommandArguments(lineAfterCommand);
                 if(!titleArgs.isEmpty()) {  // take only name of command
                     result.append("<div class='man-page'>"); // it'd be better to close it somehow...
-                    result.append("<h1>").append(parseTextField(titleArgs.get(0))).append("</h1>");
+                    result.append("<h1>").append(parseTextField(titleArgs.get(0), false)).append("</h1>");
                 }
 
                 break;
@@ -221,7 +219,7 @@ public class Man2Html {
                 }
                 List<String> subHeaderArgs = parseQuotedCommandArguments(lineAfterCommand);
                 if(!subHeaderArgs.isEmpty()) {
-                    String shName = parseTextField(subHeaderArgs.get(0));
+                    String shName = parseTextField(subHeaderArgs.get(0), true);
                     result.append("<div id='").append(shName).append("' class='section'>")
                             .append("<h2>")
                               .append("<a href='#").append(shName).append("'>").append(shName).append("</a>")
@@ -230,7 +228,7 @@ public class Man2Html {
                 insideSection = true;
                 break;
             case fl: {
-                String options = parseTextField(lineAfterCommand);
+                String options = parseTextField(lineAfterCommand, true);
                 Pattern wordMatcher = Pattern.compile("\\w+");
                 Matcher wMatcher = wordMatcher.matcher(options);
                 String optionsDashed = wMatcher.replaceAll("-$0");
@@ -239,7 +237,7 @@ public class Man2Html {
             }
             case op: {
                 result.append(" [");
-                String options = parseTextField(lineAfterCommand);
+                String options = parseTextField(lineAfterCommand, true);
                 boolean dashedOption = false, argument = false;
                 for (String option : options.split(" ")) {
                     if (option.equalsIgnoreCase(Command.fl.name())) {
@@ -284,7 +282,7 @@ public class Man2Html {
                     }
                     result.append("</i></b>").append("\n");
                 } else {
-                    result.append(parseTextField(lineAfterCommand));
+                    result.append(parseTextField(lineAfterCommand, true));
                     result.append("</i></b>").append(" ");
                 }
                 break;
@@ -306,20 +304,33 @@ public class Man2Html {
             }
             // fall-through
             case b: // bold
-                result.append(" ").append("<b>").append(parseTextField(lineAfterCommand)).append("</b>").append(" ");
+                result.append(" ").append("<b>").append(parseTextField(lineAfterCommand, true)).append("</b>").append(" ");
                 break;
             case ar:
             case i: // italic
-                result.append(" ").append("<i>").append(parseTextField(lineAfterCommand)).append("</i>").append(" ");
+                result.append(" ").append("<i>").append(parseTextField(lineAfterCommand, true)).append("</i>").append(" ");
+                break;
+            case ri:
+            case rb: // not sure what this means, just append text
+            case ir:
+            case ib:
+                result.append(" ").append(parseTextField(lineAfterCommand, true)).append(" ");
                 break;
             case br:
-                String[] words = lineAfterCommand.split(" ");
+                if (lineAfterCommand.length() == 0) {
+                    // line break
+                    result.append("<br/>");
+                    break;
+                }
+
+                String[] words = parseTextField(lineAfterCommand, true).split(" ");
+
                 // first word is bold...
-                result.append(" ").append("<b>").append(parseTextField(words[0])).append("</b>");
+                result.append(" ").append("<b>").append(words[0]).append("</b>");
 
                 // others are regular
                 for(int i = 1; i < words.length; ++i) {
-                    result.append(" ").append(parseTextField(words[i]));
+                    result.append(" ").append(words[i]);
                 }
                 break;
             case tp: // indent after next line
@@ -330,13 +341,13 @@ public class Man2Html {
                     if(!lineAfterCommand.startsWith("\"\"")) { // not empty (hack?)
                         List<String> notationArgs = parseQuotedCommandArguments(lineAfterCommand);
                         if (!notationArgs.isEmpty()) {
-                            result.append("<dl><dt>").append(parseTextField(notationArgs.get(0))).append("</dt><dd>");
+                            result.append("<dl><dt>").append(parseTextField(notationArgs.get(0), true)).append("</dt><dd>");
                         }
                     } else {
                         result.append("<dl><dd>");
                     }
                 } else {
-                    result.append("<dl><dt>").append(parseTextField(lineAfterCommand)).append("</dt><dd>");
+                    result.append("<dl><dt>").append(parseTextField(lineAfterCommand, true)).append("</dt><dd>");
                 }
                 linesBeforeIndent = 0;
                 break;
@@ -345,11 +356,12 @@ public class Man2Html {
                 insidePreformatted = true;
                 break;
             case fi:
+                insidePreformatted = false;
                 result.append("</pre>");
-                result.append(" ").append(parseTextField(lineAfterCommand));
+                result.append(" ").append(parseTextField(lineAfterCommand, true));
                 break;
             case nd:
-                result.append(" - ").append(parseTextField(lineAfterCommand));
+                result.append(" - ").append(parseTextField(lineAfterCommand, true));
                 break;
         }
     }
@@ -384,7 +396,10 @@ public class Man2Html {
     private Document postprocessInDocLinks(StringBuilder sb) {
         // process OPTIONS section
         Document doc = Jsoup.parse(sb.toString());
-        Elements options = doc.select(String.format("div#OPTIONS > p > b:matches(%1$s), div#OPTIONS > dl > dt > b:matches(%1$s)", OPTION_PATTERN));
+        Elements options = doc.select(String.format(
+                "div#OPTIONS > p > b:matches(%1$s)," +
+                "div#OPTIONS > dl > dt b:matches(%1$s)",
+                OPTION_PATTERN));
         Set<String> availableOptions = new HashSet<>(options.size());
         for(Element option : options) {
             Element anchor = new Element(Tag.valueOf("a"), doc.baseUri());
@@ -393,7 +408,6 @@ public class Man2Html {
             anchor.addClass("in-doc");
             anchor.appendChild(option.clone());
 
-            option.replaceWith(anchor);
             availableOptions.add(option.ownText());
         }
 
@@ -419,12 +433,24 @@ public class Man2Html {
      * @return GROFF-unescaped string convenient for html inserting
      */
     @NonNull
-    private String parseTextField(String text) {
+    private String parseTextField(String text, boolean withinCommand) {
         int length = text.length();
         StringBuilder output = new StringBuilder(length);      // real html result
         StringBuilder tempTextBuffer = new StringBuilder(100); // temporary holder for html-escaping
+        boolean insideQuote = false;
+        char previousChar = 0;
         for(int i = 0; i < length; ++i) {
             char c = text.charAt(i);
+
+            if (c == '"') {
+                insideQuote = !insideQuote;
+                continue;
+            }
+
+            if (!insideQuote && withinCommand && previousChar == ' ' && c == ' ') {
+                continue;
+            }
+
             if(c == '\\' && length > i + 1) { // escape directive/character and not last in line
                 output.append(HtmlEscaper.escapeHtml(tempTextBuffer));
                 tempTextBuffer.setLength(0);  // append temporary text
@@ -479,6 +505,10 @@ public class Man2Html {
                         }
                         break;
                     case '&': // non-printable zero-width, skip
+                    case '^':
+                        break;
+                    case '*': // dunno what it is, found in grep manpage
+                        i += 3;
                         break;
                     default:
                         tempTextBuffer.append(firstEscapeChar);
@@ -486,6 +516,7 @@ public class Man2Html {
             } else {
                 tempTextBuffer.append(c);
             }
+            previousChar = c;
         }
         output.append(HtmlEscaper.escapeHtml(tempTextBuffer)); // add all from temp buffer if remaining
         if(insidePreformatted) { // newlines should be preserved
