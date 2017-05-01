@@ -4,6 +4,11 @@ android {
     compileSdkVersion 25
     buildToolsVersion '25.0.2'
 
+    lintOptions {
+        disable 'MissingTranslation'
+        disable 'ExtraTranslation'
+    }
+
     dexOptions {
         javaMaxHeapSize "4g"
     }
@@ -16,8 +21,8 @@ android {
         applicationId "com.adonai.manman"
         minSdkVersion 21
         targetSdkVersion 25
-        versionCode 163
-        versionName "1.6.3"
+        versionCode 170
+        versionName "1.7.0"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
