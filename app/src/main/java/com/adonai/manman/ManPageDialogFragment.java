@@ -65,6 +65,8 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import static com.adonai.manman.Utils.FONT_PREF_KEY;
+
 /**
  * Dialog fragment for showing web page with man content
  * Retrieves info from DB (if cached) or network (if not)
@@ -77,6 +79,9 @@ public class ManPageDialogFragment extends Fragment {
 
     private static final String PARAM_ADDRESS = "param.address";
     private static final String PARAM_NAME = "param.name";
+
+    private SharedPreferences mPrefs;
+    private SharedPreferences.OnSharedPreferenceChangeListener mPrefChangeListener;
 
     private RetrieveManPageCallback manPageCallback = new RetrieveManPageCallback();
     private File mLocalArchive;
@@ -123,6 +128,10 @@ public class ManPageDialogFragment extends Fragment {
         setHasOptionsMenu(true);
 
         mLocalArchive = new File(getActivity().getCacheDir(), "manpages.zip");
+        mPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        // making strong reference as requested by registerOnSharedPreferenceChangeListener call
+        mPrefChangeListener = new FontChangeListener();
+        mPrefs.registerOnSharedPreferenceChangeListener(mPrefChangeListener);
 
         View root = inflater.inflate(R.layout.fragment_man_page_show, container, false);
         mLinkContainer = (LinearLayout) root.findViewById(R.id.link_list);
@@ -130,6 +139,8 @@ public class ManPageDialogFragment extends Fragment {
         mContent = (WebView) root.findViewById(R.id.man_content_web);
         mContent.setWebViewClient(new ManPageChromeClient());
         mContent.getSettings().setJavaScriptEnabled(true);
+        mContent.getSettings().setMinimumFontSize(getFontFromProperties());
+
         mSlider = (PassiveSlidingPane) root.findViewById(R.id.sliding_pane);
         mSlider.setTrackedView(mContent);
 
@@ -171,10 +182,21 @@ public class ManPageDialogFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.show_search_bar:
-                mSearchContainer.setVisibility(View.VISIBLE);
+                toggleSearchBar(View.VISIBLE);
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void toggleSearchBar(int visibility) {
+        mSearchContainer.setVisibility(visibility);
+        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (visibility == View.VISIBLE) {
+            mSearchEdit.requestFocus();
+            imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
+        } else {
+            imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+        }
     }
 
     /**
@@ -323,7 +345,6 @@ public class ManPageDialogFragment extends Fragment {
         if(mLinkContainer.getChildCount() == 0) // nothing to show in the links pane
             return;
 
-        SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         if(mPrefs.contains(USER_LEARNED_SLIDER))
             return;
 
@@ -369,6 +390,19 @@ public class ManPageDialogFragment extends Fragment {
                 }
             });
             mLinkContainer.addView(root);
+        }
+    }
+
+    /**
+     * Retrieve font size for web views from shared properties
+     * @return integer representing font size or default in case incorrect number is set
+     */
+    private int getFontFromProperties() {
+        try {
+            return Integer.parseInt(mPrefs.getString(FONT_PREF_KEY, "12"));
+        } catch (NumberFormatException ex) {
+            Toast.makeText(getActivity(), R.string.invalid_font_size_set, Toast.LENGTH_SHORT).show();
+            return 12; // default webview font size
         }
     }
 
@@ -427,7 +461,7 @@ public class ManPageDialogFragment extends Fragment {
     private class SearchBarCloser implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            mSearchContainer.setVisibility(View.GONE);
+            toggleSearchBar(View.GONE);
             mContent.clearMatches();
         }
     }
@@ -463,14 +497,20 @@ public class ManPageDialogFragment extends Fragment {
 
         }
 
-        @SuppressWarnings("deprecation")
         @Override
         public void afterTextChanged(Editable s) {
-            // Lollipop blocks mixed content but we should load CSS from filesystem
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                mContent.findAllAsync(s.toString()); // API 16
-            } else {
-                mContent.findAll(s.toString());
+            mContent.findAllAsync(s.toString());
+        }
+    }
+
+    private class FontChangeListener implements SharedPreferences.OnSharedPreferenceChangeListener {
+
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+            switch (key) {
+                case FONT_PREF_KEY:
+                    mContent.getSettings().setMinimumFontSize(getFontFromProperties());
+                    break;
             }
         }
     }

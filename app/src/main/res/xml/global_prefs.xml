@@ -13,6 +13,14 @@
         android:title="@string/delete_local_archive"
         android:summary="@string/delete_local_archive_sum"/>
 
+    <EditTextPreference
+            android:icon="@android:drawable/ic_menu_edit"
+            android:defaultValue="12"
+            android:digits="1234567890"
+            android:key="webview.font.size"
+            android:summary="@string/webview_font_size_sum"
+            android:title="@string/webview_font_size"/>
+
     <ListPreference
         android:icon="@android:drawable/ic_menu_gallery"
         android:key="app.theme"

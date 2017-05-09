@@ -70,4 +70,7 @@
     <string name="default_tab">Вкладка по-умолчанию</string>
     <string name="default_tab_summary">Вкладка, открываемая при запуске приложения</string>
     <string name="select_command">Выберите команду</string>
+    <string name="invalid_font_size_set">Указан некорректный размер шрифта в параметрах</string>
+    <string name="webview_font_size">Минимальный размер шрифта для ман-страниц</string>
+    <string name="webview_font_size_sum">Минимальный размер шрифта для вебформ с содержимым ман-страниц</string>
 </resources>

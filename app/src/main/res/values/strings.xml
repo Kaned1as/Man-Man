@@ -71,4 +71,7 @@
     <string name="default_tab">Default tab</string>
     <string name="default_tab_summary">Default tab on application start</string>
     <string name="select_command">Select command</string>
+    <string name="invalid_font_size_set">Invalid font size number was set in properties</string>
+    <string name="webview_font_size">Minimal font size on man pages</string>
+    <string name="webview_font_size_sum">Minimal font size on web forms with full man page content</string>
 </resources>

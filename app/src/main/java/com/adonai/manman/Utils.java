@@ -40,6 +40,8 @@ public class Utils {
 
     public final static String MM_TAG = "Man Man";
 
+    public final static String FONT_PREF_KEY = "webview.font.size";
+
     /**
      * Converts |-delimited string array from resources to hash map
      * @param context context to retrieve resources from
