@@ -30,6 +30,14 @@ Updating
 I consider this app as stable now,
 so if you want any additional features to be included, please create an enhancement issue here
 
+Local archive
+-------------
+
+You may wonder what's the hosting from which local archive is taken. In fact, it's same old Github. 
+Content of the archive is assembled just by zipping manpage directory of Archlinux at nearly 2016-08-16. 
+The archive in question is accessible from [here](https://github.com/Adonai/Man-Man/releases/download/1.6.0/manpages.zip),
+application just downloads it if requested.
+
 
 P.S. Regarding offline mode
 -----------
