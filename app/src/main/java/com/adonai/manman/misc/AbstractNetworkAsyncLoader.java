@@ -1,7 +1,7 @@
 package com.adonai.manman.misc;
 
 import android.content.Context;
-import android.support.v4.content.AsyncTaskLoader;
+import androidx.loader.content.AsyncTaskLoader;
 
 /**
  * Almost full copy-paste from

@@ -5,7 +5,7 @@ import android.animation.TimeInterpolator;
 import android.annotation.TargetApi;
 import android.graphics.Color;
 import android.os.Build;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;

@@ -1,8 +1,8 @@
 package com.adonai.manman.parser;
 
-import android.support.annotation.NonNull;
-import android.support.v4.text.TextUtilsCompat;
-import android.text.TextUtils;
+import androidx.annotation.NonNull;
+import androidx.core.text.TextUtilsCompat;
+
 import android.util.Log;
 
 import com.adonai.manman.Utils;

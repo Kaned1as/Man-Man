@@ -1,15 +1,12 @@
 package com.adonai.manman.preferences;
 
 import android.os.Bundle;
-import android.preference.PreferenceActivity;
-import android.preference.PreferenceFragment;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import com.adonai.manman.R;
 import com.adonai.manman.Utils;
-
-import java.util.List;
 
 /**
  * Activity for holding and showing preference fragments

@@ -2,7 +2,7 @@ package com.adonai.manman.database;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.util.Log;
 
 import com.adonai.manman.entities.ManPage;
@@ -85,10 +85,5 @@ public class PersistManager extends OrmLiteSqliteOpenHelper {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @Override
-    public void close() {
-        super.close();
     }
 }

@@ -1,6 +1,6 @@
 package com.adonai.manman.parser;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 /**
  * Helper class to deal with GROFF special characters

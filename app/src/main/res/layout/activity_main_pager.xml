@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.v7.widget.Toolbar
+    <androidx.appcompat.widget.Toolbar
         android:id="@+id/app_toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
@@ -35,7 +35,7 @@
                 custom:pstsShouldExpand="true"
                 custom:pstsDividerColor="?attr/semi_transparent_divider_color"/>
 
-            <android.support.v4.view.ViewPager
+            <androidx.viewpager.widget.ViewPager
                 android:layout_height="match_parent"
                 android:layout_width="match_parent"
                 android:paddingTop="@dimen/activity_vertical_margin"
