@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion 29
@@ -66,10 +67,14 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    // kotlin-related stuff
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.0-beta01'     // coroutines lifecycle scopes
+
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'             // support library (ViewPager etc.)
     implementation 'androidx.appcompat:appcompat:1.2.0'                  // support library (material design)
     implementation 'androidx.cardview:cardview:1.0.0'                    // support library (material design)
+    implementation 'androidx.preference:preference:1.1.1'                // preference fragment compatibility
     implementation 'com.google.android.material:material:1.2.1'
     // support library (material design)
     implementation 'com.jpardogo.materialtabstrip:library:1.1.1'               // header tabs bar
@@ -87,5 +92,8 @@ dependencies {
     androidTestImplementation 'org.awaitility:awaitility:3.0.0'                        // useful wait-for-condition
     // androidTestImplementation 'org.mockito:mockito-core:1.10.19'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
-    androidTestImplementation 'androidx.test:rules:1.3.0'  // UI testing lib
+    androidTestImplementation 'androidx.test:rules:1.3.0'
+}
+repositories {
+    mavenCentral()
 }
