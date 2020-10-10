@@ -3,13 +3,11 @@ package com.adonai.manman.database
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.util.Log
-import com.adonai.manman.database.DbProvider.helper
 import com.adonai.manman.entities.ManPage
 import com.adonai.manman.entities.ManSectionIndex
 import com.adonai.manman.entities.ManSectionItem
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper
 import com.j256.ormlite.dao.Dao
-import com.j256.ormlite.dao.RuntimeExceptionDao
 import com.j256.ormlite.support.ConnectionSource
 import com.j256.ormlite.table.TableUtils
 import java.sql.SQLException
@@ -22,9 +20,9 @@ import java.sql.SQLException
 class PersistManager(context: Context) : OrmLiteSqliteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     //Dao fast access links
-    lateinit var manChaptersDao: Dao<ManSectionItem, String>
-    lateinit var manChapterIndexesDao: Dao<ManSectionIndex, String>
-    lateinit var manPagesDao: Dao<ManPage, String>
+    val manChaptersDao: Dao<ManSectionItem, String> = getDao(ManSectionItem::class.java)
+    val manChapterIndexesDao: Dao<ManSectionIndex, String> = getDao(ManSectionIndex::class.java)
+    val manPagesDao: Dao<ManPage, String> = getDao(ManPage::class.java)
 
     override fun onCreate(db: SQLiteDatabase, connectionSource: ConnectionSource) {
         try {
@@ -41,9 +39,9 @@ class PersistManager(context: Context) : OrmLiteSqliteOpenHelper(context, DATABA
 
     fun clearAllTables() {
         try {
-            TableUtils.clearTable(helper.getConnectionSource(), ManSectionItem::class.java)
-            TableUtils.clearTable(helper.getConnectionSource(), ManSectionIndex::class.java)
-            TableUtils.clearTable(helper.getConnectionSource(), ManPage::class.java)
+            TableUtils.clearTable(connectionSource, ManSectionItem::class.java)
+            TableUtils.clearTable(connectionSource, ManSectionIndex::class.java)
+            TableUtils.clearTable(connectionSource, ManPage::class.java)
         } catch (e: SQLException) {
             throw RuntimeException(e)
         }

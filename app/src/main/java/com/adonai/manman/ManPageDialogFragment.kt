@@ -8,7 +8,6 @@ import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.os.Build
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.provider.Browser
 import android.text.Editable
 import android.text.TextUtils
@@ -24,6 +23,7 @@ import androidx.fragment.app.Fragment
 import androidx.loader.app.LoaderManager
 import androidx.loader.content.Loader
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.preference.PreferenceManager
 import com.adonai.manman.database.DbProvider.helper
 import com.adonai.manman.entities.ManPage
 import com.adonai.manman.misc.AbstractNetworkAsyncLoader
@@ -54,23 +54,24 @@ class ManPageDialogFragment : Fragment() {
 
     private lateinit var mPrefs: SharedPreferences
     private lateinit var mLocalArchive: File
-    private var mAddressUrl: String? = null
-    private var mCommandName: String? = null
-    private var mLinkContainer: LinearLayout? = null
-    private var mSlider: PassiveSlidingPane? = null
-    private var mFlipper: ViewFlipper? = null
-    private var mContent: WebView? = null
-    private var mSearchContainer: LinearLayout? = null
-    private var mSearchEdit: EditText? = null
-    private var mCloseSearchBar: ImageView? = null
-    private var mFindNext: ImageView? = null
-    private var mFindPrevious: ImageView? = null
+    private lateinit var mAddressUrl: String
+    private lateinit var mCommandName: String
+
+    private lateinit var mLinkContainer: LinearLayout
+    private lateinit var mSlider: PassiveSlidingPane
+    private lateinit var mFlipper: ViewFlipper
+    private lateinit var mContent: WebView
+    private lateinit var mSearchContainer: LinearLayout
+    private lateinit var mSearchEdit: EditText
+    private lateinit var mCloseSearchBar: ImageView
+    private lateinit var mFindNext: ImageView
+    private lateinit var mFindPrevious: ImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (arguments != null) {
-            mAddressUrl = requireArguments().getString(PARAM_ADDRESS)
-            mCommandName = requireArguments().getString(PARAM_NAME)
+            mAddressUrl = requireArguments().getString(PARAM_ADDRESS)!!
+            mCommandName = requireArguments().getString(PARAM_NAME)!!
         }
     }
 
@@ -81,31 +82,32 @@ class ManPageDialogFragment : Fragment() {
         mPrefs = PreferenceManager.getDefaultSharedPreferences(activity)
         // making strong reference as requested by registerOnSharedPreferenceChangeListener call
         mPrefChangeListener
-        mPrefs!!.registerOnSharedPreferenceChangeListener(mPrefChangeListener)
+        mPrefs.registerOnSharedPreferenceChangeListener(mPrefChangeListener)
+
         val root = inflater.inflate(R.layout.fragment_man_page_show, container, false)
         mLinkContainer = root.findViewById<View>(R.id.link_list) as LinearLayout
         mFlipper = root.findViewById<View>(R.id.flipper) as ViewFlipper
         mContent = root.findViewById<View>(R.id.man_content_web) as WebView
-        mContent!!.webViewClient = ManPageChromeClient()
-        mContent!!.settings.javaScriptEnabled = true
-        mContent!!.settings.minimumFontSize = fontFromProperties
+        mContent.webViewClient = ManPageChromeClient()
+        mContent.settings.javaScriptEnabled = true
+        mContent.settings.minimumFontSize = fontFromProperties
         mSlider = root.findViewById<View>(R.id.sliding_pane) as PassiveSlidingPane
-        mSlider!!.setTrackedView(mContent)
+        mSlider.setTrackedView(mContent)
 
         // search-specific
         mSearchContainer = root.findViewById<View>(R.id.search_bar_layout) as LinearLayout
-        mSearchEdit = mSearchContainer!!.findViewById<View>(R.id.search_edit) as EditText
-        mCloseSearchBar = mSearchContainer!!.findViewById<View>(R.id.close_search_bar) as ImageView
-        mFindNext = mSearchContainer!!.findViewById<View>(R.id.find_next_occurrence) as ImageView
-        mFindPrevious = mSearchContainer!!.findViewById<View>(R.id.find_previous_occurrence) as ImageView
-        mCloseSearchBar!!.setOnClickListener(SearchBarCloser())
-        mSearchEdit!!.addTextChangedListener(SearchExecutor())
-        mFindNext!!.setOnClickListener(SearchFurtherExecutor(true))
-        mFindPrevious!!.setOnClickListener(SearchFurtherExecutor(false))
+        mSearchEdit = mSearchContainer.findViewById<View>(R.id.search_edit) as EditText
+        mCloseSearchBar = mSearchContainer.findViewById<View>(R.id.close_search_bar) as ImageView
+        mFindNext = mSearchContainer.findViewById<View>(R.id.find_next_occurrence) as ImageView
+        mFindPrevious = mSearchContainer.findViewById<View>(R.id.find_previous_occurrence) as ImageView
+        mCloseSearchBar.setOnClickListener(SearchBarCloser())
+        mSearchEdit.addTextChangedListener(SearchExecutor())
+        mFindNext.setOnClickListener(SearchFurtherExecutor(true))
+        mFindPrevious.setOnClickListener(SearchFurtherExecutor(false))
 
         // Lollipop blocks mixed content but we should load CSS from filesystem
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            mContent!!.settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+            mContent.settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
         }
         loaderManager.initLoader(MainPagerActivity.MAN_PAGE_RETRIEVER_LOADER, null, manPageCallback)
         return root
@@ -115,7 +117,7 @@ class ManPageDialogFragment : Fragment() {
         super.onResume()
         // hide keyboard on fragment show, window token is hopefully present at this moment
         val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(mContent!!.windowToken, 0)
+        imm.hideSoftInputFromWindow(mContent.windowToken, 0)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -134,10 +136,10 @@ class ManPageDialogFragment : Fragment() {
     }
 
     private fun toggleSearchBar(visibility: Int) {
-        mSearchContainer!!.visibility = visibility
+        mSearchContainer.visibility = visibility
         val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         if (visibility == View.VISIBLE) {
-            mSearchEdit!!.requestFocus()
+            mSearchEdit.requestFocus()
             imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0)
         } else {
             imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0)
@@ -155,7 +157,7 @@ class ManPageDialogFragment : Fragment() {
             return object : AbstractNetworkAsyncLoader<ManPage?>(activity!!) {
                 override fun loadInBackground(): ManPage? {
                     // handle special case when it's a local file
-                    if (mAddressUrl!!.startsWith("/")) { // TODO: rewrite with URI
+                    if (mAddressUrl.startsWith("/")) { // TODO: rewrite with URI
                         try {
                             val input = File(mAddressUrl)
                             val charset = Utils.detectEncodingOfArchive(input)
@@ -178,17 +180,17 @@ class ManPageDialogFragment : Fragment() {
                         }
                         return null // no further querying
                     }
-                    if (mAddressUrl!!.startsWith("local:")) { // local man archive
+                    if (mAddressUrl.startsWith("local:")) { // local man archive
                         try {
                             val zip = ZipFile(mLocalArchive)
-                            val zEntry = zip.getEntry(mAddressUrl!!.substring(7))
+                            val zEntry = zip.getEntry(mAddressUrl.substring(7))
                             val `is` = zip.getInputStream(zEntry)
                             // can't use java's standard GZIPInputStream around zip IS because of inflating issue
                             val gis = GzipCompressorInputStream(`is`) // manpage files are .gz
                             val br = BufferedReader(InputStreamReader(gis))
                             val parser = Man2Html(br)
                             val parsed = parser.doc
-                            val result = ManPage(zEntry.name, mAddressUrl!!)
+                            val result = ManPage(zEntry.name, mAddressUrl)
                             result.links = getLinks(parsed.select("div.man-page").first())
                             result.webContent = parsed.html()
                             br.close() // closes all the IS hierarchy
@@ -252,13 +254,13 @@ class ManPageDialogFragment : Fragment() {
 
         override fun onLoadFinished(loader: Loader<ManPage?>, data: ManPage?) {
             if (data != null) {
-                mContent!!.loadDataWithBaseURL(mAddressUrl, Utils.getWebWithCss(activity!!, data.url, data.webContent), "text/html", "UTF-8", null)
-                mContent!!.setBackgroundColor(Utils.getThemedValue(activity, R.attr.fill_color)) // prevent flickering
+                mContent.loadDataWithBaseURL(mAddressUrl, Utils.getWebWithCss(activity!!, data.url, data.webContent), "text/html", "UTF-8", null)
+                mContent.setBackgroundColor(Utils.getThemedValue(activity, R.attr.fill_color)) // prevent flickering
                 fillLinkPane(data.links)
-                mFlipper!!.showNext()
+                mFlipper.showNext()
                 shakeSlider()
             } else {
-                mContent!!.postDelayed({
+                mContent.postDelayed({
                     fragmentManager!!.popBackStack() // can't perform transactions from onLoadFinished
                 }, 0)
             }
@@ -270,16 +272,16 @@ class ManPageDialogFragment : Fragment() {
     }
 
     private fun shakeSlider() {
-        if (mLinkContainer!!.childCount == 0) // nothing to show in the links pane
+        if (mLinkContainer.childCount == 0) // nothing to show in the links pane
             return
-        if (mPrefs!!.contains(USER_LEARNED_SLIDER)) return
-        mSlider!!.postDelayed({ mSlider!!.openPane() }, 1000)
-        mSlider!!.postDelayed({ mSlider!!.closePane() }, 2000)
-        mPrefs!!.edit().putBoolean(USER_LEARNED_SLIDER, true).apply()
+        if (mPrefs.contains(USER_LEARNED_SLIDER)) return
+        mSlider.postDelayed({ mSlider.openPane() }, 1000)
+        mSlider.postDelayed({ mSlider.closePane() }, 2000)
+        mPrefs.edit().putBoolean(USER_LEARNED_SLIDER, true).apply()
     }
 
     private fun fillLinkPane(links: Set<String>?) {
-        mLinkContainer!!.removeAllViews()
+        mLinkContainer.removeAllViews()
         if (links == null || links.isEmpty()) return
         for (link in links) {
             // hack  for https://code.google.com/p/android/issues/detail?id=36660 - place inside of FrameLayout
@@ -287,7 +289,7 @@ class ManPageDialogFragment : Fragment() {
             val linkLabel = root.findViewById<View>(R.id.link_text) as TextView
             linkLabel.text = link
             root.setOnClickListener {
-                mContent!!.loadUrl("""javascript:(function() {
+                mContent.loadUrl("""javascript:(function() {
     var l = document.querySelector('a[href$="#$link"]');
     var event = new MouseEvent('click', {
         'view': window,
@@ -307,7 +309,7 @@ class ManPageDialogFragment : Fragment() {
      */
     private val fontFromProperties: Int
         private get() = try {
-            mPrefs!!.getString(Utils.FONT_PREF_KEY, "12")!!.toInt()
+            mPrefs.getString(Utils.FONT_PREF_KEY, "12")!!.toInt()
         } catch (ex: NumberFormatException) {
             Toast.makeText(activity, R.string.invalid_font_size_set, Toast.LENGTH_SHORT).show()
             12 // default webview font size
@@ -320,7 +322,7 @@ class ManPageDialogFragment : Fragment() {
     private inner class ManPageChromeClient : WebViewClient() {
         override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
             if (url.matches(Regex("https://www\\.mankier\\.com/.+/.+"))) { // it's an address of the command
-                mFlipper!!.showPrevious()
+                mFlipper.showPrevious()
                 mAddressUrl = url
                 mCommandName = url.substring(url.lastIndexOf('/') + 1)
                 loaderManager.getLoader<Any>(MainPagerActivity.MAN_PAGE_RETRIEVER_LOADER)!!.onContentChanged()
@@ -366,7 +368,7 @@ class ManPageDialogFragment : Fragment() {
     private inner class SearchBarCloser : View.OnClickListener {
         override fun onClick(v: View) {
             toggleSearchBar(View.GONE)
-            mContent!!.clearMatches()
+            mContent.clearMatches()
         }
     }
 
@@ -375,7 +377,7 @@ class ManPageDialogFragment : Fragment() {
      */
     private inner class SearchFurtherExecutor(private val goDown: Boolean) : View.OnClickListener {
         override fun onClick(v: View) {
-            mContent!!.findNext(goDown)
+            mContent.findNext(goDown)
         }
     }
 
@@ -386,14 +388,14 @@ class ManPageDialogFragment : Fragment() {
         override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
         override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
         override fun afterTextChanged(s: Editable) {
-            mContent!!.findAllAsync(s.toString())
+            mContent.findAllAsync(s.toString())
         }
     }
 
     private inner class FontChangeListener : OnSharedPreferenceChangeListener {
         override fun onSharedPreferenceChanged(prefs: SharedPreferences, key: String) {
             when (key) {
-                Utils.FONT_PREF_KEY -> mContent!!.settings.minimumFontSize = fontFromProperties
+                Utils.FONT_PREF_KEY -> mContent.settings.minimumFontSize = fontFromProperties
             }
         }
     }
