@@ -161,8 +161,6 @@ class MainPagerActivity : AppCompatActivity() {
 
     companion object {
         const val FOLDER_LIST_KEY = "folder.list"
-        const val SEARCH_COMMAND_LOADER = 0
-        const val SEARCH_ONELINER_LOADER = 1
         const val MAN_PAGE_RETRIEVER_LOADER = 2 // final man page retriever
         const val CHAPTER_RETRIEVER_LOADER = 3 // chapter contents retriever
         const val PACKAGE_RETRIEVER_LOADER = 4 // package contents retriever

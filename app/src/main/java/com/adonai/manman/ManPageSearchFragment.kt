@@ -7,9 +7,7 @@ import android.content.Intent
 import android.content.res.Resources
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.os.Handler
 import android.text.TextUtils
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,17 +15,15 @@ import android.widget.*
 import android.widget.AdapterView.OnItemClickListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
-import androidx.loader.app.LoaderManager
-import androidx.loader.content.Loader
+import androidx.lifecycle.lifecycleScope
 import com.adonai.manman.ManPageDialogFragment.Companion.newInstance
 import com.adonai.manman.entities.SearchResult
 import com.adonai.manman.entities.SearchResultList
-import com.adonai.manman.misc.AbstractNetworkAsyncLoader
 import com.google.gson.FieldNamingPolicy
 import com.google.gson.GsonBuilder
+import kotlinx.coroutines.*
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import java.io.IOException
 import java.net.URLEncoder
 import java.util.*
 
@@ -38,15 +34,12 @@ import java.util.*
  * @author Kanedias
  */
 class ManPageSearchFragment : Fragment() {
-    private val mSearchCommandCallback = SearchLoaderCallback()
-    private val mSearchOneLinerCallback = SearchOneLinerLoaderCallback()
     private val mJsonConverter = GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create()
 
     private lateinit var mSearchView: SearchView
     private lateinit var mSearchImage: ImageView
     private lateinit var mSearchDefaultDrawable: Drawable
     private lateinit var mSearchList: ListView
-    private lateinit var mUiHandler: Handler
     private lateinit var cachedChapters: Map<String, String>
 
     /**
@@ -76,110 +69,13 @@ class ManPageSearchFragment : Fragment() {
         mSearchDefaultDrawable = mSearchImage.drawable
 
         mSearchList = root.findViewById<View>(R.id.search_results_list) as ListView
-        mUiHandler = Handler()
-        loaderManager.initLoader(MainPagerActivity.SEARCH_COMMAND_LOADER, null, mSearchCommandCallback)
-        loaderManager.initLoader(MainPagerActivity.SEARCH_ONELINER_LOADER, null, mSearchOneLinerCallback)
         return root
-    }
-
-    /**
-     * Load search results for single word query (supposedly, command)
-     */
-    private inner class SearchLoaderCallback : LoaderManager.LoaderCallbacks<SearchResultList?> {
-        override fun onCreateLoader(id: Int, args: Bundle?): Loader<SearchResultList?> {
-            return object : AbstractNetworkAsyncLoader<SearchResultList?>(activity!!) {
-                override fun onStartLoading() {
-                    if (!TextUtils.isEmpty(mSearchView.query.toString())) {
-                        super.onStartLoading()
-                    }
-                }
-
-                override fun loadInBackground(): SearchResultList? {
-                    try {
-                        val address = URLEncoder.encode(mSearchView!!.query.toString(), "UTF-8")
-                        val client = OkHttpClient()
-                        val request = Request.Builder().url(SEARCH_COMMAND_PREFIX + address).build()
-                        val response = client.newCall(request).execute()
-                        if (response.isSuccessful) {
-                            val result = response.body()!!.string()
-                            return mJsonConverter.fromJson(result, SearchResultList::class.java)
-                        }
-                    } catch (e: IOException) {
-                        Log.e(Utils.MM_TAG, "Error while loading search of commands from network", e)
-                        // can't show a toast from a thread without looper
-                        Utils.showToastFromAnyThread(activity, R.string.connection_error)
-                    }
-                    return null
-                }
-
-                override fun deliverResult(data: SearchResultList?) {
-                    mSearchImage.setImageDrawable(mSearchDefaultDrawable) // finish animation
-                    super.deliverResult(data)
-                }
-            }
-        }
-
-        override fun onLoadFinished(loader: Loader<SearchResultList?>, data: SearchResultList?) {
-            if (data?.results != null) {
-                val adapter = SearchResultArrayAdapter(data)
-                mSearchList.adapter = adapter
-                mSearchList.onItemClickListener = mCommandClickListener
-            }
-        }
-
-        override fun onLoaderReset(loader: Loader<SearchResultList?>) {
-            // no need to clear data
-        }
-    }
-
-    private inner class SearchOneLinerLoaderCallback : LoaderManager.LoaderCallbacks<String> {
-        override fun onCreateLoader(id: Int, args: Bundle?): AbstractNetworkAsyncLoader<String?> {
-            return object : AbstractNetworkAsyncLoader<String?>(requireContext()) {
-                override fun onStartLoading() {
-                    val query = mSearchView.query.toString()
-                    if (!TextUtils.isEmpty(query) && query.contains(" ")) {
-                        super.onStartLoading()
-                    }
-                }
-
-                override fun loadInBackground(): String? {
-                    try {
-                        val address = URLEncoder.encode(mSearchView.query.toString(), "UTF-8")
-                        val client = OkHttpClient()
-                        val request = Request.Builder().url(SEARCH_ONE_LINER_PREFIX + address).build()
-                        val response = client.newCall(request).execute()
-                        if (response.isSuccessful) {
-                            return response.body()!!.string()
-                        }
-                    } catch (e: IOException) {
-                        Log.e(Utils.MM_TAG, "Error while retrieving one-liner from network", e)
-                        // can't show a toast from a thread without looper
-                        Utils.showToastFromAnyThread(activity, R.string.connection_error)
-                    }
-                    return null
-                }
-
-                override fun deliverResult(data: String?) {
-                    mSearchImage.setImageDrawable(mSearchDefaultDrawable) // finish animation
-                    super.deliverResult(data)
-                }
-            }
-        }
-
-        override fun onLoadFinished(loader: Loader<String>, data: String) {
-            if (!TextUtils.isEmpty(data)) {
-                val elements: Array<String?> = data.split("\\n\\n".toRegex()).toTypedArray()
-                mSearchList.adapter = OnelinerArrayAdapter(elements)
-                mSearchList.onItemClickListener = null
-            }
-        }
-
-        override fun onLoaderReset(loader: Loader<String>) {}
     }
 
     private inner class SearchQueryTextListener : SearchView.OnQueryTextListener {
 
         private var currentText = ""
+        private var queryJob: Job? = null
 
         override fun onQueryTextSubmit(query: String): Boolean {
             currentText = query
@@ -190,7 +86,7 @@ class ManPageSearchFragment : Fragment() {
         override fun onQueryTextChange(newText: String): Boolean {
             if (TextUtils.isEmpty(newText)) {
                 currentText = newText
-                mUiHandler.removeCallbacksAndMessages(null)
+                queryJob?.cancel("New text entered")
                 return true
             }
 
@@ -204,19 +100,44 @@ class ManPageSearchFragment : Fragment() {
 
         // make a delay for not spamming requests to server so fast
         private fun fireLoader(immediate: Boolean) {
-            mUiHandler.removeCallbacksAndMessages(null)
-            mUiHandler.postDelayed({
+            queryJob = lifecycleScope.launch {
+                if (!immediate)
+                    delay(800)
+
                 mSearchImage.setImageResource(Utils.getThemedResource(activity, R.attr.loading_icon_resource))
-                if (!currentText.contains(" ")) { // this is a single command query, just search
-                    loaderManager.getLoader<Any>(MainPagerActivity.SEARCH_COMMAND_LOADER)!!.onContentChanged()
-                } else { // this is oneliner with arguments/other commands
-                    loaderManager.getLoader<Any>(MainPagerActivity.SEARCH_ONELINER_LOADER)!!.onContentChanged()
+
+                val address = URLEncoder.encode(mSearchView.query.toString(), "UTF-8")
+                val client = OkHttpClient()
+
+                if (!currentText.contains(" ")) {
+                    // this is a single command query, just search
+                    val request = Request.Builder().url(SEARCH_COMMAND_PREFIX + address).build()
+                    val response = withContext(Dispatchers.IO) { client.newCall(request).execute() }
+                    if (response.isSuccessful) {
+                        val result = response.body!!.string()
+                        val searchList = mJsonConverter.fromJson(result, SearchResultList::class.java)
+                        val adapter = SearchResultArrayAdapter(searchList)
+                        mSearchList.adapter = adapter
+                        mSearchList.onItemClickListener = mCommandClickListener
+                    }
+                } else {
+                    // this is oneliner with arguments/other commands
+                    val request = Request.Builder().url(SEARCH_ONE_LINER_PREFIX + address).build()
+                    val response = withContext(Dispatchers.IO) { client.newCall(request).execute() }
+                    if (response.isSuccessful) {
+                        val data = response.body!!.string()
+                        val elements: Array<String> = data.split("\\n\\n".toRegex()).toTypedArray()
+                        mSearchList.adapter = OnelinerArrayAdapter(elements)
+                        mSearchList.onItemClickListener = null
+                    }
                 }
-            }, if (immediate) 0 else 800.toLong())
+
+                mSearchImage.setImageDrawable(mSearchDefaultDrawable) // finish animation
+            }
         }
     }
 
-    private inner class OnelinerArrayAdapter(objects: Array<String?>?) : ArrayAdapter<String?>(activity!!, R.layout.search_list_item, R.id.command_name_label, objects!!) {
+    private inner class OnelinerArrayAdapter(objects: Array<String>) : ArrayAdapter<String?>(requireContext(), R.layout.search_list_item, R.id.command_name_label, objects) {
         override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
             val root = super.getView(position, convertView, parent)
             val paragraph = getItem(position)

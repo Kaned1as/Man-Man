@@ -87,7 +87,7 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.5'                           // Json (De)Serializer
     implementation 'org.jsoup:jsoup:1.12.1'                                    // html DOM parser
     implementation 'com.googlecode.juniversalchardet:juniversalchardet:1.0.3'  // file encoding detector
-    implementation 'com.squareup.okhttp3:okhttp:3.14.2'                        // good android http client
+    implementation 'com.squareup.okhttp3:okhttp:4.9.0'                         // good android http client
     implementation 'org.apache.commons:commons-compress:1.13'                  // uncompress lib (for archives)
 
     testImplementation 'junit:junit:4.12'

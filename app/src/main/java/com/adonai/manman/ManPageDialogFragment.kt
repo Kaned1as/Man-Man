@@ -214,7 +214,7 @@ class ManPageDialogFragment : Fragment() {
                         val request = Request.Builder().url(mAddressUrl).build()
                         val response = client.newCall(request).execute()
                         if (response.isSuccessful) {
-                            val result = response.body()!!.string()
+                            val result = response.body!!.string()
                             val root = Jsoup.parse(result, mAddressUrl)
                             val man = root.select("div.man-page, main").first()
                                     ?: // not actually a man page

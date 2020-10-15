@@ -266,8 +266,8 @@ class ManLocalArchiveFragment : Fragment(), OnSharedPreferenceChangeListener {
                         publishProgress(-2L)
                         return null
                     }
-                    val contentLength = response.body()!!.contentLength()
-                    val cis = CountingInputStream(response.body()!!.byteStream())
+                    val contentLength = response.body!!.contentLength()
+                    val cis = CountingInputStream(response.body!!.byteStream())
                     val fos = FileOutputStream(mLocalArchive)
                     val buffer = ByteArray(8096)
                     var read: Int

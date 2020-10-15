@@ -183,12 +183,12 @@ class ManChaptersFragment : Fragment() {
                             // count the bytes and show progress
                             val inStream: InputStream = if (response.header("Content-Length") != null) {
                                 GZIPInputStream(
-                                        CountingInputStream(response.body()!!.byteStream(),
-                                                response.body()!!.contentLength().toInt()),
-                                        response.body()!!.contentLength().toInt())
+                                        CountingInputStream(response.body!!.byteStream(),
+                                                response.body!!.contentLength().toInt()),
+                                        response.body!!.contentLength().toInt())
                             } else {
-                                GZIPInputStream(CountingInputStream(response.body()!!.byteStream(),
-                                        response.body()!!.contentLength().toInt()))
+                                GZIPInputStream(CountingInputStream(response.body!!.byteStream(),
+                                        response.body!!.contentLength().toInt()))
                             }
                             val msItems: MutableList<ManSectionItem> = ArrayList(500)
                             val doc = Jsoup.parse(inStream, "UTF-8", link)
@@ -296,7 +296,7 @@ class ManChaptersFragment : Fragment() {
                     try {
                         val response = client.newCall(request).execute()
                         if (response.isSuccessful) {
-                            val result = response.body()!!.string()
+                            val result = response.body!!.string()
                             val root = Jsoup.parse(result, CHAPTER_COMMANDS_PREFIX)
                             val rows = root.select(String.format("caption:has(a[href=/%s/]) ~ tbody > tr", index))
                             val manPages: MutableList<ManSectionItem> = ArrayList(rows.size)
