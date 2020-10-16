@@ -488,11 +488,5 @@ class ManChaptersFragment : Fragment() {
         const val CHAPTER_INDEX = "chapter.index"
         const val CHAPTER_PACKAGE = "chapter.package"
         const val CHAPTER_COMMANDS_PREFIX = "https://www.mankier.com"
-        fun newInstance(): ManChaptersFragment {
-            val fragment = ManChaptersFragment()
-            val args = Bundle()
-            fragment.arguments = args
-            return fragment
-        }
     }
 }

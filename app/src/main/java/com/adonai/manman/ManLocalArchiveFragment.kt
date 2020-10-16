@@ -332,11 +332,5 @@ class ManLocalArchiveFragment : Fragment(), OnSharedPreferenceChangeListener {
 
     companion object {
         private const val LOCAL_ARCHIVE_URL = "https://github.com/Adonai/Man-Man/releases/download/1.6.0/manpages.zip"
-        fun newInstance(): ManLocalArchiveFragment {
-            val fragment = ManLocalArchiveFragment()
-            val args = Bundle()
-            fragment.arguments = args
-            return fragment
-        }
     }
 }

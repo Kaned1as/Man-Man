@@ -86,7 +86,7 @@ class ManPageSearchFragment : Fragment() {
         override fun onQueryTextChange(newText: String): Boolean {
             if (TextUtils.isEmpty(newText)) {
                 currentText = newText
-                queryJob?.cancel("New text entered")
+                queryJob?.cancel("No text entered")
                 return true
             }
 
@@ -100,6 +100,7 @@ class ManPageSearchFragment : Fragment() {
 
         // make a delay for not spamming requests to server so fast
         private fun fireLoader(immediate: Boolean) {
+            queryJob?.cancel("Launching new search")
             queryJob = lifecycleScope.launch {
                 if (!immediate)
                     delay(800)
@@ -116,8 +117,7 @@ class ManPageSearchFragment : Fragment() {
                     if (response.isSuccessful) {
                         val result = response.body!!.string()
                         val searchList = mJsonConverter.fromJson(result, SearchResultList::class.java)
-                        val adapter = SearchResultArrayAdapter(searchList)
-                        mSearchList.adapter = adapter
+                        mSearchList.adapter = SearchResultArrayAdapter(searchList)
                         mSearchList.onItemClickListener = mCommandClickListener
                     }
                 } else {
@@ -153,14 +153,14 @@ class ManPageSearchFragment : Fragment() {
         }
     }
 
-    private inner class SearchResultArrayAdapter(data: SearchResultList) : ArrayAdapter<SearchResult?>(requireContext(), R.layout.search_list_item, R.id.command_name_label, data.results) {
+    private inner class SearchResultArrayAdapter(data: SearchResultList) : ArrayAdapter<SearchResult>(requireContext(), R.layout.search_list_item, R.id.command_name_label, data.results) {
 
-        private val cachedDescs: MutableMap<SearchResult?, String> = HashMap(5)
+        private val cachedDescs: MutableMap<SearchResult, String> = HashMap(5)
 
         override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
             val root = super.getView(position, convertView, parent)
             val searchRes = getItem(position)
-            val chapterName = cachedChapters!![searchRes!!.section]
+            val chapterName = cachedChapters[searchRes!!.section]
             val command = root.findViewById<View>(R.id.command_name_label) as TextView
             val chapter = root.findViewById<View>(R.id.command_chapter_label) as TextView
             val description = root.findViewById<View>(R.id.description_text_web) as TextView
@@ -216,12 +216,5 @@ class ManPageSearchFragment : Fragment() {
         private const val SEARCH_COMMAND_PREFIX = "https://www.mankier.com/api/v2/mans/?q="
         private const val SEARCH_ONE_LINER_PREFIX = "https://www.mankier.com/api/v2/explain/?cols=80&q="
         private const val SEARCH_DESCRIPTION_PREFIX = "https://www.mankier.com/api/v2/mans/"
-
-        fun newInstance(): ManPageSearchFragment {
-            val fragment = ManPageSearchFragment()
-            val args = Bundle()
-            fragment.arguments = args
-            return fragment
-        }
     }
 }

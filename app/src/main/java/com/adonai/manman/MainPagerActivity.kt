@@ -83,10 +83,10 @@ class MainPagerActivity : AppCompatActivity() {
 
         override fun getItem(i: Int): Fragment {
             when (i) {
-                0 -> return ManPageSearchFragment.newInstance()
-                1 -> return ManChaptersFragment.newInstance()
-                2 -> return ManCacheFragment.newInstance()
-                3 -> return ManLocalArchiveFragment.newInstance()
+                0 -> return ManPageSearchFragment()
+                1 -> return ManChaptersFragment()
+                2 -> return ManCacheFragment()
+                3 -> return ManLocalArchiveFragment()
             }
             throw IllegalArgumentException(String.format("No such fragment, index was %d", i))
         }
@@ -156,12 +156,11 @@ class MainPagerActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        mDonateHelper!!.handleActivityDestroy()
+        mDonateHelper.handleActivityDestroy()
     }
 
     companion object {
         const val FOLDER_LIST_KEY = "folder.list"
-        const val MAN_PAGE_RETRIEVER_LOADER = 2 // final man page retriever
         const val CHAPTER_RETRIEVER_LOADER = 3 // chapter contents retriever
         const val PACKAGE_RETRIEVER_LOADER = 4 // package contents retriever
         const val CACHE_RETRIEVER_LOADER = 5 // cached pages retriever

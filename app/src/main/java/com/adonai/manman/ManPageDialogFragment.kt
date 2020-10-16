@@ -20,15 +20,17 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.*
 import androidx.fragment.app.Fragment
-import androidx.loader.app.LoaderManager
-import androidx.loader.content.Loader
+import androidx.fragment.app.FragmentTransaction
+import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
-import com.adonai.manman.database.DbProvider.helper
+import com.adonai.manman.database.DbProvider
 import com.adonai.manman.entities.ManPage
-import com.adonai.manman.misc.AbstractNetworkAsyncLoader
 import com.adonai.manman.parser.Man2Html
 import com.adonai.manman.views.PassiveSlidingPane
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream
@@ -44,18 +46,15 @@ import java.util.zip.ZipFile
  * Dialog fragment for showing web page with man content
  * Retrieves info from DB (if cached) or network (if not)
  *
- * @see com.adonai.manman.entities.ManPage
+ * @see ManPage
  *
  * @author Kanedias
  */
 class ManPageDialogFragment : Fragment() {
     private val mPrefChangeListener = FontChangeListener()
-    private val manPageCallback = RetrieveManPageCallback()
 
     private lateinit var mPrefs: SharedPreferences
     private lateinit var mLocalArchive: File
-    private lateinit var mAddressUrl: String
-    private lateinit var mCommandName: String
 
     private lateinit var mLinkContainer: LinearLayout
     private lateinit var mSlider: PassiveSlidingPane
@@ -67,21 +66,12 @@ class ManPageDialogFragment : Fragment() {
     private lateinit var mFindNext: ImageView
     private lateinit var mFindPrevious: ImageView
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        if (arguments != null) {
-            mAddressUrl = requireArguments().getString(PARAM_ADDRESS)!!
-            mCommandName = requireArguments().getString(PARAM_NAME)!!
-        }
-    }
-
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         setHasOptionsMenu(true)
         mLocalArchive = File(requireActivity().cacheDir, "manpages.zip")
+
         mPrefs = PreferenceManager.getDefaultSharedPreferences(activity)
-        // making strong reference as requested by registerOnSharedPreferenceChangeListener call
-        mPrefChangeListener
         mPrefs.registerOnSharedPreferenceChangeListener(mPrefChangeListener)
 
         val root = inflater.inflate(R.layout.fragment_man_page_show, container, false)
@@ -109,8 +99,134 @@ class ManPageDialogFragment : Fragment() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             mContent.settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
         }
-        loaderManager.initLoader(MainPagerActivity.MAN_PAGE_RETRIEVER_LOADER, null, manPageCallback)
+
+        triggerLoadPageContent()
         return root
+    }
+
+    private fun triggerLoadPageContent() {
+        val addressUrl = requireArguments().getString(PARAM_ADDRESS)!!
+        val commandName = requireArguments().getString(PARAM_NAME)!!
+
+        lifecycleScope.launch {
+            val manpage = withContext(Dispatchers.IO) { doLoadContent(addressUrl, commandName) }
+            if (manpage != null) {
+                mContent.loadDataWithBaseURL(addressUrl, Utils.getWebWithCss(requireContext(), manpage.url, manpage.webContent), "text/html", "UTF-8", null)
+                mContent.setBackgroundColor(Utils.getThemedValue(activity, R.attr.fill_color)) // prevent flickering
+                fillLinkPane(manpage.links)
+
+                // show the actual content on web page
+                mFlipper.showNext()
+                shakeSlider()
+            } else {
+                parentFragmentManager.popBackStack()
+            }
+        }
+    }
+
+    private fun doLoadContent(addressUrl: String, commandName: String): ManPage? {
+        // handle special case when it's a filesystem
+        if (addressUrl.startsWith("/")) { // TODO: rewrite with URI
+            try {
+                val input = File(addressUrl)
+                val charset = Utils.detectEncodingOfArchive(input)
+                val fis = FileInputStream(input)
+                val gis = GZIPInputStream(fis)
+
+                val reader = when (charset) {
+                    null -> BufferedReader(InputStreamReader(gis))
+                    else -> BufferedReader(InputStreamReader(gis, charset))
+                }
+
+                reader.use {
+                    val parser = Man2Html(it)
+                    val parsed = parser.doc
+                    val result = ManPage(input.name, "file://$addressUrl")
+                    result.links = getLinks(parsed.select("div.man-page").first())
+                    result.webContent = parsed.html()
+                    return result
+                }
+            } catch (e: FileNotFoundException) {
+                Log.e(Utils.MM_TAG, "File with man page was not found in local folder: $addressUrl", e)
+                Toast.makeText(activity, R.string.file_not_found, Toast.LENGTH_SHORT).show()
+            } catch (e: IOException) {
+                Log.e(Utils.MM_TAG, "Exception while loading man page file from local folder: $addressUrl", e)
+                Toast.makeText(activity, R.string.wrong_file_format, Toast.LENGTH_SHORT).show()
+            }
+
+            // no further querying, request was for local file
+            return null
+        }
+
+        // special case: local file
+        if (addressUrl.startsWith("local:")) {
+            // local man archive
+            try {
+                val zip = ZipFile(mLocalArchive)
+                val zEntry = zip.getEntry(addressUrl.substringAfter("local:"))
+                val zStream = zip.getInputStream(zEntry)
+                // can't use java's standard GZIPInputStream around zip IS because of inflating issue
+                val gis = GzipCompressorInputStream(zStream) // manpage files are .gz
+                val reader = BufferedReader(InputStreamReader(gis))
+
+                reader.use {
+                    val parser = Man2Html(it)
+                    val parsed = parser.doc
+                    val result = ManPage(zEntry.name, addressUrl)
+                    result.links = getLinks(parsed.select("div.man-page").first())
+                    result.webContent = parsed.html()
+                    return result
+                }
+            } catch (e: IOException) {
+                Log.e(Utils.MM_TAG, "Error while loading man page from local archive: $addressUrl", e)
+                Toast.makeText(activity, R.string.wrong_file_format, Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        // query cache database for corresponding command
+        val cached = DbProvider.helper.manPagesDao.queryForId(addressUrl)
+        if (cached != null) {
+            return cached
+        }
+
+        // exhausted all local variants, fetch remote content
+        try {
+            val client = OkHttpClient()
+            val request = Request.Builder().url(addressUrl).build()
+            val response = client.newCall(request).execute()
+            if (response.isSuccessful) {
+                val result = response.body!!.string()
+                val root = Jsoup.parse(result, addressUrl)
+                val man = root.select("div.man-page, main").first() ?: return null
+                val webContent = man.html()
+                val linkContainer = getLinks(man)
+
+                // save to DB for caching
+                val toCache = ManPage(commandName, addressUrl)
+                toCache.links = linkContainer
+                toCache.webContent = webContent
+                DbProvider.helper.manPagesDao.createIfNotExists(toCache)
+                LocalBroadcastManager.getInstance(requireContext()).sendBroadcast(Intent(MainPagerActivity.DB_CHANGE_NOTIFY))
+                return toCache
+            }
+        } catch (e: IOException) {
+            Log.e(Utils.MM_TAG, "Exception while saving cached page to DB: $addressUrl", e)
+            Utils.showToastFromAnyThread(activity, R.string.connection_error)
+        }
+
+        return null
+    }
+
+    // retrieve link set from manpage
+    private fun getLinks(man: Element): TreeSet<String> {
+        val links = man.select("a[href*=#]")
+        val linkContainer = TreeSet<String>()
+        for (link in links) {
+            if (!TextUtils.isEmpty(link.text()) && link.attr("href").contains("#" + link.text())) { // it's like <a href="http://ex.com/#a">-x</a>
+                linkContainer.add(link.text())
+            }
+        }
+        return linkContainer
     }
 
     override fun onResume() {
@@ -146,137 +262,20 @@ class ManPageDialogFragment : Fragment() {
         }
     }
 
-    /**
-     * Class for creating a loader that performs async loading of man page from www.mankier.com
-     * On finish passes data to web content and makes it active
-     * On fail dismisses parent dialog
-     *
-     */
-    private inner class RetrieveManPageCallback : LoaderManager.LoaderCallbacks<ManPage?> {
-        override fun onCreateLoader(id: Int, args: Bundle?): Loader<ManPage?> {
-            return object : AbstractNetworkAsyncLoader<ManPage?>(activity!!) {
-                override fun loadInBackground(): ManPage? {
-                    // handle special case when it's a local file
-                    if (mAddressUrl.startsWith("/")) { // TODO: rewrite with URI
-                        try {
-                            val input = File(mAddressUrl)
-                            val charset = Utils.detectEncodingOfArchive(input)
-                            val fis = FileInputStream(input)
-                            val gis = GZIPInputStream(fis)
-                            val br = if (charset == null) BufferedReader(InputStreamReader(gis)) else BufferedReader(InputStreamReader(gis, charset))
-                            val parser = Man2Html(br)
-                            val parsed = parser.doc
-                            val result = ManPage(input.name, "file://$mAddressUrl")
-                            result.links = getLinks(parsed.select("div.man-page").first())
-                            result.webContent = parsed.html()
-                            br.close() // closes all the IS hierarchy
-                            return result
-                        } catch (e: FileNotFoundException) {
-                            Log.e(Utils.MM_TAG, "File with man page was not found in local folder", e)
-                            Toast.makeText(activity, R.string.file_not_found, Toast.LENGTH_SHORT).show()
-                        } catch (e: IOException) {
-                            Log.e(Utils.MM_TAG, "Exception while loading man page file from local folder", e)
-                            Toast.makeText(activity, R.string.wrong_file_format, Toast.LENGTH_SHORT).show()
-                        }
-                        return null // no further querying
-                    }
-                    if (mAddressUrl.startsWith("local:")) { // local man archive
-                        try {
-                            val zip = ZipFile(mLocalArchive)
-                            val zEntry = zip.getEntry(mAddressUrl.substring(7))
-                            val `is` = zip.getInputStream(zEntry)
-                            // can't use java's standard GZIPInputStream around zip IS because of inflating issue
-                            val gis = GzipCompressorInputStream(`is`) // manpage files are .gz
-                            val br = BufferedReader(InputStreamReader(gis))
-                            val parser = Man2Html(br)
-                            val parsed = parser.doc
-                            val result = ManPage(zEntry.name, mAddressUrl)
-                            result.links = getLinks(parsed.select("div.man-page").first())
-                            result.webContent = parsed.html()
-                            br.close() // closes all the IS hierarchy
-                            return result
-                        } catch (e: IOException) {
-                            Log.e(Utils.MM_TAG, "Error while loading man page from local archive", e)
-                            Toast.makeText(activity, R.string.wrong_file_format, Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                    try { // query cache database for corresponding command
-                        val cached = helper.manPagesDao.queryForId(mAddressUrl)
-                        if (cached != null) {
-                            return cached
-                        }
-                    } catch (e: RuntimeException) { // it's RuntimeExceptionDao, so catch runtime exceptions
-                        Log.e(Utils.MM_TAG, "Exception while querying the DB", e)
-                        Utils.showToastFromAnyThread(activity, R.string.database_retrieve_error)
-                    }
-                    try {
-                        val client = OkHttpClient()
-                        val request = Request.Builder().url(mAddressUrl).build()
-                        val response = client.newCall(request).execute()
-                        if (response.isSuccessful) {
-                            val result = response.body!!.string()
-                            val root = Jsoup.parse(result, mAddressUrl)
-                            val man = root.select("div.man-page, main").first()
-                                    ?: // not actually a man page
-                                    return null
-                            val webContent = man.html()
-                            val linkContainer = getLinks(man)
-
-                            // save to DB for caching
-                            val toCache = ManPage(mCommandName!!, mAddressUrl!!)
-                            toCache.links = linkContainer
-                            toCache.webContent = webContent
-                            helper.manPagesDao.createIfNotExists(toCache)
-                            LocalBroadcastManager.getInstance(activity!!).sendBroadcast(Intent(MainPagerActivity.DB_CHANGE_NOTIFY))
-                            return toCache
-                        }
-                    } catch (e: IOException) {
-                        Log.e(Utils.MM_TAG, "Exception while saving cached page to DB", e)
-                        // can't show a toast from a thread without looper
-                        Utils.showToastFromAnyThread(activity, R.string.connection_error)
-                    }
-                    return null
-                }
-
-                // retrieve link set from manpage
-                private fun getLinks(man: Element): TreeSet<String> {
-                    val links = man.select("a[href*=#]")
-                    val linkContainer = TreeSet<String>()
-                    for (link in links) {
-                        if (!TextUtils.isEmpty(link.text()) && link.attr("href").contains("#" + link.text())) { // it's like <a href="http://ex.com/#a">-x</a>
-                            linkContainer.add(link.text())
-                        }
-                    }
-                    return linkContainer
-                }
-            }
-        }
-
-        override fun onLoadFinished(loader: Loader<ManPage?>, data: ManPage?) {
-            if (data != null) {
-                mContent.loadDataWithBaseURL(mAddressUrl, Utils.getWebWithCss(activity!!, data.url, data.webContent), "text/html", "UTF-8", null)
-                mContent.setBackgroundColor(Utils.getThemedValue(activity, R.attr.fill_color)) // prevent flickering
-                fillLinkPane(data.links)
-                mFlipper.showNext()
-                shakeSlider()
-            } else {
-                mContent.postDelayed({
-                    fragmentManager!!.popBackStack() // can't perform transactions from onLoadFinished
-                }, 0)
-            }
-        }
-
-        override fun onLoaderReset(loader: Loader<ManPage?>) {
-            // never used
-        }
-    }
-
     private fun shakeSlider() {
-        if (mLinkContainer.childCount == 0) // nothing to show in the links pane
+        if (mLinkContainer.childCount == 0) {
+            // nothing to show in the links pane, skip
             return
-        if (mPrefs.contains(USER_LEARNED_SLIDER)) return
+        }
+
+        if (mPrefs.contains(USER_LEARNED_SLIDER)) {
+            // user already seen this animation, skip
+            return
+        }
+
         mSlider.postDelayed({ mSlider.openPane() }, 1000)
         mSlider.postDelayed({ mSlider.closePane() }, 2000)
+
         mPrefs.edit().putBoolean(USER_LEARNED_SLIDER, true).apply()
     }
 
@@ -289,19 +288,20 @@ class ManPageDialogFragment : Fragment() {
             val linkLabel = root.findViewById<View>(R.id.link_text) as TextView
             linkLabel.text = link
             root.setOnClickListener {
-                mContent.loadUrl("""javascript:(function() {
-    var l = document.querySelector('a[href$="#$link"]');
-    var event = new MouseEvent('click', {
-        'view': window,
-        'bubbles': true,
-        'cancelable': true
-    });    console.log(l);
-    l.dispatchEvent(event);
-})()""")
+                mContent.loadUrl("""
+                javascript:(function() {
+                    var l = document.querySelector('a[href$="#$link"]');
+                    var event = new MouseEvent('click', {
+                        'view': window,
+                        'bubbles': true,
+                        'cancelable': true
+                    });
+                    l.dispatchEvent(event);
+                })()""".trimIndent())
             }
-            mLinkContainer!!.addView(root)
+            mLinkContainer.addView(root)
         }
-    }// default webview font size
+    }
 
     /**
      * Retrieve font size for web views from shared properties
@@ -322,10 +322,16 @@ class ManPageDialogFragment : Fragment() {
     private inner class ManPageChromeClient : WebViewClient() {
         override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
             if (url.matches(Regex("https://www\\.mankier\\.com/.+/.+"))) { // it's an address of the command
-                mFlipper.showPrevious()
-                mAddressUrl = url
-                mCommandName = url.substring(url.lastIndexOf('/') + 1)
-                loaderManager.getLoader<Any>(MainPagerActivity.MAN_PAGE_RETRIEVER_LOADER)!!.onContentChanged()
+                val name = url.substring(url.lastIndexOf('/') + 1)
+
+                val mpdf = newInstance(name, url)
+                parentFragmentManager
+                        .beginTransaction()
+                        .addToBackStack("PageFromCache")
+                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                        .add(R.id.replacer, mpdf)
+                        .commit()
+
                 return true
             }
             return shouldOverrideUrlLoadingOld(view, url)
@@ -404,6 +410,7 @@ class ManPageDialogFragment : Fragment() {
         private const val USER_LEARNED_SLIDER = "user.learned.slider"
         private const val PARAM_ADDRESS = "param.address"
         private const val PARAM_NAME = "param.name"
+
         @JvmStatic
         fun newInstance(commandName: String, address: String): ManPageDialogFragment {
             val fragment = ManPageDialogFragment()

@@ -57,7 +57,7 @@ class ManCacheFragment : Fragment(), OnItemClickListener {
     }
 
     override fun onItemClick(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-        mSearchCache!!.clearFocus() // otherwise we have to click "back" twice
+        mSearchCache.clearFocus() // otherwise we have to click "back" twice
         val manPage = parent.getItemAtPosition(position) as ManPage
         val mpdf = ManPageDialogFragment.newInstance(manPage.name, manPage.url)
         parentFragmentManager
@@ -124,15 +124,6 @@ class ManCacheFragment : Fragment(), OnItemClickListener {
     private inner class DbBroadcastReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             loaderManager.getLoader<Any>(MainPagerActivity.CACHE_RETRIEVER_LOADER)!!.onContentChanged()
-        }
-    }
-
-    companion object {
-        fun newInstance(): ManCacheFragment {
-            val fragment = ManCacheFragment()
-            val args = Bundle()
-            fragment.arguments = args
-            return fragment
         }
     }
 }
