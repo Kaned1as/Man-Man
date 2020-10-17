@@ -163,7 +163,7 @@ class ManPageDialogFragment : Fragment() {
             // local man archive
             try {
                 val zip = ZipFile(mLocalArchive)
-                val zEntry = zip.getEntry(addressUrl.substringAfter("local:"))
+                val zEntry = zip.getEntry(addressUrl.substringAfter("local:/"))
                 val zStream = zip.getInputStream(zEntry)
                 // can't use java's standard GZIPInputStream around zip IS because of inflating issue
                 val gis = GzipCompressorInputStream(zStream) // manpage files are .gz

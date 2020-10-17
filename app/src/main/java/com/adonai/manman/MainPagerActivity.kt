@@ -164,7 +164,6 @@ class MainPagerActivity : AppCompatActivity() {
         const val CHAPTER_RETRIEVER_LOADER = 3 // chapter contents retriever
         const val PACKAGE_RETRIEVER_LOADER = 4 // package contents retriever
         const val CACHE_RETRIEVER_LOADER = 5 // cached pages retriever
-        const val LOCAL_PACKAGE_LOADER = 6 // local archive retriever
         const val DB_CHANGE_NOTIFY = "database.updated"
         const val LOCAL_CHANGE_NOTIFY = "locals.updated"
         const val BACK_BUTTON_NOTIFY = "back.button.pressed"

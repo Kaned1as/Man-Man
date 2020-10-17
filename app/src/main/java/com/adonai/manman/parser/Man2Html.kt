@@ -97,8 +97,8 @@ class Man2Html(private val source: BufferedReader) {
     @Throws(IOException::class)
     private fun doParse() {
         result.append("<html><body>")
-        var line: String
-        while (source.readLine().also { line = it } != null) {
+        var line = ""
+        while (source.readLine()?.apply { line = this } != null) {
             while (line.endsWith("\\")) { // take next line too
                 var nextLine: String
                 if (source.readLine().also { nextLine = it } != null) {

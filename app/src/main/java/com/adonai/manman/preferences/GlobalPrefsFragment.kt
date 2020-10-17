@@ -18,8 +18,8 @@ import java.io.File
  * @author Kanedias
  */
 class GlobalPrefsFragment : PreferenceFragmentCompat() {
-    override fun onCreatePreferences(savedInstanceState: Bundle, rootKey: String) {
-        super.onCreate(savedInstanceState)
+
+    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.global_prefs)
 
         findPreference<Preference>("clear.cache")!!.onPreferenceClickListener = Preference.OnPreferenceClickListener {
