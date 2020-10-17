@@ -14,6 +14,8 @@ import android.widget.AdapterView.OnItemClickListener
 import android.widget.ArrayAdapter
 import android.widget.FrameLayout
 import android.widget.ListView
+import androidx.annotation.UiThread
+import androidx.annotation.WorkerThread
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
@@ -102,6 +104,7 @@ class ManChaptersFragment : Fragment() {
         return root
     }
 
+    @UiThread
     private fun triggerLoadChapter(index: String) {
         lifecycleScope.launch {
             val chapter = withContext(Dispatchers.IO) { doLoadChapter(index) } ?: return@launch
@@ -128,6 +131,7 @@ class ManChaptersFragment : Fragment() {
         }
     }
 
+    @WorkerThread
     private fun doLoadChapter(index: String): ManPageContentsResult? {
         // check the DB for cached pages first
         val query = DbProvider.helper.manChaptersDao.queryBuilder()
@@ -151,6 +155,7 @@ class ManChaptersFragment : Fragment() {
         return null
     }
 
+    @WorkerThread
     private fun loadChapterFromNetwork(index: String, link: String): MutableList<ManSectionItem> {
         try {
             // load chapter page with command links
@@ -181,6 +186,7 @@ class ManChaptersFragment : Fragment() {
         return mutableListOf()
     }
 
+    @WorkerThread
     private fun saveChapterToDb(items: List<ManSectionItem>) {
         // save to DB for caching
         try {
@@ -201,6 +207,7 @@ class ManChaptersFragment : Fragment() {
         }
     }
 
+    @UiThread
     private fun triggerLoadPackage(parentChapter: String, url: String) {
         lifecycleScope.launch {
             val items = withContext(Dispatchers.IO) { doLoadPackage(parentChapter, url) }
@@ -224,6 +231,7 @@ class ManChaptersFragment : Fragment() {
         }
     }
 
+    @WorkerThread
     private fun doLoadPackage(index: String, url: String): List<ManSectionItem> {
         val client = OkHttpClient()
         val request = Request.Builder().url(url).build()

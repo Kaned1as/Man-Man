@@ -13,6 +13,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import android.widget.AdapterView.OnItemClickListener
+import androidx.annotation.UiThread
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.lifecycleScope
@@ -99,6 +100,7 @@ class ManPageSearchFragment : Fragment() {
         }
 
         // make a delay for not spamming requests to server so fast
+        @UiThread
         private fun fireLoader(immediate: Boolean) {
             queryJob?.cancel("Launching new search")
             queryJob = lifecycleScope.launch {

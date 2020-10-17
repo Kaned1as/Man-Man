@@ -8,6 +8,8 @@ import android.view.*
 import android.widget.AdapterView.OnItemClickListener
 import android.widget.ListView
 import android.widget.SearchView
+import androidx.annotation.UiThread
+import androidx.annotation.WorkerThread
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
@@ -125,6 +127,7 @@ class ManLocalArchiveFragment : Fragment(), OnSharedPreferenceChangeListener {
         }
     }
 
+    @UiThread
     private fun triggerReloadLocalContent() {
         lifecycleScope.launch {
             val localPages = withContext(Dispatchers.IO) { doLoadContent() }
@@ -148,6 +151,7 @@ class ManLocalArchiveFragment : Fragment(), OnSharedPreferenceChangeListener {
         }
     }
 
+    @WorkerThread
     private fun doLoadContent(): List<File> {
         val collectedPages: MutableList<File> = ArrayList()
 
@@ -173,6 +177,7 @@ class ManLocalArchiveFragment : Fragment(), OnSharedPreferenceChangeListener {
         return collectedPages
     }
 
+    @WorkerThread
     private fun populateWithLocal(result: MutableList<File>) {
         try {
             val zip = ZipFile(mLocalArchive)
@@ -188,6 +193,7 @@ class ManLocalArchiveFragment : Fragment(), OnSharedPreferenceChangeListener {
         }
     }
 
+    @WorkerThread
     private fun walkFileTree(directoryRoot: File, resultList: MutableList<File>) {
         val list = directoryRoot.listFiles() ?: // unknown, happens on some devices
         return
@@ -207,6 +213,7 @@ class ManLocalArchiveFragment : Fragment(), OnSharedPreferenceChangeListener {
     /**
      * Load archive to app data folder from my GitHub releases page
      */
+    @UiThread
     private fun downloadArchive() {
         if (mLocalArchive.exists()) {
             return
@@ -238,6 +245,7 @@ class ManLocalArchiveFragment : Fragment(), OnSharedPreferenceChangeListener {
         }
     }
 
+    @WorkerThread
     private suspend fun doDownloadArchive(pd: AlertDialog, archiveUrl: String) {
         try {
             val client = OkHttpClient()
@@ -278,8 +286,8 @@ class ManLocalArchiveFragment : Fragment(), OnSharedPreferenceChangeListener {
 
         private fun applyFilter(text: CharSequence) {
             // safe to cast, we have only this type of adapter here
-            val adapter = mLocalPageList.adapter as LocalArchiveArrayAdapter
-            adapter.filter.filter(text)
+            val adapter = mLocalPageList.adapter as? LocalArchiveArrayAdapter
+            adapter?.filter?.filter(text)
         }
     }
 

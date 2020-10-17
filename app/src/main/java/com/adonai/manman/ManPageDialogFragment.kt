@@ -19,6 +19,8 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.*
+import androidx.annotation.UiThread
+import androidx.annotation.WorkerThread
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.lifecycleScope
@@ -104,6 +106,7 @@ class ManPageDialogFragment : Fragment() {
         return root
     }
 
+    @UiThread
     private fun triggerLoadPageContent() {
         val addressUrl = requireArguments().getString(PARAM_ADDRESS)!!
         val commandName = requireArguments().getString(PARAM_NAME)!!
@@ -124,6 +127,7 @@ class ManPageDialogFragment : Fragment() {
         }
     }
 
+    @WorkerThread
     private fun doLoadContent(addressUrl: String, commandName: String): ManPage? {
         // handle special case when it's a filesystem
         if (addressUrl.startsWith("/")) { // TODO: rewrite with URI
