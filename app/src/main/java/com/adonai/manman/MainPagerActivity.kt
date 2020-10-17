@@ -161,8 +161,6 @@ class MainPagerActivity : AppCompatActivity() {
 
     companion object {
         const val FOLDER_LIST_KEY = "folder.list"
-        const val CHAPTER_RETRIEVER_LOADER = 3 // chapter contents retriever
-        const val PACKAGE_RETRIEVER_LOADER = 4 // package contents retriever
         const val CACHE_RETRIEVER_LOADER = 5 // cached pages retriever
         const val DB_CHANGE_NOTIFY = "database.updated"
         const val LOCAL_CHANGE_NOTIFY = "locals.updated"
