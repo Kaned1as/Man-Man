@@ -104,7 +104,7 @@ object Utils {
     }
 
     @Throws(IOException::class)
-    fun detectEncodingOfArchive(gzipped: File?): String {
+    fun detectEncodingOfArchive(gzipped: File?): String? {
         val fis = FileInputStream(gzipped)
         val gis = GZIPInputStream(fis)
         val buf = ByteArray(4096)

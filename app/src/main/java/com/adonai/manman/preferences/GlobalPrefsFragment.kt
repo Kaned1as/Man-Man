@@ -25,10 +25,12 @@ class GlobalPrefsFragment : PreferenceFragmentCompat() {
         findPreference<Preference>("clear.cache")!!.onPreferenceClickListener = Preference.OnPreferenceClickListener {
             val builder = AlertDialog.Builder(activity)
             builder.setTitle(R.string.confirm_action).setMessage(R.string.clear_cache_question)
-                    .setNegativeButton(android.R.string.no, null).setPositiveButton(android.R.string.yes) { dialog, which ->
+                    .setNegativeButton(android.R.string.no, null).setPositiveButton(android.R.string.yes) { _, _ ->
                         DbProvider.helper.clearAllTables()
                         LocalBroadcastManager.getInstance(requireActivity()).sendBroadcast(Intent(MainPagerActivity.DB_CHANGE_NOTIFY))
-                    }.create().show()
+                    }
+                    .create()
+                    .show()
             true
         }
 

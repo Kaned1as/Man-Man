@@ -67,7 +67,7 @@ class ManChaptersFragment : Fragment() {
      *
      * @see RetrieveChapterContentsCallback
      */
-    private val mChapterClickListener = OnItemClickListener { parent, view, position, id ->
+    private val mChapterClickListener = OnItemClickListener { parent, _, position, _ ->
         val item = parent.getItemAtPosition(position) as Map.Entry<String, String>
         triggerLoadChapter(item.key)
     }
@@ -82,7 +82,7 @@ class ManChaptersFragment : Fragment() {
      * for loading full command man page.
      *
      */
-    private val mPackageClickListener = OnItemClickListener { parent, view, position, id ->
+    private val mPackageClickListener = OnItemClickListener { parent, _, position, _ ->
         val item = parent.getItemAtPosition(position) as ManSectionItem
         triggerLoadPackage(item.parentChapter, item.url)
     }
@@ -216,7 +216,7 @@ class ManChaptersFragment : Fragment() {
             val adapter: ArrayAdapter<ManSectionItem> = ChapterContentsArrayAdapter(requireContext(), R.layout.package_command_list_item, R.id.command_name_label, items)
             AlertDialog.Builder(requireContext())
                     .setTitle(R.string.select_command)
-                    .setAdapter(adapter) { dialog, which ->
+                    .setAdapter(adapter) { _, which ->
                         val item = adapter.getItem(which)
                         val mpdf = ManPageDialogFragment.newInstance(item!!.name, item.url)
                         parentFragmentManager

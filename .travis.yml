@@ -51,14 +51,18 @@ script:
   - "./gradlew assembleRelease"
 
 deploy:
+
+  # tag uploads
   - provider: releases
     api_key: "${GITHUB_PUBLISH_OAUTH_TOKEN}"
     file: app/build/build/outputs/apk/release/app-release.apk
     skip_cleanup: true
     on:
       tags: true
+
+  # googleplay publish
   - provider: script
-    script: ./gradlew app:publishApkRelease
+    script: ./gradlew app:publishGoogleplayReleaseApk
     skip_cleanup: true
     on:
       tags: true

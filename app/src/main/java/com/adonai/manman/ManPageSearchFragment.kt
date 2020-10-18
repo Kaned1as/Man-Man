@@ -47,7 +47,7 @@ class ManPageSearchFragment : Fragment() {
      * Click listener for loading man-page of the clicked command
      * Usable only when list view shows list of commands
      */
-    private val mCommandClickListener = OnItemClickListener { parent, view, position, id ->
+    private val mCommandClickListener = OnItemClickListener { parent, _, position, _ ->
         mSearchView.clearFocus() // otherwise we have to click "back" twice
         val sr = parent.getItemAtPosition(position) as SearchResult
         val mpdf = newInstance(sr.name, sr.url)

@@ -315,7 +315,7 @@ class ManPageDialogFragment : Fragment() {
      * @return integer representing font size or default in case incorrect number is set
      */
     private val fontFromProperties: Int
-        private get() = try {
+        get() = try {
             mPrefs.getString(Utils.FONT_PREF_KEY, "12")!!.toInt()
         } catch (ex: NumberFormatException) {
             Toast.makeText(activity, R.string.invalid_font_size_set, Toast.LENGTH_SHORT).show()

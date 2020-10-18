@@ -52,7 +52,7 @@ class ManLocalArchiveFragment : Fragment(), OnSharedPreferenceChangeListener {
      * Long story short, let's try to do this in UI and look at the performance
      *
      */
-    private val mManArchiveClickListener = OnItemClickListener { parent, view, position, id ->
+    private val mManArchiveClickListener = OnItemClickListener { parent, _, position, _ ->
         mSearchLocalPage.clearFocus() // otherwise we have to click "back" twice
 
         val data = parent.getItemAtPosition(position) as? File
@@ -222,7 +222,7 @@ class ManLocalArchiveFragment : Fragment(), OnSharedPreferenceChangeListener {
             AlertDialog.Builder(requireContext())
                     .setTitle(R.string.confirm_action)
                     .setMessage(R.string.confirm_action_load_archive)
-                    .setPositiveButton(android.R.string.ok) { dialog, which ->
+                    .setPositiveButton(android.R.string.ok) { _, _ ->
                         mUserAgreedToDownload = true
                         downloadArchive()
                     }.setNegativeButton(android.R.string.no, null)

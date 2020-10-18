@@ -44,7 +44,7 @@ class ManCacheFragment : Fragment() {
         mSearchCache.setOnQueryTextListener(SearchInCacheListener())
 
         mCacheList = root.findViewById<View>(R.id.cached_pages_list) as ListView
-        mCacheList.setOnItemClickListener { parent, view, position, id ->
+        mCacheList.setOnItemClickListener { parent, _, position, _ ->
             mSearchCache.clearFocus() // otherwise we have to click "back" twice
             val manPage = parent.getItemAtPosition(position) as ManPage
             val mpdf = ManPageDialogFragment.newInstance(manPage.name, manPage.url)
@@ -81,13 +81,13 @@ class ManCacheFragment : Fragment() {
     private fun doReloadCache(query: String): List<ManPage> {
         // check the DB for cached pages
         try {
-            val query = DbProvider.helper.manPagesDao
+            val prepared = DbProvider.helper.manPagesDao
                     .queryBuilder()
                     .where()
                     .like("name", "%${query}%")
                     .prepare()
 
-            return DbProvider.helper.manPagesDao.query(query)
+            return DbProvider.helper.manPagesDao.query(prepared)
         } catch (e: SQLException) {
             Log.e(Utils.MM_TAG, "Exception while querying DB for cached page", e)
             Utils.showToastFromAnyThread(activity, R.string.database_retrieve_error)

@@ -26,7 +26,7 @@ class ManSectionItem : Comparable<ManSectionItem> {
     @DatabaseField(index = true, canBeNull = false)
     lateinit var parentChapter: String
 
-    override fun compareTo(another: ManSectionItem): Int {
-        return name[0] - another.name[0]
+    override fun compareTo(other: ManSectionItem): Int {
+        return name[0] - other.name[0]
     }
 }
