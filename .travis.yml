@@ -48,7 +48,7 @@ before_install:
   - yes | sdkmanager "extras;google;m2repository"
 
 script:
-  - "./gradlew --info assembleRelease"
+  - "./gradlew assembleRelease"
 
 deploy:
   - provider: releases
