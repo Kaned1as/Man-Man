@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string tools:context="donation google play interface" name="thanks_for_your_pledge">Thanks for your pledge!</string>
+    <string tools:context="donation google play interface" name="request_a_feature">Request a feature</string>
+    <string tools:context="donation google play interface" name="create_issue">You are about to be redirected to project tracker. Please create new issue there.</string>
+    <string tools:context="donation google play interface" name="understood">Understood</string>
+</resources>

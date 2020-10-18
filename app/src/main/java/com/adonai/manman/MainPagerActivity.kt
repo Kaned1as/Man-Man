@@ -66,7 +66,7 @@ class MainPagerActivity : AppCompatActivity() {
                 return true
             }
             R.id.donate_menu_item -> {
-                mDonateHelper.purchaseGift()
+                mDonateHelper.donate()
                 return true
             }
             R.id.settings_menu_item -> {
@@ -78,8 +78,6 @@ class MainPagerActivity : AppCompatActivity() {
     }
 
     private inner class ManFragmentPagerAdapter(fm: FragmentManager?) : FragmentPagerAdapter(fm!!, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
-
-        private var oldPrimary: Fragment? = null
 
         override fun getItem(i: Int): Fragment {
             when (i) {
@@ -104,23 +102,6 @@ class MainPagerActivity : AppCompatActivity() {
                 else -> null
             }
         }
-
-        /**
-         * A way to notify fragments when they become visible to user in this pager
-         */
-        override fun setPrimaryItem(container: ViewGroup, position: Int, `object`: Any) {
-            val newPrimary = `object` as Fragment
-            if (oldPrimary !== newPrimary) {
-                if (oldPrimary != null) {
-                    oldPrimary!!.userVisibleHint = false
-                    oldPrimary!!.onPause()
-                }
-                newPrimary.userVisibleHint = true
-                newPrimary.onResume()
-                oldPrimary = newPrimary
-            }
-            super.setPrimaryItem(container, position, `object`)
-        }
     }
 
     /**
@@ -138,25 +119,10 @@ class MainPagerActivity : AppCompatActivity() {
         builder.show()
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        // Pass on the activity result to the helper for handling
-        if (!mDonateHelper.handleActivityResult(requestCode, resultCode, data)) {
-            // not handled, so handle it ourselves (here's where you'd
-            // perform any handling of activity results not related to in-app
-            // billing...
-            super.onActivityResult(requestCode, resultCode, data)
-        }
-    }
-
     override fun onBackPressed() {
         if (!LocalBroadcastManager.getInstance(this).sendBroadcast(Intent(BACK_BUTTON_NOTIFY))) {
             super.onBackPressed()
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        mDonateHelper.handleActivityDestroy()
     }
 
     companion object {

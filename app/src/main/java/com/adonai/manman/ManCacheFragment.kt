@@ -33,7 +33,9 @@ import java.sql.SQLException
  * @author Kanedias
  */
 class ManCacheFragment : Fragment() {
+
     private val mBroadcastHandler: BroadcastReceiver = DbBroadcastReceiver()
+
     private lateinit var mSearchCache: SearchView
     private lateinit var mCacheList: ListView
 

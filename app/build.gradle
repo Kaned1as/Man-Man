@@ -22,8 +22,8 @@ android {
         applicationId "com.adonai.manman"
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 172
-        versionName "2.0.0"
+        versionCode 173
+        versionName "2.0.1"
 
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
@@ -97,6 +97,8 @@ dependencies {
     implementation 'com.googlecode.juniversalchardet:juniversalchardet:1.0.3'  // file encoding detector
     implementation 'com.squareup.okhttp3:okhttp:4.9.0'                         // good android http client
     implementation 'org.apache.commons:commons-compress:1.13'                  // uncompress lib (for archives)
+
+    googleplayImplementation("com.android.billingclient:billing:2.1.0")
 
     testImplementation 'junit:junit:4.12'
 

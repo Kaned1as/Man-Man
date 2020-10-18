@@ -20,15 +20,12 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.lifecycleScope
-import androidx.loader.app.LoaderManager
-import androidx.loader.content.Loader
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.adonai.manman.adapters.ChapterContentsArrayAdapter
 import com.adonai.manman.adapters.ChapterContentsCursorAdapter
 import com.adonai.manman.adapters.ChaptersArrayAdapter
 import com.adonai.manman.database.DbProvider
 import com.adonai.manman.entities.ManSectionItem
-import com.adonai.manman.misc.AbstractNetworkAsyncLoader
 import com.j256.ormlite.dao.Dao
 import com.j256.ormlite.misc.TransactionManager
 import com.j256.ormlite.stmt.PreparedQuery
@@ -95,7 +92,7 @@ class ManChaptersFragment : Fragment() {
 
         mListView = root.findViewById<View>(R.id.chapter_commands_list) as ListView
         mListView.adapter = mChaptersAdapter
-        mListView.setOnItemClickListener { parent, view, position, id ->
+        mListView.setOnItemClickListener { parent, _, position, _ ->
             val item = parent.getItemAtPosition(position) as Map.Entry<String, String>
             triggerLoadChapter(item.key)
         }
@@ -271,18 +268,12 @@ class ManChaptersFragment : Fragment() {
 
     override fun onPause() {
         super.onPause()
-        // if we're pausing this fragment and have active listener, we should no longer receive back button feedback
-        if (!userVisibleHint && mListView.onItemClickListener === mPackageClickListener) {
-            LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(mBroadcastHandler)
-        }
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(mBroadcastHandler)
     }
 
     override fun onResume() {
         super.onResume()
-        // if we're resuming this fragment while in command list, we re-register to receive back button feedback
-        if (userVisibleHint && mListView.onItemClickListener === mPackageClickListener) {
-            LocalBroadcastManager.getInstance(requireContext()).registerReceiver(mBroadcastHandler, IntentFilter(MainPagerActivity.BACK_BUTTON_NOTIFY))
-        }
+        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(mBroadcastHandler, IntentFilter(MainPagerActivity.BACK_BUTTON_NOTIFY))
     }
 
     override fun onDestroy() { // if application is forcibly closed
@@ -345,8 +336,6 @@ class ManChaptersFragment : Fragment() {
     }
 
     companion object {
-        const val CHAPTER_INDEX = "chapter.index"
-        const val CHAPTER_PACKAGE = "chapter.package"
         const val CHAPTER_COMMANDS_PREFIX = "https://www.mankier.com"
     }
 }

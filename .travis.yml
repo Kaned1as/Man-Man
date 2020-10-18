@@ -55,7 +55,7 @@ deploy:
   # tag uploads
   - provider: releases
     api_key: "${GITHUB_PUBLISH_OAUTH_TOKEN}"
-    file: app/build/build/outputs/apk/release/app-release.apk
+    file: app/build/outputs/apk/fdroid/release/app-fdroid-release.apk
     skip_cleanup: true
     on:
       tags: true
