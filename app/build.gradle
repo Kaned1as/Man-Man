@@ -22,8 +22,8 @@ android {
         applicationId "com.adonai.manman"
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 171
-        versionName "1.7.1"
+        versionCode 172
+        versionName "2.0.0"
 
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
