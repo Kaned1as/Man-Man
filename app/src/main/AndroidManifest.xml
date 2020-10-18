@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.adonai.manman" >
 
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -11,7 +12,9 @@
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:requestLegacyExternalStorage="true"
-        android:label="@string/app_name">
+        android:resizeableActivity="true"
+        android:label="@string/app_name"
+        tools:ignore="UnusedAttribute">
         <activity
             android:name=".MainPagerActivity"
             android:launchMode="singleInstance"
@@ -26,6 +29,11 @@
         <activity
             android:name=".preferences.PreferencesActivity"
             android:label="@string/settings"/>
+
+        <!-- DeX Mode and Screen Mirroring support -->
+        <meta-data android:name="com.samsung.android.keepalive.density" android:value="true"/>
+        <meta-data android:name="com.samsung.android.multidisplay.keep_process_alive" android:value="true"/>
+
     </application>
 
 </manifest>

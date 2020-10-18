@@ -1,0 +1,6 @@
+- added download local manpage archive ability
+- new theme
+- fixes all around the place
+
+1.5.1
+- added Spanish translation (thanks to auroszx)

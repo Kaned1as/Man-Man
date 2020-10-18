@@ -1,0 +1,1 @@
+Convenient app for searching, browsing linux manpages and explaining commands

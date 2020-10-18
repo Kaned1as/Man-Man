@@ -1,0 +1,315 @@
+{
+  "defaultLanguage" : "ru-RU",
+  "defaultPrice" : {
+    "currency" : "USD",
+    "priceMicros" : "3000000"
+  },
+  "listings" : {
+    "ru-RU" : {
+      "description" : "Скинуться разработчику на улучшение программы и на нелёгкую жизнь",
+      "title" : "3$ разработчику"
+    },
+    "en-US" : {
+      "description" : "Donate 3$ to help development of this product :)",
+      "title" : "3$ for developers"
+    }
+  },
+  "packageName" : "com.adonai.manman",
+  "prices" : {
+    "AU" : {
+      "currency" : "AUD",
+      "priceMicros" : "3820000"
+    },
+    "AT" : {
+      "currency" : "EUR",
+      "priceMicros" : "3170000"
+    },
+    "BE" : {
+      "currency" : "EUR",
+      "priceMicros" : "3190000"
+    },
+    "BG" : {
+      "currency" : "BGN",
+      "priceMicros" : "6190000"
+    },
+    "BO" : {
+      "currency" : "BOB",
+      "priceMicros" : "20730000"
+    },
+    "BR" : {
+      "currency" : "BRL",
+      "priceMicros" : "8600000"
+    },
+    "GB" : {
+      "currency" : "GBP",
+      "priceMicros" : "2340000"
+    },
+    "HU" : {
+      "currency" : "HUF",
+      "priceMicros" : "1021080000"
+    },
+    "VN" : {
+      "currency" : "VND",
+      "priceMicros" : "63990000000"
+    },
+    "DE" : {
+      "currency" : "EUR",
+      "priceMicros" : "3140000"
+    },
+    "HK" : {
+      "currency" : "HKD",
+      "priceMicros" : "23280000"
+    },
+    "GR" : {
+      "currency" : "EUR",
+      "priceMicros" : "3250000"
+    },
+    "DK" : {
+      "currency" : "DKK",
+      "priceMicros" : "24600000"
+    },
+    "EG" : {
+      "currency" : "EGP",
+      "priceMicros" : "22890000"
+    },
+    "IL" : {
+      "currency" : "ILS",
+      "priceMicros" : "11600000"
+    },
+    "IN" : {
+      "currency" : "INR",
+      "priceMicros" : "186300000"
+    },
+    "ID" : {
+      "currency" : "IDR",
+      "priceMicros" : "38436000000"
+    },
+    "IE" : {
+      "currency" : "EUR",
+      "priceMicros" : "3250000"
+    },
+    "ES" : {
+      "currency" : "EUR",
+      "priceMicros" : "3190000"
+    },
+    "IT" : {
+      "currency" : "EUR",
+      "priceMicros" : "3220000"
+    },
+    "CA" : {
+      "currency" : "CAD",
+      "priceMicros" : "3760000"
+    },
+    "CY" : {
+      "currency" : "EUR",
+      "priceMicros" : "3140000"
+    },
+    "CO" : {
+      "currency" : "COP",
+      "priceMicros" : "7376000000"
+    },
+    "CR" : {
+      "currency" : "CRC",
+      "priceMicros" : "1613000000"
+    },
+    "LB" : {
+      "currency" : "LBP",
+      "priceMicros" : "4511000000"
+    },
+    "LT" : {
+      "currency" : "EUR",
+      "priceMicros" : "3190000"
+    },
+    "LU" : {
+      "currency" : "EUR",
+      "priceMicros" : "3090000"
+    },
+    "MY" : {
+      "currency" : "MYR",
+      "priceMicros" : "10860000"
+    },
+    "MA" : {
+      "currency" : "MAD",
+      "priceMicros" : "28560000"
+    },
+    "MX" : {
+      "currency" : "MXN",
+      "priceMicros" : "45090000"
+    },
+    "NL" : {
+      "currency" : "EUR",
+      "priceMicros" : "3190000"
+    },
+    "NZ" : {
+      "currency" : "NZD",
+      "priceMicros" : "3990000"
+    },
+    "NO" : {
+      "currency" : "NOK",
+      "priceMicros" : "22580000"
+    },
+    "AE" : {
+      "currency" : "AED",
+      "priceMicros" : "11020000"
+    },
+    "PK" : {
+      "currency" : "PKR",
+      "priceMicros" : "305000000"
+    },
+    "PE" : {
+      "currency" : "PEN",
+      "priceMicros" : "9260000"
+    },
+    "PL" : {
+      "currency" : "PLN",
+      "priceMicros" : "13520000"
+    },
+    "PT" : {
+      "currency" : "EUR",
+      "priceMicros" : "3250000"
+    },
+    "KR" : {
+      "currency" : "KRW",
+      "priceMicros" : "3306000000"
+    },
+    "RU" : {
+      "currency" : "RUB",
+      "priceMicros" : "185910000"
+    },
+    "RO" : {
+      "currency" : "RON",
+      "priceMicros" : "14580000"
+    },
+    "SA" : {
+      "currency" : "SAR",
+      "priceMicros" : "11250000"
+    },
+    "SG" : {
+      "currency" : "SGD",
+      "priceMicros" : "4080000"
+    },
+    "SK" : {
+      "currency" : "EUR",
+      "priceMicros" : "3170000"
+    },
+    "SI" : {
+      "currency" : "EUR",
+      "priceMicros" : "3220000"
+    },
+    "US" : {
+      "currency" : "USD",
+      "priceMicros" : "3000000"
+    },
+    "TH" : {
+      "currency" : "THB",
+      "priceMicros" : "97620000"
+    },
+    "TW" : {
+      "currency" : "TWD",
+      "priceMicros" : "95000000"
+    },
+    "TR" : {
+      "currency" : "TRY",
+      "priceMicros" : "7360000"
+    },
+    "UA" : {
+      "currency" : "UAH",
+      "priceMicros" : "84000000"
+    },
+    "PH" : {
+      "currency" : "PHP",
+      "priceMicros" : "132690000"
+    },
+    "FI" : {
+      "currency" : "EUR",
+      "priceMicros" : "3270000"
+    },
+    "FR" : {
+      "currency" : "EUR",
+      "priceMicros" : "3170000"
+    },
+    "CZ" : {
+      "currency" : "CZK",
+      "priceMicros" : "87850000"
+    },
+    "CL" : {
+      "currency" : "CLP",
+      "priceMicros" : "1847000000"
+    },
+    "CH" : {
+      "currency" : "CHF",
+      "priceMicros" : "2820000"
+    },
+    "SE" : {
+      "currency" : "SEK",
+      "priceMicros" : "31390000"
+    },
+    "EE" : {
+      "currency" : "EUR",
+      "priceMicros" : "3170000"
+    },
+    "ZA" : {
+      "currency" : "ZAR",
+      "priceMicros" : "34920000"
+    },
+    "JP" : {
+      "currency" : "JPY",
+      "priceMicros" : "357000000"
+    },
+    "LI" : {
+      "currency" : "CHF",
+      "priceMicros" : "2840000"
+    },
+    "KZ" : {
+      "currency" : "KZT",
+      "priceMicros" : "563580000"
+    },
+    "QA" : {
+      "currency" : "QAR",
+      "priceMicros" : "10920000"
+    },
+    "NG" : {
+      "currency" : "NGN",
+      "priceMicros" : "594150000"
+    },
+    "KW" : {
+      "currency" : "USD",
+      "priceMicros" : "3000000"
+    },
+    "BH" : {
+      "currency" : "USD",
+      "priceMicros" : "2990000"
+    },
+    "OM" : {
+      "currency" : "USD",
+      "priceMicros" : "2990000"
+    },
+    "HR" : {
+      "currency" : "HRK",
+      "priceMicros" : "27000000"
+    },
+    "LV" : {
+      "currency" : "EUR",
+      "priceMicros" : "3390000"
+    },
+    "KE" : {
+      "currency" : "KES",
+      "priceMicros" : "300000000"
+    },
+    "KH" : {
+      "currency" : "USD",
+      "priceMicros" : "2990000"
+    },
+    "TZ" : {
+      "currency" : "TZS",
+      "priceMicros" : "7000000000"
+    },
+    "LK" : {
+      "currency" : "LKR",
+      "priceMicros" : "475000000"
+    }
+  },
+  "purchaseType" : "managedUser",
+  "sku" : "small",
+  "status" : "active"
+}
