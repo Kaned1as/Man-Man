@@ -1,24 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:compat="http://schemas.android.com/apk/res-auto">
+
     <item
         android:id="@+id/about_menu_item"
         android:title="@string/about"
-        android:icon="@android:drawable/ic_menu_info_details"
+        android:icon="@drawable/information"
         android:orderInCategory="1"
         compat:showAsAction="never"/>
 
     <item
         android:id="@+id/donate_menu_item"
         android:title="@string/donate"
-        android:icon="@android:drawable/ic_menu_myplaces"
+        android:icon="@drawable/cash"
         android:orderInCategory="2"
         compat:showAsAction="never"/>
 
     <item
         android:id="@+id/settings_menu_item"
         android:title="@string/settings"
-        android:icon="@android:drawable/ic_menu_preferences"
+        android:icon="@drawable/settings"
         android:orderInCategory="3"
         compat:showAsAction="never"/>
 </menu>

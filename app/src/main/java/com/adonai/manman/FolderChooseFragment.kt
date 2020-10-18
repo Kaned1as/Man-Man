@@ -1,5 +1,6 @@
 package com.adonai.manman
 
+import android.Manifest
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
@@ -11,6 +12,8 @@ import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.ListView
 import android.widget.TextView
+import androidx.core.content.ContextCompat
+import androidx.core.content.PermissionChecker
 import androidx.fragment.app.DialogFragment
 import androidx.preference.PreferenceManager
 import com.adonai.manman.misc.FolderAddDialog
@@ -31,6 +34,7 @@ class FolderChooseFragment : DialogFragment() {
 
     private lateinit var mSharedPrefs: SharedPreferences
     private var mStoredFolders  = HashSet<String>()
+    private var pendingAction: (() -> Unit)? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,12 +65,27 @@ class FolderChooseFragment : DialogFragment() {
 
     private inner class AddFolderClickListener : View.OnClickListener {
         override fun onClick(v: View) {
+            val canWrite = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_EXTERNAL_STORAGE)
+            if (canWrite != PermissionChecker.PERMISSION_GRANTED) {
+                requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 0)
+                pendingAction = { onClick(v) }
+                return
+            }
+
             val folder = FolderAddDialog.newInstance {
                 // add dir to the list
                 mStoredFolders.add(it.absolutePath)
                 syncFolderList()
             }
             folder.show(parentFragmentManager, "FolderChooseFragment")
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        val idx = permissions.indexOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+        if (idx != -1) {
+            if(grantResults[idx] == PermissionChecker.PERMISSION_GRANTED)
+                pendingAction?.invoke()
         }
     }
 

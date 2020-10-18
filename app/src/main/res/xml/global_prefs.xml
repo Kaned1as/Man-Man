@@ -1,28 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:compat="http://schemas.android.com/apk/res-auto">
 
     <Preference
-        android:icon="@android:drawable/ic_menu_delete"
+        android:icon="@drawable/trash_outlined"
         android:key="clear.cache"
         android:title="@string/clear_cache"
         android:summary="@string/clear_cache_sum"/>
 
     <Preference
-        android:icon="@android:drawable/ic_menu_delete"
+        android:icon="@drawable/trash_outlined"
         android:key="delete.local.archive"
         android:title="@string/delete_local_archive"
         android:summary="@string/delete_local_archive_sum"/>
 
     <EditTextPreference
-            android:icon="@android:drawable/ic_menu_edit"
-            android:defaultValue="12"
-            android:digits="1234567890"
-            android:key="webview.font.size"
-            android:summary="@string/webview_font_size_sum"
-            android:title="@string/webview_font_size"/>
+        android:icon="@drawable/edit"
+        android:defaultValue="12"
+        android:digits="1234567890"
+        android:key="webview.font.size"
+        android:summary="@string/webview_font_size_sum"
+        android:title="@string/webview_font_size"/>
 
     <ListPreference
-        android:icon="@android:drawable/ic_menu_gallery"
+        android:icon="@drawable/image"
         android:key="app.theme"
         android:title="@string/app_theme"
         android:summary="@string/app_theme_summary"
@@ -30,7 +32,7 @@
         android:entryValues="@array/preference_themes_values" />
 
     <ListPreference
-        android:icon="@android:drawable/ic_menu_view"
+        android:icon="@drawable/eye"
         android:key="app.default.tab"
         android:title="@string/default_tab"
         android:summary="@string/default_tab_summary"

@@ -8,6 +8,6 @@
     android:maxHeight="4dp"
     android:minHeight="4dp"
     android:indeterminate="true"
-    custom:spb_color="?attr/tint_inverse"
+    custom:spb_color="?attr/tint"
     custom:spb_mirror_mode="true"
     custom:spb_progressiveStart_activated="true"/>

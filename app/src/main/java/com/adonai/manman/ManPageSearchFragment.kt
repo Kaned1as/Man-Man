@@ -60,7 +60,7 @@ class ManPageSearchFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        cachedChapters = Utils.parseStringArray(activity, R.array.man_page_chapters)
+        cachedChapters = Utils.parseStringArray(requireContext(), R.array.man_page_chapters)
 
         // Inflate the layout for this fragment
         val root = inflater.inflate(R.layout.fragment_man_page_search, container, false)
@@ -107,7 +107,7 @@ class ManPageSearchFragment : Fragment() {
                 if (!immediate)
                     delay(800)
 
-                mSearchImage.setImageResource(Utils.getThemedResource(activity, R.attr.loading_icon_resource))
+                mSearchImage.setImageResource(Utils.getThemedResource(requireContext(), R.attr.loading_icon_resource))
 
                 val address = URLEncoder.encode(mSearchView.query.toString(), "UTF-8")
                 val client = OkHttpClient()

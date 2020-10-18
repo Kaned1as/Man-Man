@@ -21,6 +21,7 @@ import android.webkit.WebViewClient
 import android.widget.*
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
+import androidx.core.graphics.ColorUtils
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.lifecycleScope
@@ -84,6 +85,7 @@ class ManPageDialogFragment : Fragment() {
         mContent.settings.javaScriptEnabled = true
         mContent.settings.minimumFontSize = fontFromProperties
         mSlider = root.findViewById<View>(R.id.sliding_pane) as PassiveSlidingPane
+        mSlider.sliderFadeColor = ColorUtils.setAlphaComponent(Utils.getThemedValue(requireContext(), R.attr.background_color), 200)
         mSlider.setTrackedView(mContent)
 
         // search-specific
@@ -115,7 +117,7 @@ class ManPageDialogFragment : Fragment() {
             val manpage = withContext(Dispatchers.IO) { doLoadContent(addressUrl, commandName) }
             if (manpage != null) {
                 mContent.loadDataWithBaseURL(addressUrl, Utils.getWebWithCss(requireContext(), manpage.url, manpage.webContent), "text/html", "UTF-8", null)
-                mContent.setBackgroundColor(Utils.getThemedValue(activity, R.attr.fill_color)) // prevent flickering
+                mContent.setBackgroundColor(Utils.getThemedValue(requireContext(), R.attr.fill_color)) // prevent flickering
                 fillLinkPane(manpage.links)
 
                 // show the actual content on web page
@@ -260,9 +262,10 @@ class ManPageDialogFragment : Fragment() {
         val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         if (visibility == View.VISIBLE) {
             mSearchEdit.requestFocus()
-            imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0)
+            imm.showSoftInput(mSearchEdit, 0)
         } else {
-            imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0)
+            mSearchEdit.clearFocus()
+            imm.hideSoftInputFromWindow(mSearchEdit.windowToken, 0)
         }
     }
 

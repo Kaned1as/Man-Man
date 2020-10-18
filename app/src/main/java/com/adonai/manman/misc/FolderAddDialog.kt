@@ -5,7 +5,6 @@ import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
 import android.os.Bundle
-import android.os.Environment
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
@@ -27,9 +26,6 @@ import java.util.*
  * @author Kanedias
  */
 class FolderAddDialog : DialogFragment(), DialogInterface.OnClickListener, OnItemClickListener {
-    interface ResultFolderListener {
-        fun receiveResult(resultDir: File?)
-    }
 
     private lateinit var mFolderList: ListView
     private lateinit var mFolderTitle: TextView
@@ -38,8 +34,11 @@ class FolderAddDialog : DialogFragment(), DialogInterface.OnClickListener, OnIte
     private lateinit var listener: (dir: File) -> Unit
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val external = Environment.getExternalStorageDirectory()
-        pwd = if (external.exists() && external.canRead()) external else File("/")
+        val external = requireContext().getExternalFilesDir(null)
+        pwd = when {
+            external != null && external.exists() && external.canRead() -> external
+            else -> File("/")
+        }
 
         val folderSelector = View.inflate(activity, R.layout.folder_selector_dialog, null)
         mFolderList = folderSelector.findViewById<View>(R.id.folder_list) as ListView

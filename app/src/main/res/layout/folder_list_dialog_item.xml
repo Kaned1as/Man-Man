@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="horizontal"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="horizontal"
               android:layout_width="match_parent"
               android:layout_height="wrap_content">
 
@@ -15,15 +16,14 @@
 
     <ImageView
         android:id="@+id/remove_local_folder"
-        android:src="@drawable/ic_menu_add"
+        android:src="@drawable/add"
         android:scaleType="fitCenter"
         android:rotation="45"
         android:scaleX="0.8"
         android:scaleY="0.8"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:tint="?attr/tint_inverse"
         android:layout_gravity="center_vertical"
-        android:contentDescription="@string/remove"/>
+        android:contentDescription="@string/remove" />
 
 </LinearLayout>

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -30,9 +31,8 @@
                 android:layout_width="64dp"
                 android:layout_height="64dp"
                 android:layout_gravity="center_horizontal"
-                android:src="@drawable/ic_settings"
-                android:tint="?attr/tint_inverse"
-                android:contentDescription="@string/settings"/>
+                android:src="@drawable/settings"
+                android:contentDescription="@string/settings" />
 
         </LinearLayout>
 

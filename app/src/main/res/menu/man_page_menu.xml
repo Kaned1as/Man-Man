@@ -5,7 +5,7 @@
     <item
         android:id="@+id/show_search_bar"
         android:title="@string/search"
-        android:icon="@android:drawable/ic_menu_search"
+        android:icon="@drawable/search"
         compat:showAsAction="always"/>
-    
+
 </menu>
