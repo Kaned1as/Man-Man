@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
+apply plugin: 'com.github.triplet.play'
 
 android {
     compileSdkVersion 29
@@ -29,17 +30,19 @@ android {
 
     signingConfigs {
         release {
-            storeFile file("/home/adonai/devel/keystore/Adonai")
-            storePassword "release"
-            keyAlias "adonai"
-            keyPassword "release"
+            storeFile file('misc/signing.keystore')
+            storePassword System.getenv('SIGNING_KEYSTORE_PASSWORD')
+            keyAlias 'release-key'
+            keyPassword System.getenv('RELEASE_KEY_PASSWORD')
         }
     }
 
     buildTypes {
+
         debug {
             applicationIdSuffix ".debug"
         }
+
         release {
             debuggable false
             signingConfig signingConfigs.release
@@ -70,6 +73,11 @@ android {
     }
 }
 
+play {
+    serviceAccountCredentials = file("misc/android-publisher-account.json")
+    track = 'production'
+}
+
 dependencies {
     // kotlin-related stuff
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
@@ -78,7 +86,7 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'             // support library (ViewPager etc.)
     implementation 'androidx.appcompat:appcompat:1.2.0'                  // support library (material design)
     implementation 'androidx.cardview:cardview:1.0.0'                    // support library (material design)
-    implementation 'androidx.preference:preference:1.1.1'                // preference fragment compatibility
+    implementation 'androidx.preference:preference-ktx:1.1.1'            // preference fragment compatibility
     implementation 'com.google.android.material:material:1.2.1'
     // support library (material design)
     implementation 'com.jpardogo.materialtabstrip:library:1.1.1'               // header tabs bar

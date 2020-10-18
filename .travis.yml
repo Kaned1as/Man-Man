@@ -1,45 +1,64 @@
 language: android
+dist: trusty
 
 jdk:
   - oraclejdk8
 
+addons:
+  apt:
+    update: true
+
 env:
   global:
-    # install timeout in minutes (2 minutes by default)
-    - ADB_INSTALL_TIMEOUT=8
+    - ANDROID_COMPILE_SDK=29
+    - ANDROID_BUILD_TOOLS=29.0.3
+    - GOOGLE_PUBLISH_JSON=app/misc/android-publisher-account.json
 
 android:
   components:
-    # use the latest revision of Android SDK Tools
-    - platform-tools
     - tools
-
-    # The BuildTools version used
-    - build-tools-24.0.1
-
-    # The SDK version used
-    - android-24
-
-    # Additional components
+    - tools
+    - platform-tools
     - extra-google-m2repository
     - extra-android-m2repository
+    - build-tools-28.0.3
+    - android-28
 
-    # Emulator image for test run
-    - sys-img-armeabi-v7a-android-21
+  licenses:
+    - android-sdk-license-.+
+    - android-sdk-preview-license-.+
 
 before_cache:
-  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
 cache:
   directories:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
+    - $HOME/.android/build-cache
 
-before_script:
-  - echo no | android create avd --force -n test -t android-21 --abi armeabi-v7a
-  - emulator -avd test -no-audio -no-window -no-boot-anim &
-  - android-wait-for-emulator
-  - adb devices
-  - adb shell input keyevent 82 &
+before_install:
+  - sudo apt-get install -y gnupg2
+  - gpg --batch --decrypt --output ${GOOGLE_PUBLISH_JSON} --passphrase ${GOOGLE_ACCOUNT_DECRYPTION_KEY} ${GOOGLE_PUBLISH_JSON}.gpg
+  - yes | sdkmanager "platforms;android-${ANDROID_COMPILE_SDK}"
+  - yes | sdkmanager "platform-tools"
+  - yes | sdkmanager "build-tools;${ANDROID_BUILD_TOOLS}"
+  - yes | sdkmanager "extras;android;m2repository"
+  - yes | sdkmanager "extras;google;m2repository"
 
 script:
-  - ./gradlew -PdisablePreDex --info connectedFdroidDebugAndroidTest
+  - "./gradlew --info assembleRelease"
+
+deploy:
+  - provider: releases
+    api_key: "${GITHUB_PUBLISH_OAUTH_TOKEN}"
+    file: app/build/build/outputs/apk/release/app-release.apk
+    skip_cleanup: true
+    on:
+      tags: true
+  - provider: script
+    script: ./gradlew app:publishApkRelease
+    skip_cleanup: true
+    on:
+      tags: true
