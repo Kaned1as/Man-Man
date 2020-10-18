@@ -30,7 +30,7 @@ import java.sql.SQLException
  * Fragment to show cached man pages list
  * These pages can be viewed without touching the network
  *
- * @author Oleg Chernovskiy
+ * @author Kanedias
  */
 class ManCacheFragment : Fragment() {
     private val mBroadcastHandler: BroadcastReceiver = DbBroadcastReceiver()

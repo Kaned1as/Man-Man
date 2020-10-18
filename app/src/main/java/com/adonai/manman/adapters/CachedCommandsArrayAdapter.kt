@@ -16,10 +16,10 @@ import com.adonai.manman.entities.ManPage
 
 /**
  * Array adapter for showing cached commands in ListView
- * The data retrieval is done through [ManCacheFragment.CacheBrowseCallback]
+ * The data retrieval is done through [ManCacheFragment.doReloadCache]
  *
- * @see android.widget.ArrayAdapter
- * @see com.adonai.manman.entities.ManPage
+ * @see ArrayAdapter
+ * @see ManPage
  *
  * @author Kanedias
  */

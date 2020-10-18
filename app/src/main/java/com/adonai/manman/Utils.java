@@ -30,7 +30,7 @@ import java.util.zip.GZIPInputStream;
 /**
  * Utility class for wrapping useful static functions
  *
- * @author Oleg Chernovskiy
+ * @author Kanedias
  */
 public class Utils {
 

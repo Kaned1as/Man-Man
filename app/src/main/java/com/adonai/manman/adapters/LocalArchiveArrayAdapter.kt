@@ -9,18 +9,18 @@ import android.widget.Filter
 import android.widget.ImageView
 import android.widget.TextView
 import com.adonai.manman.R
+import com.adonai.manman.ManLocalArchiveFragment
 import java.io.File
 import java.util.*
 
 /**
  * Array adapter for showing files in local man page archive
- * The data retrieval is done through [com.adonai.manman.ManLocalArchiveFragment.LocalArchiveParserCallback]
+ * The data retrieval is done through [ManLocalArchiveFragment.doLoadContent]
  *
- * @see android.widget.ArrayAdapter
+ * @see ArrayAdapter
+ * @see File
  *
- * @see java.io.File
- *
- * @author Oleg Chernovskiy
+ * @author Kanedias
  */
 class LocalArchiveArrayAdapter(context: Context, resource: Int, textViewResourceId: Int, private val originals: List<File>) : ArrayAdapter<File>(context, resource, textViewResourceId, originals) {
 

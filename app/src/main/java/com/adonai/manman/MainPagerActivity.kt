@@ -22,7 +22,7 @@ import com.astuetz.PagerSlidingTabStrip
 /**
  * Main activity where everything takes place
  *
- * @author Oleg Chernovskiy
+ * @author Kanedias
  */
 class MainPagerActivity : AppCompatActivity() {
 

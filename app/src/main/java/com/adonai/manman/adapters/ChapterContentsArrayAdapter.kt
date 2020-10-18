@@ -8,6 +8,7 @@ import android.widget.ImageView
 import android.widget.SectionIndexer
 import android.widget.TextView
 import com.adonai.manman.R
+import com.adonai.manman.ManChaptersFragment
 import com.adonai.manman.Utils
 import com.adonai.manman.entities.ManSectionIndex
 import com.adonai.manman.entities.ManSectionItem
@@ -17,11 +18,11 @@ import com.adonai.manman.misc.ManChapterItemOnClickListener
  * Array adapter for showing commands with their description in ListView
  * It's convenient whet all the data is retrieved via network,
  * so we have complete command list at hand
- * <br></br>
- * The data retrieval is done through [com.adonai.manman.ManChaptersFragment.RetrieveContentsCallback]
  *
- * @see android.widget.ArrayAdapter
- * @see com.adonai.manman.entities.ManSectionItem
+ * The data retrieval is done through [ManChaptersFragment.loadChapterFromNetwork]
+ *
+ * @see ArrayAdapter
+ * @see ManSectionItem
  *
  * @author Kanedias
  */

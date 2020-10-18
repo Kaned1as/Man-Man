@@ -11,6 +11,7 @@ import com.adonai.manman.R
 import com.adonai.manman.database.DbProvider
 import com.adonai.manman.entities.ManSectionIndex
 import com.adonai.manman.entities.ManSectionItem
+import com.adonai.manman.ManChaptersFragment
 import com.adonai.manman.misc.ManChapterItemOnClickListener
 import com.j256.ormlite.dao.Dao
 import com.j256.ormlite.stmt.PreparedQuery
@@ -19,8 +20,8 @@ import com.j256.ormlite.stmt.PreparedQuery
  * Cursor adapter for showing large lists of commands from DB
  * For example, General commands chapter has about 14900 ones
  * so we should load only a window of those
- * <br></br>
- * The data retrieval is done through [com.adonai.manman.ManChaptersFragment.RetrieveContentsCallback]
+ *
+ * The data retrieval is done through [ManChaptersFragment.doLoadChapter]
  *
  * @see OrmLiteCursorAdapter
  *

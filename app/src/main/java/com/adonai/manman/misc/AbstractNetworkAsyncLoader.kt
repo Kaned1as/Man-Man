@@ -8,7 +8,7 @@ import androidx.loader.content.AsyncTaskLoader
  * [Implementing loaders](http://www.androiddesignpatterns.com/2012/08/implementing-loaders.html)
  * blog post
  *
- * @author Oleg Chernovskiy
+ * @author Kanedias
  */
 abstract class AbstractNetworkAsyncLoader<D>(context: Context) : AsyncTaskLoader<D?>(context) {
     private var mData: D? = null

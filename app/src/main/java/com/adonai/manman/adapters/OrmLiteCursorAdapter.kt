@@ -1,6 +1,5 @@
 package com.adonai.manman.adapters
 
-import android.app.Activity
 import android.content.Context
 import android.database.Cursor
 import android.widget.BaseAdapter
@@ -12,11 +11,11 @@ import java.io.IOException
 
 /**
  * Convenient class for creating ListView adapters
- * <br></br>
+ *
  * This task could be achieved using just ArrayAdapter with OrmLite query results
  * but for some chapters with 15000 commands in them it takes too much time
  *
- * @author Oleg Chernovskiy
+ * @author Kanedias
  */
 abstract class OrmLiteCursorAdapter<T>(protected var mContext: Context, private val mDao: Dao<T, *>, private val mQuery: PreparedQuery<T>) : BaseAdapter() {
     protected var mCursor: CloseableIterator<T>? = null

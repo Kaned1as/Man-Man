@@ -2,6 +2,7 @@ package com.adonai.manman.entities
 
 import com.j256.ormlite.field.DatabaseField
 import com.j256.ormlite.table.DatabaseTable
+import com.adonai.manman.ManChaptersFragment
 
 /**
  * Class representing static alphabet indexes on chapters
@@ -9,7 +10,7 @@ import com.j256.ormlite.table.DatabaseTable
  * [android.widget.AlphabetIndexer] is very laggy on huge tables with
  * about 15000 items, so we use this class for retrieving indexes once and for all
  *
- * @see com.adonai.manman.ManChaptersFragment
+ * @see ManChaptersFragment
  *
  * @author Kanedias
  */

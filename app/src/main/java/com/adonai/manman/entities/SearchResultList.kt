@@ -14,6 +14,8 @@ import com.google.gson.annotations.SerializedName
 class SearchResultList {
     @SerializedName("q")
     lateinit var query: String
+
     var results: List<SearchResult> = emptyList()
+
     var truncated = false
 }

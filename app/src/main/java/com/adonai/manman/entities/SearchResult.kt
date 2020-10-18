@@ -1,9 +1,11 @@
 package com.adonai.manman.entities
 
+import com.google.gson.Gson
+
 /**
  * Object representing one of search results in corresponding API call
  *
- * @see com.google.gson.Gson
+ * @see Gson
  *
  * @author Kanedias
  */

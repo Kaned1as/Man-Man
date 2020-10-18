@@ -20,7 +20,7 @@ import java.util.*
  * A dialog for showing and managing list of watched folders of local man archive.
  * Each folder is parsed recursively to retrieve list of man pages afterwards
  *
- * @see com.adonai.manman.ManLocalArchiveFragment
+ * @see ManLocalArchiveFragment
  *
  * @author Kanedias
  */
