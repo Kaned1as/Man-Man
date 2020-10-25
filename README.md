@@ -18,6 +18,11 @@ man pages. It provides a fast way to search, browse and save man pages on your a
         alt="Get it on Google Play" height="60"/>
 </a>
 
+Screenshots
+-----------
+
+<img src="./app/src/googleplay/play/listings/en-US/graphics/phone-screenshots/1.png" alt="search page" width="200" /> <img src="./app/src/googleplay/play/listings/en-US/graphics/phone-screenshots/2.png" alt="One-liner search" width="200" /> <img src="./app/src/googleplay/play/listings/en-US/graphics/phone-screenshots/7.png" alt="Contents" width="200" />
+
 Features
 --------
 
@@ -30,8 +35,9 @@ Features
 Donate
 --------
 
-[<img alt="Patreon Page" src="https://s3.amazonaws.com/patreon_public_assets/toolbox/patreon.png" height="40"/>](https://www.patreon.com/kanedias)
-
+[<img alt="Patreon" src="https://user-images.githubusercontent.com/863272/97095951-23960e80-1655-11eb-922e-376b9a541478.png" height="40"/>](https://www.patreon.com/kanedias)
+[<img alt="PayPal" src="https://user-images.githubusercontent.com/863272/97095946-17aa4c80-1655-11eb-8c8f-afd8ebcabb44.png" height="40"/>](https://paypal.me/kaned1as)
+[<img alt="Liberapay" src="https://user-images.githubusercontent.com/863272/97095949-2133b480-1655-11eb-8550-24a1dc5da410.png" height="40">](https://liberapay.com/Kanedias/donate)
 
 In progress
 -----------
