@@ -5,14 +5,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/app_toolbar"
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:theme="?attr/actionbar_theme"
-        custom:elevation="4dp"/>
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true">
 
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/app_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:theme="?attr/toolbarOverrideStyle"
+            android:popupTheme="?attr/toolbarPopupOverrideStyle"
+            custom:elevation="4dp"/>
+
+    </com.google.android.material.appbar.AppBarLayout>
 
     <FrameLayout
         android:id="@+id/content_frame"

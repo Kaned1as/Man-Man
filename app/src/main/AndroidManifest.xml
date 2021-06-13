@@ -8,7 +8,7 @@
 
     <application
         android:name=".ManApplication"
-        android:theme="@style/Light"
+        android:theme="@style/AppThemeLight"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:requestLegacyExternalStorage="true"

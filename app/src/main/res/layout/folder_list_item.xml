@@ -10,4 +10,5 @@
     android:maxLines="1"
     android:fadingEdge="horizontal"
     android:fadingEdgeLength="10dip"
+    android:textAppearance="?android:textAppearanceListItem"
     app:drawableStartCompat="@drawable/folder" />

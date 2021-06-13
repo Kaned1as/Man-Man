@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
@@ -17,7 +16,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
 import androidx.viewpager.widget.ViewPager
 import com.adonai.manman.preferences.PreferencesActivity
-import com.astuetz.PagerSlidingTabStrip
+import com.google.android.material.tabs.TabLayout
 
 /**
  * Main activity where everything takes place
@@ -41,8 +40,8 @@ class MainPagerActivity : AppCompatActivity() {
         setSupportActionBar(mActionBar)
         mPager.adapter = ManFragmentPagerAdapter(supportFragmentManager)
 
-        val tabs = findViewById<View>(R.id.tabs) as PagerSlidingTabStrip
-        tabs.setViewPager(mPager)
+        val tabs = findViewById<View>(R.id.tabs) as TabLayout
+        tabs.setupWithViewPager(mPager)
 
         // setting up vending
         mDonateHelper = DonateHelper(this)

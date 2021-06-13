@@ -12,7 +12,7 @@
         android:layout_weight="1"
         android:layout_gravity="center_vertical"
         android:gravity="center"
-        android:textAppearance="?android:textAppearanceSmall"/>
+        android:textAppearance="?android:textAppearanceListItemSmall"/>
 
     <ImageView
         android:id="@+id/remove_local_folder"

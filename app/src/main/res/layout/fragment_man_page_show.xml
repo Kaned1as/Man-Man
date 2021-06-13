@@ -1,23 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ViewFlipper
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:compat="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/flipper"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:inAnimation="@android:anim/fade_in"
     android:outAnimation="@android:anim/fade_out"
-    android:background="?attr/background_color"
-    android:id="@+id/flipper">
+    android:background="?android:attr/colorBackground">
 
     <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:id="@+id/wait_icon"
-        android:src="?attr/loading_icon_resource"
-        android:scaleX="2.0"
-        android:scaleY="2.0"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/wait"
         android:layout_gravity="center"
-        android:contentDescription="@string/loading" />
+        android:contentDescription="@string/loading"
+        app:tint="?android:attr/colorAccent"/>
 
     <com.adonai.manman.views.PassiveSlidingPane
         android:id="@+id/sliding_pane"
@@ -27,7 +26,6 @@
         <ScrollView
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:background="?attr/background_color"
             android:padding="5dp">
 
             <LinearLayout
@@ -56,7 +54,6 @@
                 android:id="@+id/search_bar_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="?attr/background_color"
                 android:visibility="gone">
 
                 <ImageView

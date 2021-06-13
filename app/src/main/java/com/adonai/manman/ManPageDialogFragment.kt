@@ -78,22 +78,25 @@ class ManPageDialogFragment : Fragment() {
         mPrefs.registerOnSharedPreferenceChangeListener(mPrefChangeListener)
 
         val root = inflater.inflate(R.layout.fragment_man_page_show, container, false)
-        mLinkContainer = root.findViewById<View>(R.id.link_list) as LinearLayout
-        mFlipper = root.findViewById<View>(R.id.flipper) as ViewFlipper
-        mContent = root.findViewById<View>(R.id.man_content_web) as WebView
+
+        mLinkContainer = root.findViewById(R.id.link_list)
+        mFlipper = root.findViewById(R.id.flipper)
+
+        mContent = root.findViewById(R.id.man_content_web)
         mContent.webViewClient = ManPageChromeClient()
         mContent.settings.javaScriptEnabled = true
         mContent.settings.minimumFontSize = fontFromProperties
-        mSlider = root.findViewById<View>(R.id.sliding_pane) as PassiveSlidingPane
+
+        mSlider = root.findViewById(R.id.sliding_pane)
         mSlider.sliderFadeColor = ColorUtils.setAlphaComponent(Utils.getThemedValue(requireContext(), R.attr.background_color), 200)
         mSlider.setTrackedView(mContent)
 
         // search-specific
-        mSearchContainer = root.findViewById<View>(R.id.search_bar_layout) as LinearLayout
-        mSearchEdit = mSearchContainer.findViewById<View>(R.id.search_edit) as EditText
-        mCloseSearchBar = mSearchContainer.findViewById<View>(R.id.close_search_bar) as ImageView
-        mFindNext = mSearchContainer.findViewById<View>(R.id.find_next_occurrence) as ImageView
-        mFindPrevious = mSearchContainer.findViewById<View>(R.id.find_previous_occurrence) as ImageView
+        mSearchContainer = root.findViewById(R.id.search_bar_layout)
+        mSearchEdit = mSearchContainer.findViewById(R.id.search_edit)
+        mCloseSearchBar = mSearchContainer.findViewById(R.id.close_search_bar)
+        mFindNext = mSearchContainer.findViewById(R.id.find_next_occurrence)
+        mFindPrevious = mSearchContainer.findViewById(R.id.find_previous_occurrence)
         mCloseSearchBar.setOnClickListener(SearchBarCloser())
         mSearchEdit.addTextChangedListener(SearchExecutor())
         mFindNext.setOnClickListener(SearchFurtherExecutor(true))
@@ -117,7 +120,7 @@ class ManPageDialogFragment : Fragment() {
             val manpage = withContext(Dispatchers.IO) { doLoadContent(addressUrl, commandName) }
             if (manpage != null) {
                 mContent.loadDataWithBaseURL(addressUrl, Utils.getWebWithCss(requireContext(), manpage.url, manpage.webContent), "text/html", "UTF-8", null)
-                mContent.setBackgroundColor(Utils.getThemedValue(requireContext(), R.attr.fill_color)) // prevent flickering
+                mContent.setBackgroundColor(Utils.getThemedValue(requireContext(), R.attr.background_color)) // prevent flickering
                 fillLinkPane(manpage.links)
 
                 // show the actual content on web page
@@ -418,7 +421,6 @@ class ManPageDialogFragment : Fragment() {
         private const val PARAM_ADDRESS = "param.address"
         private const val PARAM_NAME = "param.name"
 
-        @JvmStatic
         fun newInstance(commandName: String, address: String): ManPageDialogFragment {
             val fragment = ManPageDialogFragment()
             val args = Bundle()

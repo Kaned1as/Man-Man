@@ -18,7 +18,7 @@
             android:orientation="horizontal"
             android:descendantFocusability="blocksDescendants"
             android:padding="10dp"
-            android:divider="?attr/vertical_divider_resource"
+            android:divider="@drawable/vertical_divider_dark"
             android:dividerPadding="5dp"
             android:showDividers="middle">
 

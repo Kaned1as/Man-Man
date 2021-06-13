@@ -1,79 +1,54 @@
 <resources>
     <attr name="link_color" format="reference"/>
     <attr name="background_color" format="reference"/>
-    <attr name="loading_icon_resource" format="reference"/>
-    <attr name="fill_color" format="reference"/>
     <attr name="vertical_divider_resource" format="reference"/>
-    <attr name="semi_transparent_divider_color" format="reference"/>
-    <attr name="actionbar_theme" format="reference"/>
+
+    <attr name="toolbarOverrideStyle" format="reference" />
+    <attr name="toolbarPopupOverrideStyle" format="reference" />
 
     <!-- Base application theme. -->
-    <style name="Light" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <item name="actionbar_theme">@style/DarkToolbar</item>
+    <style name="AppThemeLight" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <!-- colorPrimary: The primary brand color of your app, used most predominantly in theming -->
+        <item name="colorPrimary">@color/md_grey_900</item>
+        <item name="colorPrimaryDark">@color/md_grey_900D</item>
+        <item name="colorAccent">@color/md_grey_600</item>
+        <!-- colorPrimaryVariant: A lighter/darker variant of your primary brand color, used sparingly in theming -->
+        <item name="colorPrimaryVariant">@color/md_grey_600</item>
+        <!-- colorOnPrimary: The color used for elements displayed on top of your primary colors (eg. Text and icons, often white or semi-transparent black depending on accessibility) -->
+        <item name="colorOnPrimary">@color/md_almost_white</item>
 
-        <item name="link_color">@color/link_color_dark</item>
-        <item name="background_color">@color/background_light</item>
-        <item name="loading_icon_resource">@drawable/rotating_wait_dark</item>
-        <item name="vertical_divider_resource">@drawable/vertical_divider_dark</item>
-        <item name="fill_color">@android:color/white</item>
-        <item name="semi_transparent_divider_color">@color/semi_transparent_dark</item>
+        <!-- colorSecondary: The secondary brand color of your app, used mostly as an accent for certain widgets that need to stand out -->
+        <item name="colorSecondary">@color/md_indigo_600</item>
+        <!-- colorSecondaryVariant: A lighter/darker variant of your secondary brand color, used sparingly in theming -->
+        <item name="colorSecondaryVariant">@color/md_indigo_800</item>
+        <!-- colorOnSecondary: The color used for elements displayed on top of your secondary colors -->
+        <item name="colorOnSecondary">@color/md_almost_white</item>
 
-        <item name="android:tint">@color/tint_color_black</item>
-        <item name="android:textColorPrimary">@color/alt_text_color_dark</item>
+        <!-- colorError: The color used for errors (often a shade of red) -->
+        <item name="colorError">@color/md_deep_orange_800</item>
+        <!-- colorOnError: The color used for elements displayed on top of your error color -->
+        <item name="colorOnError">@color/md_almost_white</item>
 
-        <item name="colorPrimary">@color/primary</item> <!-- used for the default action bar background -->
-        <item name="colorPrimaryDark">@color/primary_dark</item> <!-- used for the status bar -->
-        <item name="colorAccent">@color/accent</item> <!-- used to tint widgets -->
+        <!-- colorSurface: The color used for surfaces (i.e. Material “sheets”) -->
+        <item name="colorSurface">@color/md_grey_50</item>
+        <!-- colorOnSurface: The color used for elements displayed on top of your surface color -->
+        <item name="colorOnSurface">@color/md_grey_900</item>
+
+        <!-- android:colorBackground: The color behind all other screen content -->
+        <item name="android:colorBackground">@android:color/white</item>
+        <!-- colorOnBackground: The color used for elements displayed on top of your background color -->
+        <item name="colorOnBackground">@color/md_grey_700</item>
+
+        <item name="toolbarOverrideStyle">@style/Theme.MaterialComponents.NoActionBar</item>
+        <item name="toolbarPopupOverrideStyle">@style/Theme.MaterialComponents.Light.NoActionBar</item>
     </style>
 
-    <style name="DarkToolbar" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
-        <item name="android:tint">@android:color/white</item>
-        <item name="popupTheme">@style/Theme.MaterialComponents</item>
+    <style name="AppThemeDark" parent="Theme.MaterialComponents.NoActionBar">
+
     </style>
 
-    <style name="Dark" parent="Theme.MaterialComponents.NoActionBar">
-        <item name="actionbar_theme">@style/DarkToolbar</item>
+    <style name="AppThemeDarkGreen" parent="Theme.MaterialComponents.NoActionBar">
 
-        <item name="link_color">@color/link_color_light</item>
-        <item name="background_color">@color/background_dark</item>
-        <item name="loading_icon_resource">@drawable/rotating_wait_light</item>
-        <item name="vertical_divider_resource">@drawable/vertical_divider_light</item>
-        <item name="fill_color">@android:color/black</item>
-        <item name="semi_transparent_divider_color">@color/semi_transparent_light</item>
-
-        <item name="android:tint">@color/tint_color_white</item>
-        <item name="android:textColorPrimary">@color/alt_text_color_light</item>
-
-        <item name="colorPrimary">@color/primary</item> <!-- used for the default action bar background -->
-        <item name="colorPrimaryDark">@color/primary_dark</item> <!-- used for the status bar -->
-        <item name="colorAccent">@color/accent</item> <!-- used to tint widgets -->
-    </style>
-
-    <style name="Green" parent="Theme.MaterialComponents.NoActionBar">
-        <item name="actionbar_theme">@style/GreenToolbar</item>
-
-        <item name="link_color">@color/link_color_green</item>
-        <item name="background_color">@color/background_green</item>
-        <item name="loading_icon_resource">@drawable/rotating_wait_light</item>
-        <item name="vertical_divider_resource">@drawable/vertical_divider_light</item>
-        <item name="fill_color">@android:color/black</item>
-        <item name="semi_transparent_divider_color">@color/semi_transparent_light</item>
-
-        <item name="android:tint">@color/tint_color_green</item>
-        <item name="android:textColorPrimary">@color/text_color_green</item>
-        <item name="android:textColorSecondary">@color/alt_text_color_green</item>
-        <item name="android:textColor">@color/text_color_green</item>
-        <item name="android:textColorHint">@color/alt_text_color_green</item>
-
-        <item name="colorPrimary">@color/primary</item> <!-- used for the default action bar background -->
-        <item name="colorPrimaryDark">@color/primary_dark</item> <!-- used for the status bar -->
-        <item name="colorAccent">@color/accent_green</item> <!-- used to tint widgets -->
-    </style>
-
-    <style name="GreenToolbar" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
-        <item name="android:textColorPrimary">@color/text_color_green</item>
-        <item name="android:tint">@color/tint_color_green</item>
-        <item name="popupTheme">@style/Theme.MaterialComponents</item>
     </style>
 
 </resources>

@@ -122,9 +122,9 @@ object Utils {
         val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
         val theme = prefs.getString("app.theme", "light")
         when (theme) {
-            "light" -> activity.setTheme(R.style.Light)
-            "dark" -> activity.setTheme(R.style.Dark)
-            "green" -> activity.setTheme(R.style.Green)
+            "light" -> activity.setTheme(R.style.AppThemeLight)
+            "dark" -> activity.setTheme(R.style.AppThemeDark)
+            "green" -> activity.setTheme(R.style.AppThemeDarkGreen)
         }
     }
 }

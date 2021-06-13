@@ -6,16 +6,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/app_toolbar"
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:theme="?attr/actionbar_theme"
-        custom:elevation="4dp"/>
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true">
 
-    <!-- this frame is replaced when other fragments (e.g. man page view) request focus -->
-    <!-- so don't mind the "UselessParent" warning -->
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/app_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:theme="?attr/toolbarOverrideStyle"
+            android:popupTheme="?attr/toolbarPopupOverrideStyle"
+            custom:elevation="4dp"/>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
     <FrameLayout
         android:id="@+id/replacer"
         android:layout_width="match_parent"
@@ -27,12 +32,14 @@
             android:layout_height="match_parent"
             tools:ignore="UselessParent">
 
-            <com.astuetz.PagerSlidingTabStrip
+            <com.google.android.material.tabs.TabLayout
                 android:id="@+id/tabs"
                 android:layout_width="match_parent"
-                android:layout_height="48dip"
-                custom:pstsShouldExpand="true"
-                custom:pstsDividerColor="?attr/semi_transparent_divider_color"/>
+                android:layout_height="48dp"
+                custom:tabMaxWidth="0dp"
+                custom:tabTextAppearance="?android:textAppearanceButton"
+                custom:tabGravity="center"
+                custom:tabMode="fixed"/>
 
             <androidx.viewpager.widget.ViewPager
                 android:layout_height="match_parent"
