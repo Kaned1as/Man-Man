@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.adonai.manman.databinding.SearchListItemBinding
 import com.adonai.manman.entities.SearchResult
 import com.adonai.manman.entities.SearchResultList
+import com.adonai.manman.misc.resolveAttr
 import com.google.gson.FieldNamingPolicy
 import com.google.gson.GsonBuilder
 import kotlinx.coroutines.*
@@ -96,7 +97,7 @@ class ManPageSearchFragment : Fragment() {
                     delay(800)
 
                 val drawable = ContextCompat.getDrawable(requireContext(), R.drawable.wait)!!
-                drawable.setTint(Utils.getThemedValue(requireContext(), R.attr.colorAccent))
+                drawable.setTint(requireContext().resolveAttr(R.attr.colorAccent))
                 mSearchImage.setImageResource(R.drawable.wait)
 
                 val address = URLEncoder.encode(mSearchView.query.toString(), "UTF-8")

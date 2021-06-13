@@ -1,6 +1,6 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
@@ -16,8 +16,8 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:theme="?attr/toolbarOverrideStyle"
-            android:popupTheme="?attr/toolbarPopupOverrideStyle"
-            custom:elevation="4dp"/>
+            app:popupTheme="?attr/toolbarPopupOverrideStyle"
+            app:elevation="4dp"/>
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -36,10 +36,10 @@
                 android:id="@+id/tabs"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                custom:tabMaxWidth="0dp"
-                custom:tabTextAppearance="?android:textAppearanceButton"
-                custom:tabGravity="center"
-                custom:tabMode="fixed"/>
+                app:tabMaxWidth="0dp"
+                app:tabTextAppearance="?android:textAppearanceButton"
+                app:tabGravity="center"
+                app:tabMode="fixed"/>
 
             <androidx.viewpager.widget.ViewPager
                 android:layout_height="match_parent"

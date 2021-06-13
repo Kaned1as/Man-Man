@@ -1,5 +1,7 @@
 package com.adonai.manman.misc
 
+import android.content.Context
+import android.util.TypedValue
 import android.view.Gravity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
@@ -18,4 +20,10 @@ fun FragmentActivity.showFullscreenFragment(frag: Fragment) {
         .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
         //.add(R.id.ma, frag)
         .commit()
+}
+
+fun Context.resolveAttr(attr: Int): Int {
+    val typedValue = TypedValue()
+    this.theme.resolveAttribute(attr, typedValue, true)
+    return typedValue.data
 }

@@ -7,9 +7,11 @@ import android.widget.Toast
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.PreferenceGroup
 import com.adonai.manman.MainPagerActivity
 import com.adonai.manman.R
 import com.adonai.manman.database.DbProvider
+import com.adonai.manman.misc.resolveAttr
 import java.io.File
 
 /**
@@ -41,6 +43,19 @@ class GlobalPrefsFragment : PreferenceFragmentCompat() {
                 Toast.makeText(activity, R.string.deleted, Toast.LENGTH_SHORT).show()
             }
             true
+        }
+
+        val color = requireContext().resolveAttr(R.attr.colorPrimary)
+        tintIcons(preferenceScreen, color)
+    }
+
+    private fun tintIcons(preference: Preference, color: Int) {
+        if (preference is PreferenceGroup) {
+            for (i in 0 until preference.preferenceCount) {
+                tintIcons(preference.getPreference(i), color)
+            }
+        } else {
+            preference.icon.setTint(color)
         }
     }
 }
