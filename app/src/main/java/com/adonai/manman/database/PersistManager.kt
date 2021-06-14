@@ -4,7 +4,6 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.util.Log
 import com.adonai.manman.entities.ManPage
-import com.adonai.manman.entities.ManSectionIndex
 import com.adonai.manman.entities.ManSectionItem
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper
 import com.j256.ormlite.dao.Dao
@@ -21,13 +20,11 @@ class PersistManager(context: Context) : OrmLiteSqliteOpenHelper(context, DATABA
 
     //Dao fast access links
     val manChaptersDao: Dao<ManSectionItem, String> = getDao(ManSectionItem::class.java)
-    val manChapterIndexesDao: Dao<ManSectionIndex, String> = getDao(ManSectionIndex::class.java)
     val manPagesDao: Dao<ManPage, String> = getDao(ManPage::class.java)
 
     override fun onCreate(db: SQLiteDatabase, connectionSource: ConnectionSource) {
         try {
             TableUtils.createTable(connectionSource, ManSectionItem::class.java)
-            TableUtils.createTable(connectionSource, ManSectionIndex::class.java)
             TableUtils.createTable(connectionSource, ManPage::class.java)
         } catch (e: SQLException) {
             Log.e(TAG, "error creating DB $DATABASE_NAME")
@@ -40,7 +37,6 @@ class PersistManager(context: Context) : OrmLiteSqliteOpenHelper(context, DATABA
     fun clearAllTables() {
         try {
             TableUtils.clearTable(connectionSource, ManSectionItem::class.java)
-            TableUtils.clearTable(connectionSource, ManSectionIndex::class.java)
             TableUtils.clearTable(connectionSource, ManPage::class.java)
         } catch (e: SQLException) {
             throw RuntimeException(e)

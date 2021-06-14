@@ -6,11 +6,24 @@
     android:layout_height="match_parent"
     android:focusableInTouchMode="true"> <!-- prevent searchview from gaining focus -->
 
-    <ListView
+    <ViewSwitcher
+        android:id="@+id/chapter_contents_flipper"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/chapter_commands_list"
-        android:divider="@null"
-        android:fastScrollEnabled="true" />
+        android:inAnimation="@android:anim/slide_in_left"
+        android:outAnimation="@android:anim/slide_out_right">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/chapter_list" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/chapter_commands_list"
+            android:fastScrollEnabled="true" />
+
+    </ViewSwitcher>
 
 </FrameLayout>

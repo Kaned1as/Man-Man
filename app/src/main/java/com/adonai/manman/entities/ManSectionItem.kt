@@ -27,6 +27,6 @@ class ManSectionItem : Comparable<ManSectionItem> {
     lateinit var parentChapter: String
 
     override fun compareTo(other: ManSectionItem): Int {
-        return name[0] - other.name[0]
+        return name.compareTo(other.name)
     }
 }

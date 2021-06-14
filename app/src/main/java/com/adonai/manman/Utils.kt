@@ -3,12 +3,8 @@ package com.adonai.manman
 import android.app.Activity
 import android.content.Context
 import android.util.TypedValue
-import android.view.View
-import android.view.View.OnFocusChangeListener
-import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.preference.PreferenceManager
-import com.adonai.manman.entities.ManSectionIndex
 import com.adonai.manman.entities.ManSectionItem
 import org.jsoup.nodes.Document
 import org.mozilla.universalchardet.UniversalDetector
@@ -55,21 +51,6 @@ object Utils {
         if (target == null) // probably called from detached fragment (app hidden)
             return
         target.runOnUiThread(Runnable { Toast.makeText(target, toShow, Toast.LENGTH_SHORT).show() })
-    }
-
-    fun createIndexer(items: List<ManSectionItem>): List<ManSectionIndex> {
-        val indexes: MutableList<ManSectionIndex> = ArrayList(26) // a guess
-        var lastLetter = 0.toChar() // EOF is never encountered
-        for (i in items.indices) {
-            val msi = items[i]
-            val newLetter = msi.name[0] // no commands without name, don't check
-            if (newLetter != lastLetter) { // it's a start of new index
-                val newIndex = ManSectionIndex(newLetter, i, msi.parentChapter)
-                indexes.add(newIndex)
-                lastLetter = newLetter
-            }
-        }
-        return indexes
     }
 
     fun getThemedValue(context: Context, resource: Int): Int {

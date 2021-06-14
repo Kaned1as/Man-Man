@@ -85,17 +85,18 @@ play {
 dependencies {
     // kotlin-related stuff
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.0-beta01'     // coroutines lifecycle scopes
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'     // coroutines lifecycle scopes
 
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'             // support library (ViewPager etc.)
     implementation 'androidx.appcompat:appcompat:1.3.0'                  // support library (material design)
     implementation 'androidx.cardview:cardview:1.0.0'                    // support library (material design)
     implementation 'androidx.preference:preference-ktx:1.1.1'            // preference fragment compatibility
     implementation 'com.google.android.material:material:1.3.0'
+    implementation 'com.github.zhanghai:AndroidFastScroll:v1.1.5'        // recyclerview fast scroll
     // support library (material design)
     implementation 'com.github.castorflex.smoothprogressbar:library:1.1.0'     // progressbar on chapter load
     implementation 'com.j256.ormlite:ormlite-android:5.1'                      // ORM for man pages
-    implementation 'com.google.code.gson:gson:2.8.5'                           // Json (De)Serializer
+    implementation 'com.google.code.gson:gson:2.8.6'                           // Json (De)Serializer
     implementation 'org.jsoup:jsoup:1.12.1'                                    // html DOM parser
     implementation 'com.googlecode.juniversalchardet:juniversalchardet:1.0.3'  // file encoding detector
     implementation 'com.squareup.okhttp3:okhttp:4.9.0'                         // good android http client

@@ -10,7 +10,6 @@ import android.widget.TextView
 import com.adonai.manman.R
 import com.adonai.manman.ManChaptersFragment
 import com.adonai.manman.Utils
-import com.adonai.manman.entities.ManSectionIndex
 import com.adonai.manman.entities.ManSectionItem
 import com.adonai.manman.misc.ManChapterItemOnClickListener
 
@@ -26,9 +25,7 @@ import com.adonai.manman.misc.ManChapterItemOnClickListener
  *
  * @author Kanedias
  */
-class ChapterContentsArrayAdapter(context: Context, resource: Int, textViewResourceId: Int, objects: List<ManSectionItem>) : ArrayAdapter<ManSectionItem>(context, resource, textViewResourceId, objects), SectionIndexer {
-
-    private val indexes: List<ManSectionIndex> = Utils.createIndexer(objects)
+class ChapterContentsArrayAdapter(context: Context, resource: Int, textViewResourceId: Int, objects: List<ManSectionItem>) : ArrayAdapter<ManSectionItem>(context, resource, textViewResourceId, objects) {
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val root = super.getView(position, convertView, parent)
@@ -44,24 +41,4 @@ class ChapterContentsArrayAdapter(context: Context, resource: Int, textViewResou
 
         return root
     }
-
-    override fun getSections(): Array<Char> {
-        val chars = CharArray(indexes.size)
-        for (i in indexes.indices) {
-            chars[i] = indexes[i].letter
-        }
-        return chars.toTypedArray()
-    }
-
-    override fun getPositionForSection(sectionIndex: Int): Int {
-        return indexes[sectionIndex].index
-    }
-
-    override fun getSectionForPosition(position: Int): Int {
-        for (i in indexes.indices) {
-            if (indexes[i].index > position) return i - 1
-        }
-        return 0
-    }
-
 }

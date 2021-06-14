@@ -64,7 +64,7 @@
     <string name="please_wait">Please wait…</string>
     <string name="error_parsing_local_archive">Error while parsing local archive!</string>
     <string name="already_downloaded">Already downloaded!</string>
-    <string name="confirm_action_load_archive">The archive is 35MB big. Are you sure to download it?</string>
+    <string name="confirm_action_load_archive">The archive is 35 MiB. Please confirm download.</string>
     <string name="delete_local_archive">Delete downloaded local archive</string>
     <string name="delete_local_archive_sum">Deletes downloaded archive permanently (but none of your locally added pages from sdcard will be affected). This may be helpful if you want to reduce this app private size.</string>
     <string name="deleted">Deleted!</string>

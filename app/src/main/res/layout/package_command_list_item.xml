@@ -23,7 +23,7 @@
         android:id="@+id/command_name_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textAppearance="?android:attr/textAppearanceListItem"
         android:text="@string/placeholder_text"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"

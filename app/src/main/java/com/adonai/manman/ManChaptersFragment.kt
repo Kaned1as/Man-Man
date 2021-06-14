@@ -1,19 +1,12 @@
 package com.adonai.manman
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.os.Bundle
 import android.util.Log
-import android.util.Pair
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView.OnItemClickListener
-import android.widget.ArrayAdapter
-import android.widget.FrameLayout
-import android.widget.ListView
+import android.widget.*
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.appcompat.app.AlertDialog
@@ -21,17 +14,21 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.adonai.manman.adapters.ChapterContentsArrayAdapter
-import com.adonai.manman.adapters.ChapterContentsCursorAdapter
-import com.adonai.manman.adapters.ChaptersArrayAdapter
 import com.adonai.manman.database.DbProvider
+import com.adonai.manman.databinding.ChapterCommandListItemBinding
+import com.adonai.manman.databinding.ChaptersListItemBinding
+import com.adonai.manman.databinding.FragmentManContentsBinding
 import com.adonai.manman.entities.ManSectionItem
-import com.j256.ormlite.dao.Dao
+import com.adonai.manman.misc.ManChapterItemOnClickListener
+import com.google.android.material.internal.ViewUtils
 import com.j256.ormlite.misc.TransactionManager
-import com.j256.ormlite.stmt.PreparedQuery
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import me.zhanghai.android.fastscroll.FastScrollerBuilder
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.jsoup.Jsoup
@@ -40,65 +37,36 @@ import java.io.IOException
 import java.sql.SQLException
 import java.util.*
 import java.util.zip.GZIPInputStream
+import kotlin.math.min
 
 /**
  * Fragment to show table of contents and navigate into it
- * Note: works slower that just search!
+ * Note: works slower than just search!
  *
  * @author Kanedias
  */
 class ManChaptersFragment : Fragment() {
+
+    companion object {
+        const val CHAPTER_COMMANDS_PREFIX = "https://www.mankier.com"
+    }
+
     private val mBroadcastHandler: BroadcastReceiver = BackButtonBroadcastReceiver()
 
-    private lateinit var mChaptersAdapter: ChaptersArrayAdapter
-    private lateinit var mCachedChapters: Map<String, String>
-
-    private lateinit var mFrame: FrameLayout
-    private lateinit var mListView: ListView
-
-    /**
-     * Click listener for selecting a chapter from the list.
-     * Usable only when list view shows list of chapters
-     * The request is then sent to the loader to load chapter data asynchronously
-     * <br></br>
-     *
-     * @see RetrieveChapterContentsCallback
-     */
-    private val mChapterClickListener = OnItemClickListener { parent, _, position, _ ->
-        val item = parent.getItemAtPosition(position) as Map.Entry<String, String>
-        triggerLoadChapter(item.key)
-    }
-
-    /**
-     * Click listener for selecting a package from the list.
-     * Usable only when list view shows list of packages.
-     *
-     * After picking a package a list of commands will show up that user can choose from.
-     *
-     * New instance of [ManPageDialogFragment] is then created and shown
-     * for loading full command man page.
-     *
-     */
-    private val mPackageClickListener = OnItemClickListener { parent, _, position, _ ->
-        val item = parent.getItemAtPosition(position) as ManSectionItem
-        triggerLoadPackage(item.parentChapter, item.url)
-    }
+    private lateinit var binding: FragmentManContentsBinding
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        val root = inflater.inflate(R.layout.fragment_man_contents, container, false)
+        binding = FragmentManContentsBinding.inflate(inflater, container, false)
 
-        mCachedChapters = Utils.parseStringArray(requireContext(), R.array.man_page_chapters)
-        mChaptersAdapter = ChaptersArrayAdapter(requireContext(), R.layout.chapters_list_item, R.id.chapter_index_label, ArrayList(mCachedChapters.entries))
+        val cachedChapters = Utils.parseStringArray(requireContext(), R.array.man_page_chapters)
+        val chaptersAdapter = ChaptersAdapter(cachedChapters.map { ManChapter(it.key, it.value) })
 
-        mListView = root.findViewById<View>(R.id.chapter_commands_list) as ListView
-        mListView.adapter = mChaptersAdapter
-        mListView.setOnItemClickListener { parent, _, position, _ ->
-            val item = parent.getItemAtPosition(position) as Map.Entry<String, String>
-            triggerLoadChapter(item.key)
-        }
+        binding.chapterList.layoutManager = LinearLayoutManager(requireContext())
+        binding.chapterList.adapter = chaptersAdapter
 
-        mFrame = root.findViewById<View>(R.id.chapter_fragment_frame) as FrameLayout
-        return root
+        binding.chapterCommandsList.layoutManager = LinearLayoutManager(requireContext())
+
+        return binding.root
     }
 
     @UiThread
@@ -106,23 +74,17 @@ class ManChaptersFragment : Fragment() {
         lifecycleScope.launch {
             val chapter = withContext(Dispatchers.IO) { doLoadChapter(index) } ?: return@launch
 
-            if (mListView.adapter is ChapterContentsCursorAdapter) {
-                // close opened cursor prior to adapter change
-                (mListView.adapter as ChapterContentsCursorAdapter).closeCursor()
-            }
-
-            mListView.isFastScrollEnabled = false
-            mListView.adapter = null
-            swapListView()
-
-            mListView.adapter = if (chapter.choiceDbCache != null) {
-                ChapterContentsCursorAdapter(requireContext(), chapter.choiceDbCache.first, chapter.choiceDbCache.second, chapter.chapter)
-            } else {
-                ChapterContentsArrayAdapter(requireContext(), R.layout.chapter_command_list_item, R.id.command_name_label, chapter.choiceList!!)
-            }
-
-            mListView.isFastScrollEnabled = true
-            mListView.onItemClickListener = mPackageClickListener
+            binding.chapterCommandsList.adapter = PackageAdapter(chapter.packages)
+            binding.chapterCommandsList.scrollToPosition(0)
+            FastScrollerBuilder(binding.chapterCommandsList)
+                .setPopupTextProvider { idx ->
+                    val cmdName = chapter.packages[idx].name
+                    cmdName.substring(0, min(cmdName.length, 2))
+                }
+                .setPopupStyle {  }
+                .useMd2Style()
+                .build()
+            binding.chapterContentsFlipper.showNext()
 
             LocalBroadcastManager.getInstance(requireContext()).registerReceiver(mBroadcastHandler, IntentFilter(MainPagerActivity.BACK_BUTTON_NOTIFY))
         }
@@ -131,14 +93,14 @@ class ManChaptersFragment : Fragment() {
     @WorkerThread
     private fun doLoadChapter(index: String): ManPageContentsResult? {
         // check the DB for cached pages first
-        val query = DbProvider.helper.manChaptersDao.queryBuilder()
+        val savedChapter = DbProvider.helper.manChaptersDao.queryBuilder()
                 .orderBy("name", true)
                 .where().eq("parentChapter", index)
-                .prepare()
+                .query()
 
-        if (DbProvider.helper.manChaptersDao.queryForFirst(query) != null) {
+        if (savedChapter.isNotEmpty()) {
             // we have it in the cache
-            return ManPageContentsResult(DbProvider.helper.manChaptersDao, query, index)
+            return ManPageContentsResult(savedChapter, index)
         }
 
         // If we're here, nothing is in DB for now
@@ -163,7 +125,6 @@ class ManChaptersFragment : Fragment() {
                     .build()
             val response = client.newCall(request).execute()
             if (response.isSuccessful) {
-                // count the bytes and show progress
                 GZIPInputStream(response.body!!.byteStream()).use { dlStream ->
                     val msItems: MutableList<ManSectionItem> = ArrayList(500)
                     val doc = Jsoup.parse(dlStream, "UTF-8", link)
@@ -189,11 +150,7 @@ class ManChaptersFragment : Fragment() {
         try {
             TransactionManager.callInTransaction<Void>(DbProvider.helper.connectionSource) {
                 for (msi in items) {
-                    DbProvider.helper.manChaptersDao.create(msi)
-                }
-                val indexes = Utils.createIndexer(items)
-                for (index in indexes) {
-                    DbProvider.helper.manChapterIndexesDao.create(index)
+                    DbProvider.helper.manChaptersDao.createOrUpdate(msi)
                 }
                 null
             }
@@ -210,7 +167,7 @@ class ManChaptersFragment : Fragment() {
             val items = withContext(Dispatchers.IO) { doLoadPackage(parentChapter, url) }
 
             // finished loading - show selector dialog to the user
-            val adapter: ArrayAdapter<ManSectionItem> = ChapterContentsArrayAdapter(requireContext(), R.layout.package_command_list_item, R.id.command_name_label, items)
+            val adapter = ChapterContentsArrayAdapter(requireContext(), R.layout.package_command_list_item, R.id.command_name_label, items)
             AlertDialog.Builder(requireContext())
                     .setTitle(R.string.select_command)
                     .setAdapter(adapter) { _, which ->
@@ -289,55 +246,85 @@ class ManChaptersFragment : Fragment() {
      * The first is for network load and the second is the DB retrieval
      *
      */
-    private class ManPageContentsResult {
-        val choiceList: List<ManSectionItem>? // from network
-        val choiceDbCache : Pair<Dao<ManSectionItem, String>, PreparedQuery<ManSectionItem>>? // from DB
-        val chapter: String
-
-        constructor(choiceList: List<ManSectionItem>, chapter: String) {
-            this.choiceList = choiceList
-            choiceDbCache = null
-            this.chapter = chapter
-        }
-
-        constructor(dao: Dao<ManSectionItem, String>, query: PreparedQuery<ManSectionItem>, chapter: String) {
-            choiceDbCache = Pair.create(dao, query)
-            choiceList = null
-            this.chapter = chapter
-        }
-    }
+    data class ManPageContentsResult(val packages: List<ManSectionItem>, val chapter: String)
 
     /**
      * Handler to receive notifications for back button press (to return list view to chapter show)
      */
     private inner class BackButtonBroadcastReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            mListView.adapter = mChaptersAdapter
-            mListView.onItemClickListener = mChapterClickListener
-            LocalBroadcastManager.getInstance(activity!!).unregisterReceiver(this)
+            binding.chapterContentsFlipper.showPrevious()
+            LocalBroadcastManager.getInstance(requireActivity()).unregisterReceiver(this)
         }
     }
 
+    data class ManChapter(val index: String,val name: String)
+
     /**
-     * Workaround for [this](http://stackoverflow.com/questions/20730301/android-refresh-listview-sections-overlay-not-working-in-4-4)
-     * <br></br>
-     * Swaps the list view prior to setting adapter to invalidate fast scroller
+     * This class represents an array adapter for showing man chapters
+     * There are only about ten constant chapters, so it was convenient to place it to the string-array
+     *
+     * The array is retrieved via [Utils.parseStringArray]
+     * and stored in [ManChaptersFragment.mCachedChapters]
+     *
+     * @author Kanedias
      */
-    private fun swapListView() {
-        //save layout params
-        val listViewParams: ViewGroup.LayoutParams = mListView.layoutParams
+    inner class ChaptersAdapter(val chapters: List<ManChapter>) : RecyclerView.Adapter<ChaptersAdapter.ChapterHolder>() {
 
-        //frame is a FrameLayout around the ListView
-        mFrame.removeView(mListView)
-        mListView = ListView(activity)
-        mListView.layoutParams = listViewParams
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChapterHolder {
+            val inflater = LayoutInflater.from(parent.context)
+            val binding = ChaptersListItemBinding.inflate(inflater)
+            return ChapterHolder(binding)
+        }
 
-        //other ListView initialization code like divider settings
-        mListView.divider = null
-        mFrame.addView(mListView)
+        override fun onBindViewHolder(holder: ChapterHolder, position: Int) {
+            val chapter = chapters[position]
+            holder.setup(chapter)
+        }
+
+        override fun getItemCount() = chapters.size
+
+        inner class ChapterHolder(private val binding: ChaptersListItemBinding): RecyclerView.ViewHolder(binding.root) {
+
+            fun setup(chapter: ManChapter) {
+                binding.chapterIndexLabel.text = chapter.index
+                binding.chapterNameLabel.text = chapter.name
+
+                binding.root.setOnClickListener {
+                    triggerLoadChapter(chapter.index)
+                }
+            }
+
+        }
     }
 
-    companion object {
-        const val CHAPTER_COMMANDS_PREFIX = "https://www.mankier.com"
+    inner class PackageAdapter(val commands: List<ManSectionItem>) : RecyclerView.Adapter<PackageAdapter.PackageHolder>() {
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PackageHolder {
+            val inflater = LayoutInflater.from(parent.context)
+            val binding = ChapterCommandListItemBinding.inflate(inflater)
+            return PackageHolder(binding)
+        }
+
+        override fun onBindViewHolder(holder: PackageHolder, position: Int) {
+            val chapter = commands[position]
+            holder.setup(chapter)
+        }
+
+        override fun getItemCount() = commands.size
+
+        inner class PackageHolder(private val binding: ChapterCommandListItemBinding): RecyclerView.ViewHolder(binding.root) {
+
+            fun setup(pkg: ManSectionItem) {
+                binding.commandNameLabel.text = pkg.name
+                binding.commandDescriptionLabel.text = pkg.description
+                binding.popupMenu.setOnClickListener(ManChapterItemOnClickListener(requireContext(), pkg))
+
+                binding.root.setOnClickListener {
+                    triggerLoadPackage(pkg.parentChapter, pkg.url)
+                }
+            }
+
+        }
     }
 }

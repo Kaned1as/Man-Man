@@ -14,7 +14,6 @@ import com.adonai.manman.entities.ManSectionItem
  * Click listener to call popup menu on chapter item click
  *
  * @see com.adonai.manman.adapters.ChapterContentsArrayAdapter
- * @see com.adonai.manman.adapters.ChapterContentsCursorAdapter
  *
  * @author Kanedias
  */
