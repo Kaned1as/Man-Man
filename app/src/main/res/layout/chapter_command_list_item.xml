@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:compat="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -10,7 +10,7 @@
         android:layout_height="match_parent"
         android:layout_margin="5dp"
         android:foreground="?android:attr/selectableItemBackground"
-        compat:cardElevation="4dp">
+        app:cardElevation="4dp">
 
         <RelativeLayout
             android:orientation="horizontal"
@@ -25,28 +25,29 @@
                 android:id="@+id/popup_menu"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentEnd="true"
-                android:src="@drawable/abc_ic_menu_overflow_material"
+                android:src="@drawable/overflow_menu"
                 android:scaleType="fitXY"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/popup_menu"/>
 
             <TextView
+                android:id="@+id/command_name_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceListItem"
                 android:text="@string/placeholder_text"
-                android:id="@+id/command_name_label"
                 android:layout_alignParentStart="true"
                 android:layout_alignParentTop="true"
                 android:layout_toStartOf="@id/popup_menu"
                 android:maxEms="15"/>
 
             <TextView
+                android:id="@+id/command_description_label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:text="@string/placeholder_text"
-                android:id="@+id/command_description_label"
+                android:textColor="?android:attr/textColorSecondary"
                 android:layout_below="@+id/command_name_label"
                 android:layout_alignParentStart="true"
 

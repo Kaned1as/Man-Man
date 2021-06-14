@@ -117,14 +117,4 @@ object Utils {
         gis.close()
         return detector.detectedCharset
     }
-
-    fun setupTheme(activity: Activity) {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
-        val theme = prefs.getString("app.theme", "light")
-        when (theme) {
-            "light" -> activity.setTheme(R.style.AppThemeLight)
-            "dark" -> activity.setTheme(R.style.AppThemeDark)
-            "green" -> activity.setTheme(R.style.AppThemeDarkGreen)
-        }
-    }
 }

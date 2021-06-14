@@ -2,6 +2,7 @@ package com.adonai.manman
 
 import android.app.Application
 import com.adonai.manman.database.DbProvider
+import com.adonai.manman.service.Config
 
 /**
  * Place to initialize all data prior to launching activities
@@ -12,6 +13,8 @@ class ManApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        Config.init(this)
         DbProvider.setHelper(this)
     }
 

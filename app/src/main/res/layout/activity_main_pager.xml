@@ -38,6 +38,8 @@
                 android:layout_height="48dp"
                 app:tabMaxWidth="0dp"
                 app:tabTextAppearance="?android:textAppearanceButton"
+                app:tabTextColor="?android:attr/textColorPrimary"
+                app:tabIndicatorColor="?attr/colorOnBackground"
                 app:tabGravity="center"
                 app:tabMode="fixed"/>
 

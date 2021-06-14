@@ -27,7 +27,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".preferences.PreferencesActivity"
+            android:name=".PreferencesActivity"
             android:label="@string/settings"/>
 
         <!-- DeX Mode and Screen Mirroring support -->

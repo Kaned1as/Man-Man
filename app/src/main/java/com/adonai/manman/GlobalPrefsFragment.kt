@@ -1,4 +1,4 @@
-package com.adonai.manman.preferences
+package com.adonai.manman
 
 import android.app.AlertDialog
 import android.content.Intent
@@ -8,8 +8,6 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceGroup
-import com.adonai.manman.MainPagerActivity
-import com.adonai.manman.R
 import com.adonai.manman.database.DbProvider
 import com.adonai.manman.misc.resolveAttr
 import java.io.File
@@ -45,7 +43,7 @@ class GlobalPrefsFragment : PreferenceFragmentCompat() {
             true
         }
 
-        val color = requireContext().resolveAttr(R.attr.colorPrimary)
+        val color = requireContext().resolveAttr(R.attr.colorOnBackground)
         tintIcons(preferenceScreen, color)
     }
 

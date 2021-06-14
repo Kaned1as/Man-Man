@@ -1,24 +1,21 @@
-package com.adonai.manman.preferences
+package com.adonai.manman
 
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import com.adonai.manman.R
-import com.adonai.manman.Utils
 
 /**
  * Activity for holding and showing preference fragments
  *
  * @author Kanedias
  */
-class PreferencesActivity : AppCompatActivity() {
+class PreferencesActivity : ThemedActivity() {
 
     private lateinit var mActionBar: Toolbar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // should set theme prior to instantiating compat actionbar etc.
-        Utils.setupTheme(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_preferences)
 

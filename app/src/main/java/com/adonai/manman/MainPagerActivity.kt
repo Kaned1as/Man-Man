@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -15,7 +14,6 @@ import androidx.fragment.app.FragmentPagerAdapter
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
 import androidx.viewpager.widget.ViewPager
-import com.adonai.manman.preferences.PreferencesActivity
 import com.google.android.material.tabs.TabLayout
 
 /**
@@ -23,7 +21,7 @@ import com.google.android.material.tabs.TabLayout
  *
  * @author Kanedias
  */
-class MainPagerActivity : AppCompatActivity() {
+class MainPagerActivity : ThemedActivity() {
 
     private lateinit var mPager: ViewPager
     private lateinit var mActionBar: Toolbar
@@ -31,7 +29,6 @@ class MainPagerActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // should set theme prior to instantiating compat actionbar etc.
-        Utils.setupTheme(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_pager)
         mActionBar = findViewById<View>(R.id.app_toolbar) as Toolbar

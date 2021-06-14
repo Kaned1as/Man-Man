@@ -103,6 +103,7 @@
     <color name="md_green_800">#2e7d32</color>
     <color name="md_green_900">#1b5e20</color>
     <color name="md_green_A400">#00e676</color>
+    <color name="md_true_green">#00ff00</color>
     <color name="md_grey_50">#fafafa</color>
     <color name="md_grey_300">#e0e0e0</color>
     <color name="md_grey_400">#bdbdbd</color>

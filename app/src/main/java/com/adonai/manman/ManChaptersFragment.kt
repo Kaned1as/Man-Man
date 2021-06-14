@@ -256,13 +256,15 @@ class ManChaptersFragment : Fragment() {
     }
 
     private fun sectionItemFromRow(chapterIndex: String, row: Element): ManSectionItem {
-        val cells = row.select("td")
-        val anchor = cells.first().child(0)
+        val name = row.select("td").first()
+        val anchor = row.select("td a[href]").first()
+        val desc = row.select("td").last()
+
         val msi = ManSectionItem()
         msi.parentChapter = chapterIndex
-        msi.name = anchor.text()
+        msi.name = name.text()
         msi.url = CHAPTER_COMMANDS_PREFIX + anchor.attr("href")
-        msi.description = cells.last().text()
+        msi.description = desc.text()
         return msi
     }
 
