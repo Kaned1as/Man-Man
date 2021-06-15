@@ -52,7 +52,7 @@ class ManPageSearchFragment : Fragment() {
 
         // Inflate the layout for this fragment
         val root = inflater.inflate(R.layout.fragment_man_page_search, container, false)
-        mSearchView = root.findViewById(R.id.query_edit)
+        mSearchView = root.findViewById(R.id.search_edit)
         mSearchView.setOnQueryTextListener(SearchQueryTextListener())
         mSearchImage = mSearchView.findViewById(Resources.getSystem().getIdentifier("search_mag_icon", "id", "android"))
         mSearchDefaultDrawable = mSearchImage.drawable

@@ -42,7 +42,7 @@ class ManCacheFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val root = inflater.inflate(R.layout.fragment_cache_browse, container, false)
 
-        mSearchCache = root.findViewById<View>(R.id.cache_search_edit) as SearchView
+        mSearchCache = root.findViewById<View>(R.id.search_edit) as SearchView
         mSearchCache.setOnQueryTextListener(SearchInCacheListener())
 
         mCacheList = root.findViewById<View>(R.id.cached_pages_list) as ListView

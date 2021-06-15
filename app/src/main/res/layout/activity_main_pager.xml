@@ -43,7 +43,7 @@
                 app:tabGravity="center"
                 app:tabMode="fixed"/>
 
-            <androidx.viewpager.widget.ViewPager
+            <androidx.viewpager2.widget.ViewPager2
                 android:layout_height="match_parent"
                 android:layout_width="match_parent"
                 android:paddingTop="@dimen/activity_vertical_margin"

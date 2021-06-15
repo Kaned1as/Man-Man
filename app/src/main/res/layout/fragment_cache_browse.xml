@@ -6,9 +6,9 @@
     android:focusableInTouchMode="true"> <!-- prevent searchview from gaining focus -->
 
     <SearchView
+        android:id="@+id/search_edit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/cache_search_edit"
         android:queryHint="@string/cache_search"
         android:iconifiedByDefault="false" />
 

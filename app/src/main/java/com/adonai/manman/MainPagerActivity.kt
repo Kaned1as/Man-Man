@@ -4,17 +4,21 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentPagerAdapter
+import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
-import androidx.viewpager.widget.ViewPager
+import androidx.viewpager2.adapter.FragmentStateAdapter
+import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
+import kotlinx.coroutines.delay
 
 /**
  * Main activity where everything takes place
@@ -23,7 +27,7 @@ import com.google.android.material.tabs.TabLayout
  */
 class MainPagerActivity : ThemedActivity() {
 
-    private lateinit var mPager: ViewPager
+    private lateinit var mPager: ViewPager2
     private lateinit var mActionBar: Toolbar
     private lateinit var mDonateHelper: DonateHelper
 
@@ -31,22 +35,33 @@ class MainPagerActivity : ThemedActivity() {
         // should set theme prior to instantiating compat actionbar etc.
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_pager)
+
         mActionBar = findViewById<View>(R.id.app_toolbar) as Toolbar
-        mPager = findViewById<View>(R.id.page_holder) as ViewPager
-
         setSupportActionBar(mActionBar)
-        mPager.adapter = ManFragmentPagerAdapter(supportFragmentManager)
 
+        mPager = findViewById<View>(R.id.page_holder) as ViewPager2
+        mPager.adapter = ManFragmentPagerAdapter()
         val tabs = findViewById<View>(R.id.tabs) as TabLayout
-        tabs.setupWithViewPager(mPager)
+        TabLayoutMediator(tabs, mPager)
+            { tab, position ->
+                tab.text = when (position) {
+                    0 -> getString(R.string.search)
+                    1 -> getString(R.string.contents)
+                    2 -> getString(R.string.cached)
+                    3 -> getString(R.string.local_storage)
+                    else -> null
+                }
+            }.attach()
 
         // setting up vending
         mDonateHelper = DonateHelper(this)
 
         // applying default tab
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        val index = prefs.getString("app.default.tab", "0")
-        mPager.currentItem = Integer.valueOf(index!!)
+        val index = prefs.getString("app.default.tab", "0")!!
+        mPager.currentItem = Integer.valueOf(index)
+
+        handleIntent(intent)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -73,29 +88,55 @@ class MainPagerActivity : ThemedActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-    private inner class ManFragmentPagerAdapter(fm: FragmentManager?) : FragmentPagerAdapter(fm!!, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
+    /**
+     * Handle the passed intent. This is invoked whenever we need to actually react to the intent that was
+     * passed to this activity, this can be just activity start from the app manager, click on a link or
+     * on a notification belonging to this app
+     * @param cause the passed intent. It will not be modified within this function.
+     */
+    private fun handleIntent(cause: Intent?) {
+        if (cause == null)
+            return
 
-        override fun getItem(i: Int): Fragment {
-            when (i) {
-                0 -> return ManPageSearchFragment()
-                1 -> return ManChaptersFragment()
-                2 -> return ManCacheFragment()
-                3 -> return ManLocalArchiveFragment()
+        if (cause.type != "text/plain")
+            return
+
+        val text = when (cause.action) {
+            Intent.ACTION_SEND -> cause.getStringExtra(Intent.EXTRA_TEXT)
+            Intent.ACTION_PROCESS_TEXT -> cause.getStringExtra(Intent.EXTRA_PROCESS_TEXT)
+            else -> null
+        } ?: return
+
+        mPager.currentItem = 0
+        lifecycleScope.launchWhenResumed {
+            // wait till fragments are instantiated
+            while(supportFragmentManager.fragments.isEmpty())
+                delay(100)
+
+            val currFragment = supportFragmentManager.findFragmentByTag("f${mPager.currentItem}")
+            currFragment?.view?.let { root ->
+                val search = root.findViewById<SearchView>(R.id.search_edit)
+                search?.setQuery(text, false)
             }
-            throw IllegalArgumentException(String.format("No such fragment, index was %d", i))
         }
+    }
 
-        override fun getCount(): Int {
-            return 4
-        }
+    override fun onNewIntent(received: Intent) {
+        super.onNewIntent(received)
+        handleIntent(received)
+    }
 
-        override fun getPageTitle(position: Int): CharSequence? {
+
+    private inner class ManFragmentPagerAdapter : FragmentStateAdapter(this) {
+
+        override fun getItemCount() = 4
+
+        override fun createFragment(position: Int): Fragment {
             return when (position) {
-                0 -> getString(R.string.search)
-                1 -> getString(R.string.contents)
-                2 -> getString(R.string.cached)
-                3 -> getString(R.string.local_storage)
-                else -> null
+                0 -> ManPageSearchFragment()
+                1 -> ManChaptersFragment()
+                2 -> ManCacheFragment()
+                else /* 3 */ -> ManLocalArchiveFragment()
             }
         }
     }

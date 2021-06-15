@@ -81,7 +81,7 @@ class ManLocalArchiveFragment : Fragment(), OnSharedPreferenceChangeListener {
 
         val root = inflater.inflate(R.layout.fragment_local_storage, container, false)
         mLocalPageList = root.findViewById<View>(R.id.local_storage_page_list) as ListView
-        mSearchLocalPage = root.findViewById<View>(R.id.local_search_edit) as SearchView
+        mSearchLocalPage = root.findViewById<View>(R.id.search_edit) as SearchView
 
         mLocalPageList.onItemClickListener = mManArchiveClickListener
         mSearchLocalPage.setOnQueryTextListener(FilterLocalStorage())
