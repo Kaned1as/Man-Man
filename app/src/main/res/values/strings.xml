@@ -53,6 +53,7 @@
     <string name="remove">Remove</string>
     <string name="add">Add</string>
     <string name="file_not_found">File not found</string>
+    <string name="file_not_found_extra">File not found: %s</string>
     <string name="wrong_file_format">Wrong file format</string>
     <string name="scanning_folders">Scanning folders…</string>
     <string name="find_next">Find next</string>

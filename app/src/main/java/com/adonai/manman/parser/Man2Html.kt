@@ -48,7 +48,8 @@ class Man2Html(private val source: BufferedReader) {
         ip(true),  // Indented paragraph with optional hanging tag
         b, i, br, bi, ri, rb, ir, ib,  // font directives
         ie, nh, ad, sp(true),  // conditionals and stuff...
-        nf, fi;
+        nf, fi, // start and end of preformatted text ("no fill lines")
+        so; // include another page
 
         // stop/start output filling (works like <pre> tag)
         var stopsIndentation = false
@@ -151,7 +152,7 @@ class Man2Html(private val source: BufferedReader) {
             lineAfterCommand = ""
         }
         try {
-            val command = Command.valueOf(firstWord.toLowerCase())
+            val command = Command.valueOf(firstWord.lowercase())
             if (command.stopsIndentation) {
                 if (linesBeforeIndent == 0) { // we were indenting right now, reset
                     result.append("</dd></dl>")
@@ -169,9 +170,23 @@ class Man2Html(private val source: BufferedReader) {
     private fun executeCommand(command: Command, lineAfterCommand: String) {
         var lineAfterCommand: String? = lineAfterCommand
         when (command) {
+            Command.so -> {
+                val refArgs = parseQuotedCommandArguments(lineAfterCommand)
+                val refFilename = refArgs[0].substringAfter('/')
+                val refSection = refFilename.substringAfter('.')
+                val refName = refFilename.substringBefore('.')
+                // this commands to include another page, but we need to somehow present it as a manpage
+                result.append("<div class='man-page'>")
+                result.append("<div id='NOTE' class='section'>")
+                result.append("<h2><a href='#NOTE'>NOTE</a></h2> This manpage is a reference to another. ")
+                result.append("See <b><a href='/${refArgs[0]}'>$refName ($refSection)</a></b>.")
+                result.append("</div>")
+                result.append("</div>")
+
+            }
             Command.th, Command.dt -> {
                 val titleArgs = parseQuotedCommandArguments(lineAfterCommand)
-                if (!titleArgs.isEmpty()) {  // take only name of command
+                if (titleArgs.isNotEmpty()) {  // take only name of command
                     result.append("<div class='man-page'>") // it'd be better to close it somehow...
                     result.append("<h1>").append(parseTextField(titleArgs[0], false)).append("</h1>")
                 }
@@ -190,9 +205,9 @@ class Man2Html(private val source: BufferedReader) {
                 val subHeaderArgs = parseQuotedCommandArguments(lineAfterCommand)
                 if (!subHeaderArgs.isEmpty()) {
                     val shName = parseTextField(subHeaderArgs[0], true)
-                    result.append("<div id='").append(shName).append("' class='section'>")
+                    result.append("<div id='$shName' class='section'>")
                             .append("<h2>")
-                            .append("<a href='#").append(shName).append("'>").append(shName).append("</a>")
+                            .append("<a href='#$shName'>$shName</a>")
                             .append("</h2>")
                 }
                 insideSection = true
@@ -273,6 +288,23 @@ class Man2Html(private val source: BufferedReader) {
                     result.append("<br/>")
                 } else {
                     val words = parseTextField(lineAfterCommand, true).split(" ".toRegex()).toTypedArray()
+                    if (words.size == 2 && words[1].matches("\\(\\d\\w?\\).*".toRegex())) {
+                        // special case, it's a "see also reference", put it into anchor
+                        val sectionMatch = Regex("\\((\\d\\w?)\\)(.*)").find(words[1])!!
+                        val section = sectionMatch.groups[1]!!.value
+                        val leftover = sectionMatch.groups[2]!!.value
+
+                        result
+                            .append(" ")
+                            .append("<a href='/man${section}/${words[0]}.${section}'>")
+                            .append("<b>${words[0]}</b>($section)")
+                            .append("</a>")
+                            .append(leftover)
+
+                        return
+                    }
+
+                    // not a reference, continue
 
                     // first word is bold...
                     result.append(" ").append("<b>").append(words[0]).append("</b>")
@@ -290,7 +322,7 @@ class Man2Html(private val source: BufferedReader) {
                 if (lineAfterCommand!!.startsWith("\"")) { // quoted arg
                     if (!lineAfterCommand!!.startsWith("\"\"")) { // not empty (hack?)
                         val notationArgs = parseQuotedCommandArguments(lineAfterCommand)
-                        if (!notationArgs.isEmpty()) {
+                        if (notationArgs.isNotEmpty()) {
                             result.append("<dl><dt>").append(parseTextField(notationArgs[0], true)).append("</dt><dd>")
                         }
                     } else {
@@ -344,23 +376,26 @@ class Man2Html(private val source: BufferedReader) {
     private fun postprocessInDocLinks(sb: StringBuilder): Document {
         // process OPTIONS section
         val doc = Jsoup.parse(sb.toString())
-        val options = doc.select(String.format(
-                "div#OPTIONS > p > b:matches(%1\$s)," +
-                        "div#OPTIONS > dl > dt b:matches(%1\$s)",
-                OPTION_PATTERN))
+        val options = doc.select("dl > dt b:matches($OPTION_PATTERN)")
         val availableOptions: MutableSet<String> = HashSet(options.size)
         for (option in options) {
             val anchor = Element(Tag.valueOf("a"), doc.baseUri())
-            anchor.attr("href", "#" + option.ownText())
             anchor.attr("id", option.ownText())
+            anchor.attr("href", "#" + option.ownText())
             anchor.addClass("in-doc")
             anchor.appendChild(option.clone())
+            option.replaceWith(anchor)
             availableOptions.add(option.ownText())
         }
 
         // process other references (don't put id on them)
-        val optionMentions = doc.select(String.format("b:matches(%s)", OPTION_PATTERN))
+        val optionMentions = doc.select("b:matches($OPTION_PATTERN)")
         for (option in optionMentions) {
+            if (options.contains(option)) {
+                // this element is a main description and already has a link
+                continue
+            }
+
             if (availableOptions.contains(option.ownText())) {
                 val anchor = Element(Tag.valueOf("a"), doc.baseUri())
                 anchor.attr("href", "#" + option.ownText())
@@ -369,6 +404,7 @@ class Man2Html(private val source: BufferedReader) {
                 option.replaceWith(anchor)
             }
         }
+
         return doc
     }
 

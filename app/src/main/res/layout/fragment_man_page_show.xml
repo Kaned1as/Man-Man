@@ -45,10 +45,10 @@
             android:orientation="vertical">
 
             <WebView
+                android:id="@+id/man_content_web"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1"
-                android:id="@+id/man_content_web" />
+                android:layout_weight="1" />
 
             <LinearLayout
                 android:id="@+id/search_bar_layout"

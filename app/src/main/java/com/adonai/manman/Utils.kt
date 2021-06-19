@@ -21,7 +21,6 @@ import java.util.zip.GZIPInputStream
  */
 object Utils {
     const val MM_TAG = "Man Man"
-    const val FONT_PREF_KEY = "webview.font.size"
 
     /**
      * Converts |-delimited string array from resources to hash map

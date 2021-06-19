@@ -30,13 +30,11 @@ import androidx.preference.PreferenceManager
 import com.adonai.manman.database.DbProvider
 import com.adonai.manman.entities.ManPage
 import com.adonai.manman.parser.Man2Html
+import com.adonai.manman.service.Config
 import com.adonai.manman.views.PassiveSlidingPane
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import me.zhanghai.android.fastscroll.FastScrollWebView
-import me.zhanghai.android.fastscroll.FastScrollerBuilder
-import me.zhanghai.android.fastscroll.PopupStyles
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream
@@ -88,7 +86,7 @@ class ManPageDialogFragment : Fragment() {
         mContent = root.findViewById(R.id.man_content_web)
         mContent.webViewClient = ManPageChromeClient()
         mContent.settings.javaScriptEnabled = true
-        mContent.settings.minimumFontSize = fontFromProperties
+        mContent.settings.minimumFontSize = Config.fontSize
 
         mSlider = root.findViewById(R.id.sliding_pane)
         mSlider.sliderFadeColor = ColorUtils.setAlphaComponent(Utils.getThemedValue(requireContext(), R.attr.background_color), 200)
@@ -175,7 +173,16 @@ class ManPageDialogFragment : Fragment() {
             // local man archive
             try {
                 val zip = ZipFile(mLocalArchive)
-                val zEntry = zip.getEntry(addressUrl.substringAfter("local:/"))
+                var zEntry = zip.getEntry(addressUrl.substringAfter("local:/"))
+                if (zEntry == null) {
+                    // local links from the page itself can be without gz prefix
+                    zEntry = zip.getEntry(addressUrl.substringAfter("local:/") + ".gz")
+                }
+                if (zEntry == null) {
+                    // still null, reference to a non-existing page?
+                    throw FileNotFoundException("File $addressUrl not found in local zip archive")
+                }
+
                 val zStream = zip.getInputStream(zEntry)
                 // can't use java's standard GZIPInputStream around zip IS because of inflating issue
                 val gis = GzipCompressorInputStream(zStream) // manpage files are .gz
@@ -189,9 +196,14 @@ class ManPageDialogFragment : Fragment() {
                     result.webContent = parsed.html()
                     return result
                 }
+            } catch (e: FileNotFoundException) {
+                Log.e(Utils.MM_TAG, "Error while loading man page from local archive", e)
+                Utils.showToastFromAnyThread(activity, getString(R.string.file_not_found_extra, addressUrl))
+                return null
             } catch (e: IOException) {
                 Log.e(Utils.MM_TAG, "Error while loading man page from local archive: $addressUrl", e)
-                Toast.makeText(activity, R.string.wrong_file_format, Toast.LENGTH_SHORT).show()
+                Utils.showToastFromAnyThread(activity, R.string.wrong_file_format)
+                return null
             }
         }
 
@@ -281,7 +293,7 @@ class ManPageDialogFragment : Fragment() {
             return
         }
 
-        if (mPrefs.contains(USER_LEARNED_SLIDER)) {
+        if (Config.userLearnedSlider) {
             // user already seen this animation, skip
             return
         }
@@ -289,13 +301,20 @@ class ManPageDialogFragment : Fragment() {
         mSlider.postDelayed({ mSlider.openPane() }, 1000)
         mSlider.postDelayed({ mSlider.closePane() }, 2000)
 
-        mPrefs.edit().putBoolean(USER_LEARNED_SLIDER, true).apply()
+        Config.userLearnedSlider = true
     }
 
-    private fun fillLinkPane(links: Set<String>?) {
+    private fun fillLinkPane(links: Set<String>) {
         mLinkContainer.removeAllViews()
-        if (links == null || links.isEmpty()) return
-        for (link in links) {
+        if (links.isNullOrEmpty()) {
+            return
+        }
+
+        val sortedLinks = links.sortedWith(
+            compareBy<String>{ it.firstOrNull()?.isLetter()?.not() }
+            .thenBy { it.length != 2 }
+        )
+        for (link in sortedLinks) {
             // hack  for https://code.google.com/p/android/issues/detail?id=36660 - place inside of FrameLayout
             val root = LayoutInflater.from(activity).inflate(R.layout.link_text_item, mLinkContainer, false)
             val linkLabel = root.findViewById<View>(R.id.link_text) as TextView
@@ -317,18 +336,6 @@ class ManPageDialogFragment : Fragment() {
     }
 
     /**
-     * Retrieve font size for web views from shared properties
-     * @return integer representing font size or default in case incorrect number is set
-     */
-    private val fontFromProperties: Int
-        get() = try {
-            mPrefs.getString(Utils.FONT_PREF_KEY, "12")!!.toInt()
-        } catch (ex: NumberFormatException) {
-            Toast.makeText(activity, R.string.invalid_font_size_set, Toast.LENGTH_SHORT).show()
-            12 // default webview font size
-        }
-
-    /**
      * Class to load URLs inside of already active webview
      * Calls original browser intent for the URLs it can't handle
      */
@@ -347,6 +354,20 @@ class ManPageDialogFragment : Fragment() {
 
                 return true
             }
+
+            if (url.startsWith("local:")) {
+                val name = url.substringAfterLast('/')
+                val mpdf = newInstance(name, url)
+                parentFragmentManager
+                    .beginTransaction()
+                    .addToBackStack("PageFromLocal")
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                    .add(R.id.replacer, mpdf)
+                    .commit()
+
+                return true
+            }
+
             return shouldOverrideUrlLoadingOld(view, url)
         }
 
@@ -355,9 +376,8 @@ class ManPageDialogFragment : Fragment() {
          * to handle URLs in old way if it's not a man page
          */
         fun shouldOverrideUrlLoadingOld(view: WebView, url: String): Boolean {
-            val intent: Intent
             // Perform generic parsing of the URI to turn it into an Intent.
-            intent = try {
+            val intent = try {
                 Intent.parseUri(url, Intent.URI_INTENT_SCHEME)
             } catch (ex: URISyntaxException) {
                 Log.w("WebViewCallback", "Bad URI " + url + ": " + ex.message)
@@ -414,13 +434,12 @@ class ManPageDialogFragment : Fragment() {
     private inner class FontChangeListener : OnSharedPreferenceChangeListener {
         override fun onSharedPreferenceChanged(prefs: SharedPreferences, key: String) {
             when (key) {
-                Utils.FONT_PREF_KEY -> mContent.settings.minimumFontSize = fontFromProperties
+                Config.FONT_PREF_KEY -> mContent.settings.minimumFontSize = Config.fontSize
             }
         }
     }
 
     companion object {
-        private const val USER_LEARNED_SLIDER = "user.learned.slider"
         private const val PARAM_ADDRESS = "param.address"
         private const val PARAM_NAME = "param.name"
 

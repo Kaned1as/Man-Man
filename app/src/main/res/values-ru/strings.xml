@@ -47,6 +47,7 @@
     <string name="add">Добавить</string>
     <string name="current_folder">Текущий каталог:</string>
     <string name="file_not_found">Файл не найден</string>
+    <string name="file_not_found_extra">Файл не найден: %s</string>
     <string name="local_storage">Локально</string>
     <string name="remove">Удалить</string>
     <string name="select">Выбрать</string>

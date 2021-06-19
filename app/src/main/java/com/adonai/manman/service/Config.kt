@@ -14,6 +14,8 @@ import androidx.preference.PreferenceManager
 object Config {
 
     const val APP_THEME = "app.theme"
+    const val USER_LEARNED_SLIDER = "user.learned.slider"
+    const val FONT_PREF_KEY = "webview.font.size"
 
     lateinit var prefs: SharedPreferences
 
@@ -24,4 +26,12 @@ object Config {
     var appTheme: String
         get() = prefs.getString(APP_THEME, "default")!!
         set(theme) = prefs.edit().putString(APP_THEME, theme).apply()
+
+    var userLearnedSlider: Boolean
+        get() = prefs.getBoolean(USER_LEARNED_SLIDER, false)
+        set(learned) = prefs.edit().putBoolean(USER_LEARNED_SLIDER, learned).apply()
+
+    var fontSize: Int
+        get() = prefs.getString(FONT_PREF_KEY, "12")!!.toIntOrNull() ?: 12
+        set(selectedSize) = prefs.edit().putString(FONT_PREF_KEY, selectedSize.toString()).apply()
 }
