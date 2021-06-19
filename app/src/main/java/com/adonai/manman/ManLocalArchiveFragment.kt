@@ -5,8 +5,6 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.os.Bundle
 import android.util.Log
 import android.view.*
-import android.widget.AdapterView.OnItemClickListener
-import android.widget.ListView
 import android.widget.SearchView
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
@@ -16,7 +14,11 @@ import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
-import com.adonai.manman.adapters.LocalArchiveArrayAdapter
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.adonai.manman.ManLocalArchiveFragment.LocalArchiveAdapter.*
+import com.adonai.manman.databinding.ChapterCommandListItemBinding
+import com.adonai.manman.databinding.FragmentLocalStorageBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -35,42 +37,15 @@ import java.util.zip.ZipFile
  * @author Kanedias
  */
 class ManLocalArchiveFragment : Fragment(), OnSharedPreferenceChangeListener {
+
     private var mUserAgreedToDownload = false
     private val mBroadcastHandler: BroadcastReceiver = LocalArchiveBroadcastReceiver()
 
     private lateinit var mPreferences: SharedPreferences // needed for folder list retrieval
-    private lateinit var mLocalPageList: ListView
-    private lateinit var mSearchLocalPage: SearchView
 
     private lateinit var mLocalArchive: File
 
-    /**
-     * Click listener for loading man page from selected archive file (or show config if no folders are present)
-     * <br></br>
-     * Archives are pretty small, so gzip decompression and parsing won't take loads of time...
-     * <br></br>
-     * Long story short, let's try to do this in UI and look at the performance
-     *
-     */
-    private val mManArchiveClickListener = OnItemClickListener { parent, _, position, _ ->
-        mSearchLocalPage.clearFocus() // otherwise we have to click "back" twice
-
-        val data = parent.getItemAtPosition(position) as? File
-        if (data == null) { // header is present, start config tool
-            when (position) {
-                0 -> showFolderSettingsDialog()
-                1 -> downloadArchive()
-            }
-        } else {
-            val mpdf = ManPageDialogFragment.newInstance(data.name, data.path)
-            parentFragmentManager
-                    .beginTransaction()
-                    .addToBackStack("PageFromLocalArchive")
-                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                    .replace(R.id.replacer, mpdf)
-                    .commit()
-        }
-    }
+    private lateinit var binding: FragmentLocalStorageBinding
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         setHasOptionsMenu(true)
@@ -79,16 +54,15 @@ class ManLocalArchiveFragment : Fragment(), OnSharedPreferenceChangeListener {
         mPreferences = PreferenceManager.getDefaultSharedPreferences(activity)
         mPreferences.registerOnSharedPreferenceChangeListener(this)
 
-        val root = inflater.inflate(R.layout.fragment_local_storage, container, false)
-        mLocalPageList = root.findViewById<View>(R.id.local_storage_page_list) as ListView
-        mSearchLocalPage = root.findViewById<View>(R.id.search_edit) as SearchView
+        binding = FragmentLocalStorageBinding.inflate(inflater, container, false)
 
-        mLocalPageList.onItemClickListener = mManArchiveClickListener
-        mSearchLocalPage.setOnQueryTextListener(FilterLocalStorage())
+        binding.localStoragePageList.layoutManager = LinearLayoutManager(requireContext())
+        binding.searchEdit.setOnQueryTextListener(FilterLocalStorage())
 
         triggerReloadLocalContent()
         LocalBroadcastManager.getInstance(requireContext()).registerReceiver(mBroadcastHandler, IntentFilter(MainPagerActivity.LOCAL_CHANGE_NOTIFY))
-        return root
+
+        return binding.root
     }
 
     override fun onDestroyView() {
@@ -132,22 +106,13 @@ class ManLocalArchiveFragment : Fragment(), OnSharedPreferenceChangeListener {
         lifecycleScope.launch {
             val localPages = withContext(Dispatchers.IO) { doLoadContent() }
 
-            if (mLocalPageList.headerViewsCount > 0) {
-                mLocalPageList.removeHeaderView(mLocalPageList.getChildAt(0))
-                mLocalPageList.removeHeaderView(mLocalPageList.getChildAt(1))
-            }
-
-            mLocalPageList.adapter = null // for android < kitkat for header to work properly
             if (localPages.isEmpty()) {
-                mSearchLocalPage.visibility = View.GONE
-                val header1 = View.inflate(activity, R.layout.add_folder_header, null)
-                val header2 = View.inflate(activity, R.layout.load_archive_header, null)
-                mLocalPageList.addHeaderView(header1)
-                mLocalPageList.addHeaderView(header2)
+                binding.searchEdit.visibility = View.GONE
+                binding.localStoragePageList.adapter = HeadersOnlyAdapter()
             } else {
-                mSearchLocalPage.visibility = View.VISIBLE
+                binding.searchEdit.visibility = View.VISIBLE
+                binding.localStoragePageList.adapter = LocalArchiveAdapter(localPages)
             }
-            mLocalPageList.adapter = LocalArchiveArrayAdapter(requireContext(), R.layout.chapter_command_list_item, R.id.command_name_label, localPages)
         }
     }
 
@@ -172,7 +137,9 @@ class ManLocalArchiveFragment : Fragment(), OnSharedPreferenceChangeListener {
         }
 
         // sort results alphabetically...
-        collectedPages.sort()
+        collectedPages.sortBy { it.name }
+        collectedPages.sortBy { it.parentFile?.name }
+
 
         return collectedPages
     }
@@ -195,12 +162,11 @@ class ManLocalArchiveFragment : Fragment(), OnSharedPreferenceChangeListener {
 
     @WorkerThread
     private fun walkFileTree(directoryRoot: File, resultList: MutableList<File>) {
-        val list = directoryRoot.listFiles() ?: // unknown, happens on some devices
-        return
+        val list = directoryRoot.listFiles() ?: return // unknown, happens on some devices
         for (f in list) {
             if (f.isDirectory) {
                 walkFileTree(f, resultList)
-            } else if (f.name.toLowerCase().endsWith(".gz")) { // take only gzipped files
+            } else if (f.name.lowercase().endsWith(".gz")) { // take only gzipped files
                 resultList.add(f)
             }
         }
@@ -230,8 +196,6 @@ class ManLocalArchiveFragment : Fragment(), OnSharedPreferenceChangeListener {
             return
         }
 
-        // kind of stupid to make a loader just for oneshot DL task...
-        // OK, let's do it old way...
         lifecycleScope.launch {
             val pd = AlertDialog.Builder(requireContext())
                     .setTitle(R.string.downloading)
@@ -284,10 +248,89 @@ class ManLocalArchiveFragment : Fragment(), OnSharedPreferenceChangeListener {
             return true
         }
 
-        private fun applyFilter(text: CharSequence) {
-            // safe to cast, we have only this type of adapter here
-            val adapter = mLocalPageList.adapter as? LocalArchiveArrayAdapter
-            adapter?.filter?.filter(text)
+        private fun applyFilter(text: String) {
+            val adapter = binding.localStoragePageList.adapter as? LocalArchiveAdapter
+            adapter?.filter(text)
+        }
+    }
+
+    inner class HeadersOnlyAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+        val ITEM_LOCAL_FOLDERS = 0
+        val ITEM_DOWNLOAD_ARCHIVE = 1
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+            val view = when(viewType) {
+                ITEM_LOCAL_FOLDERS -> View.inflate(parent.context, R.layout.add_folder_header, null)
+                else /* ITEM_DOWNLOAD_ARCHIVE */ -> View.inflate(parent.context, R.layout.load_archive_header, null)
+            }
+            return object: RecyclerView.ViewHolder(view) {}
+        }
+
+        override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+            when (getItemViewType(position)) {
+                ITEM_LOCAL_FOLDERS -> holder.itemView.setOnClickListener { showFolderSettingsDialog() }
+                else /* ITEM_DOWNLOAD_ARCHIVE */ -> holder.itemView.setOnClickListener { downloadArchive() }
+            }
+        }
+
+        override fun getItemViewType(position: Int): Int {
+            return when(position) {
+                0 -> ITEM_LOCAL_FOLDERS
+                else /* 1 */ -> ITEM_DOWNLOAD_ARCHIVE
+            }
+        }
+
+        override fun getItemCount() = 2
+
+    }
+
+    inner class LocalArchiveAdapter(val commands: List<File>) : RecyclerView.Adapter<LocalItemHolder>() {
+
+        private var filteredCommands = commands
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LocalItemHolder {
+            val inflater = LayoutInflater.from(parent.context)
+            val binding = ChapterCommandListItemBinding.inflate(inflater)
+            return LocalItemHolder(binding)
+        }
+
+        override fun onBindViewHolder(holder: LocalItemHolder, position: Int) {
+            val chapter = filteredCommands[position]
+            holder.setup(chapter)
+        }
+
+        override fun getItemCount() = filteredCommands.size
+
+        fun filter(text: String) {
+            filteredCommands = commands.filter { it.name.startsWith(text.lowercase()) }
+            notifyDataSetChanged()
+        }
+
+
+        inner class LocalItemHolder(private val item: ChapterCommandListItemBinding): RecyclerView.ViewHolder(item.root) {
+
+            fun setup(localFile: File) {
+                val localName = localFile.name
+                    .replace(".gz", "")
+                    .replace("\\.\\d\\w?$".toRegex(), "")
+
+                item.commandNameLabel.text = localName
+                item.commandDescriptionLabel.text = localFile.parent
+                item.popupMenu.visibility = View.GONE
+
+                item.root.setOnClickListener {
+                    binding.searchEdit.clearFocus() // otherwise we have to click "back" twice
+                    val mpdf = ManPageDialogFragment.newInstance(localFile.name, localFile.path)
+                    parentFragmentManager
+                        .beginTransaction()
+                        .addToBackStack("PageFromLocalArchive")
+                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                        .replace(R.id.replacer, mpdf)
+                        .commit()
+                }
+            }
+
         }
     }
 

@@ -34,6 +34,9 @@ import com.adonai.manman.views.PassiveSlidingPane
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import me.zhanghai.android.fastscroll.FastScrollWebView
+import me.zhanghai.android.fastscroll.FastScrollerBuilder
+import me.zhanghai.android.fastscroll.PopupStyles
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream

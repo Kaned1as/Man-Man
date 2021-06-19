@@ -12,7 +12,7 @@
         android:queryHint="@string/filter_local_storage"
         android:iconifiedByDefault="false" />
 
-    <ListView
+    <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/local_storage_page_list"
