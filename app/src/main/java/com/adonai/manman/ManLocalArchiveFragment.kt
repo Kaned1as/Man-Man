@@ -260,9 +260,10 @@ class ManLocalArchiveFragment : Fragment(), OnSharedPreferenceChangeListener {
         val ITEM_DOWNLOAD_ARCHIVE = 1
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+            val inflater = LayoutInflater.from(parent.context)
             val view = when(viewType) {
-                ITEM_LOCAL_FOLDERS -> View.inflate(parent.context, R.layout.add_folder_header, null)
-                else /* ITEM_DOWNLOAD_ARCHIVE */ -> View.inflate(parent.context, R.layout.load_archive_header, null)
+                ITEM_LOCAL_FOLDERS -> inflater.inflate(R.layout.add_folder_header, parent, false)
+                else /* ITEM_DOWNLOAD_ARCHIVE */ -> inflater.inflate(R.layout.load_archive_header, parent, false)
             }
             return object: RecyclerView.ViewHolder(view) {}
         }

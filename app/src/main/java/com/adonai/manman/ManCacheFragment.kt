@@ -1,25 +1,27 @@
 package com.adonai.manman
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ListView
+import android.widget.PopupMenu
 import android.widget.SearchView
+import android.widget.Toast
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.adonai.manman.adapters.CachedCommandsArrayAdapter
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.adonai.manman.ManCacheFragment.CacheAdapter.*
 import com.adonai.manman.database.DbProvider
+import com.adonai.manman.databinding.ChapterCommandListItemBinding
+import com.adonai.manman.databinding.FragmentCacheBrowseBinding
 import com.adonai.manman.entities.ManPage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -36,32 +38,17 @@ class ManCacheFragment : Fragment() {
 
     private val mBroadcastHandler: BroadcastReceiver = DbBroadcastReceiver()
 
-    private lateinit var mSearchCache: SearchView
-    private lateinit var mCacheList: ListView
+    private lateinit var binding: FragmentCacheBrowseBinding
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        val root = inflater.inflate(R.layout.fragment_cache_browse, container, false)
-
-        mSearchCache = root.findViewById<View>(R.id.search_edit) as SearchView
-        mSearchCache.setOnQueryTextListener(SearchInCacheListener())
-
-        mCacheList = root.findViewById<View>(R.id.cached_pages_list) as ListView
-        mCacheList.setOnItemClickListener { parent, _, position, _ ->
-            mSearchCache.clearFocus() // otherwise we have to click "back" twice
-            val manPage = parent.getItemAtPosition(position) as ManPage
-            val mpdf = ManPageDialogFragment.newInstance(manPage.name, manPage.url)
-            parentFragmentManager
-                    .beginTransaction()
-                    .addToBackStack("PageFromCache")
-                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                    .replace(R.id.replacer, mpdf)
-                    .commit()
-        }
+        binding = FragmentCacheBrowseBinding.inflate(inflater, container, false)
+        binding.searchEdit.setOnQueryTextListener(SearchInCacheListener())
+        binding.cachedPagesList.layoutManager = LinearLayoutManager(requireContext())
 
         LocalBroadcastManager.getInstance(requireContext()).registerReceiver(mBroadcastHandler, IntentFilter(MainPagerActivity.DB_CHANGE_NOTIFY))
         triggerReloadCache()
 
-        return root
+        return binding.root
     }
 
     override fun onDestroyView() {
@@ -71,11 +58,11 @@ class ManCacheFragment : Fragment() {
 
     @UiThread
     private fun triggerReloadCache() {
-        val query = mSearchCache.query.toString()
+        val query = binding.searchEdit.query.toString()
 
         lifecycleScope.launch {
             val pages = withContext(Dispatchers.IO) { doReloadCache(query) }
-            mCacheList.adapter = CachedCommandsArrayAdapter(requireContext(), R.layout.chapter_command_list_item, R.id.command_name_label, pages)
+            binding.cachedPagesList.adapter = CacheAdapter(pages)
         }
     }
 
@@ -115,6 +102,71 @@ class ManCacheFragment : Fragment() {
 
         private fun fireLoader() {
             triggerReloadCache()
+        }
+    }
+
+    inner class CacheAdapter(val cache: List<ManPage>) : RecyclerView.Adapter<CacheCommandHolder>() {
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CacheCommandHolder {
+            val inflater = LayoutInflater.from(parent.context)
+            val binding = ChapterCommandListItemBinding.inflate(inflater)
+            return CacheCommandHolder(binding)
+        }
+
+        override fun onBindViewHolder(holder: CacheCommandHolder, position: Int) {
+            val manpage = cache[position]
+            holder.setup(manpage)
+        }
+
+        override fun getItemCount() = cache.size
+
+        inner class CacheCommandHolder(private val item: ChapterCommandListItemBinding): RecyclerView.ViewHolder(item.root) {
+
+            fun setup(manpage: ManPage) {
+                item.commandNameLabel.text = manpage.name
+                item.commandDescriptionLabel.text = manpage.url
+
+                item.root.setOnClickListener {
+                    binding.searchEdit.clearFocus() // otherwise we have to click "back" twice
+                    val mpdf = ManPageDialogFragment.newInstance(manpage.name, manpage.url)
+                    parentFragmentManager
+                        .beginTransaction()
+                        .addToBackStack("PageFromCache")
+                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                        .replace(R.id.replacer, mpdf)
+                        .commit()
+                }
+
+                item.popupMenu.setOnClickListener { v ->
+                    val pm = PopupMenu(context, v)
+                    pm.inflate(R.menu.cached_item_popup)
+                    pm.setOnMenuItemClickListener(PopupMenu.OnMenuItemClickListener { item ->
+                        when (item.itemId) {
+                            R.id.share_link_popup_menu_item -> {
+                                val sendIntent = Intent(Intent.ACTION_SEND)
+                                sendIntent.type = "text/plain"
+                                sendIntent.putExtra(Intent.EXTRA_TITLE, manpage.name)
+                                sendIntent.putExtra(Intent.EXTRA_TEXT, manpage.url)
+                                startActivity(Intent.createChooser(sendIntent, getString(R.string.share_link)))
+                                return@OnMenuItemClickListener true
+                            }
+                            R.id.copy_link_popup_menu_item -> {
+                                val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                Toast.makeText(requireContext(), getString(R.string.copied) + " " + manpage.url, Toast.LENGTH_SHORT).show()
+                                clipboard.setPrimaryClip(ClipData.newPlainText(manpage.name, manpage.url))
+                                return@OnMenuItemClickListener true
+                            }
+                            R.id.delete_popup_menu_item -> {
+                                DbProvider.helper.manPagesDao.delete(manpage)
+                                LocalBroadcastManager.getInstance(requireContext()).sendBroadcast(Intent(MainPagerActivity.DB_CHANGE_NOTIFY))
+                                return@OnMenuItemClickListener true
+                            }
+                        }
+                        false
+                    })
+                    pm.show()
+                }
+            }
         }
     }
 
