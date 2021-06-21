@@ -1,36 +1,28 @@
-<LinearLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
+    android:id="@+id/main_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:fitsSystemWindows="true">
-
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/app_toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:theme="?attr/toolbarOverrideStyle"
-            app:popupTheme="?attr/toolbarPopupOverrideStyle"
-            app:elevation="4dp"/>
-
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <FrameLayout
-        android:id="@+id/replacer"
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <LinearLayout
-            android:orientation="vertical"
+        <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:ignore="UselessParent">
+            android:layout_height="wrap_content"
+            android:fitsSystemWindows="true">
+
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/app_toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:theme="?attr/toolbarOverrideStyle"
+                app:popupTheme="?attr/toolbarPopupOverrideStyle"
+                app:layout_scrollFlags="scroll|snap|enterAlways"
+                app:elevation="4dp"/>
 
             <com.google.android.material.tabs.TabLayout
                 android:id="@+id/tabs"
@@ -43,15 +35,16 @@
                 app:tabGravity="center"
                 app:tabMode="fixed"/>
 
-            <androidx.viewpager2.widget.ViewPager2
-                android:layout_height="match_parent"
-                android:layout_width="match_parent"
-                android:paddingTop="@dimen/activity_vertical_margin"
-                android:paddingBottom="@dimen/activity_vertical_margin"
-                android:id="@+id/page_holder"/>
+        </com.google.android.material.appbar.AppBarLayout>
 
-        </LinearLayout>
+        <androidx.viewpager2.widget.ViewPager2
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:paddingTop="@dimen/activity_vertical_margin"
+            android:paddingBottom="@dimen/activity_vertical_margin"
+            android:id="@+id/page_holder"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
-    </FrameLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
-</LinearLayout>
+</FrameLayout>

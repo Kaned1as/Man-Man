@@ -1,98 +1,121 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ViewFlipper
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/flipper"
+    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:inAnimation="@android:anim/fade_in"
-    android:outAnimation="@android:anim/fade_out"
-    android:background="?android:attr/colorBackground">
+    android:layout_height="match_parent">
 
-    <ImageView
-        android:id="@+id/wait_icon"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:src="@drawable/wait"
-        android:layout_gravity="center"
-        android:contentDescription="@string/loading"
-        app:tint="?android:attr/colorAccent"/>
-
-    <com.adonai.manman.views.PassiveSlidingPane
-        android:id="@+id/sliding_pane"
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/manpage_header"
+        android:fitsSystemWindows="true"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content">
 
-        <ScrollView
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:padding="5dp">
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/manpage_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:theme="?attr/toolbarOverrideStyle"
+            app:popupTheme="?attr/toolbarPopupOverrideStyle"
+            app:layout_scrollFlags="scroll|snap|enterAlways"/>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <ViewFlipper
+        android:id="@+id/manpage_wait_flipper"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:inAnimation="@android:anim/fade_in"
+        android:outAnimation="@android:anim/fade_out"
+        android:background="?android:attr/colorBackground">
+
+        <ImageView
+            android:id="@+id/wait_icon"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/wait"
+            android:layout_gravity="center"
+            android:contentDescription="@string/loading"
+            app:tint="?android:attr/colorAccent"/>
+
+        <com.adonai.manman.views.PassiveSlidingPane
+            android:id="@+id/sliding_pane"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ScrollView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:padding="5dp">
+
+                <LinearLayout
+                    android:id="@+id/link_list"
+                    android:orientation="vertical"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:dividerPadding="10dp"
+                    android:showDividers="middle"/>
+
+            </ScrollView>
 
             <LinearLayout
-                android:id="@+id/link_list"
-                android:orientation="vertical"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:dividerPadding="10dp"
-                android:showDividers="middle">
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <WebView
+                    android:id="@+id/man_content_web"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <LinearLayout
+                    android:id="@+id/search_bar_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone">
+
+                    <ImageView
+                        android:contentDescription="@string/close_search"
+                        android:id="@+id/close_search_bar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:padding="5dp"
+                        android:src="@drawable/close"/>
+
+                    <EditText
+                        android:id="@+id/search_edit"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:inputType="text"
+                        android:hint="@string/search"/>
+
+                    <ImageView
+                        android:id="@+id/find_next_occurrence"
+                        android:contentDescription="@string/find_next"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:padding="10dp"
+                        android:src="@drawable/search_next"
+                        android:scaleType="center"/>
+
+                    <ImageView
+                        android:id="@+id/find_previous_occurrence"
+                        android:contentDescription="@string/find_previous"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:padding="10dp"
+                        android:src="@drawable/search_up"
+                        android:scaleType="center"/>
 
                 </LinearLayout>
-        </ScrollView>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
-
-            <WebView
-                android:id="@+id/man_content_web"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
-
-            <LinearLayout
-                android:id="@+id/search_bar_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="gone">
-
-                <ImageView
-                    android:contentDescription="@string/close_search"
-                    android:id="@+id/close_search_bar"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:padding="5dp"
-                    android:src="@drawable/close"/>
-
-                <EditText
-                    android:id="@+id/search_edit"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:inputType="text"
-                    android:hint="@string/search"/>
-
-                <ImageView
-                    android:id="@+id/find_next_occurrence"
-                    android:contentDescription="@string/find_next"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:padding="10dp"
-                    android:src="@drawable/search_next"
-                    android:scaleType="center"/>
-
-                <ImageView
-                    android:id="@+id/find_previous_occurrence"
-                    android:contentDescription="@string/find_previous"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:padding="10dp"
-                    android:src="@drawable/search_up"
-                    android:scaleType="center"/>
 
             </LinearLayout>
 
-        </LinearLayout>
+        </com.adonai.manman.views.PassiveSlidingPane>
 
-    </com.adonai.manman.views.PassiveSlidingPane>
-</ViewFlipper>
+    </ViewFlipper>
+
+</LinearLayout>

@@ -23,6 +23,7 @@ import com.adonai.manman.databinding.ChaptersListItemBinding
 import com.adonai.manman.databinding.FragmentManContentsBinding
 import com.adonai.manman.entities.ManSectionItem
 import com.adonai.manman.misc.ManChapterItemOnClickListener
+import com.adonai.manman.misc.showFullscreenFragment
 import com.google.android.material.internal.ViewUtils
 import com.j256.ormlite.misc.TransactionManager
 import kotlinx.coroutines.Dispatchers
@@ -173,12 +174,7 @@ class ManChaptersFragment : Fragment() {
                     .setAdapter(adapter) { _, which ->
                         val item = adapter.getItem(which)
                         val mpdf = ManPageDialogFragment.newInstance(item!!.name, item.url)
-                        parentFragmentManager
-                                .beginTransaction()
-                                .addToBackStack("PageFromChapterPackage")
-                                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                                .replace(R.id.replacer, mpdf)
-                                .commit()
+                        requireActivity().showFullscreenFragment(mpdf)
                     }
                     .create()
                     .show()
@@ -260,15 +256,6 @@ class ManChaptersFragment : Fragment() {
 
     data class ManChapter(val index: String,val name: String)
 
-    /**
-     * This class represents an array adapter for showing man chapters
-     * There are only about ten constant chapters, so it was convenient to place it to the string-array
-     *
-     * The array is retrieved via [Utils.parseStringArray]
-     * and stored in [ManChaptersFragment.mCachedChapters]
-     *
-     * @author Kanedias
-     */
     inner class ChaptersAdapter(val chapters: List<ManChapter>) : RecyclerView.Adapter<ChaptersAdapter.ChapterHolder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChapterHolder {

@@ -23,6 +23,7 @@ import com.adonai.manman.database.DbProvider
 import com.adonai.manman.databinding.ChapterCommandListItemBinding
 import com.adonai.manman.databinding.FragmentCacheBrowseBinding
 import com.adonai.manman.entities.ManPage
+import com.adonai.manman.misc.showFullscreenFragment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -129,12 +130,7 @@ class ManCacheFragment : Fragment() {
                 item.root.setOnClickListener {
                     binding.searchEdit.clearFocus() // otherwise we have to click "back" twice
                     val mpdf = ManPageDialogFragment.newInstance(manpage.name, manpage.url)
-                    parentFragmentManager
-                        .beginTransaction()
-                        .addToBackStack("PageFromCache")
-                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                        .replace(R.id.replacer, mpdf)
-                        .commit()
+                    requireActivity().showFullscreenFragment(mpdf)
                 }
 
                 item.popupMenu.setOnClickListener { v ->

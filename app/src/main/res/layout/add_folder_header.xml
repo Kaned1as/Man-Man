@@ -32,6 +32,7 @@
                 android:layout_height="64dp"
                 android:layout_gravity="center_horizontal"
                 android:src="@drawable/settings"
+                app:tint="?android:attr/colorAccent"
                 android:contentDescription="@string/settings" />
 
         </LinearLayout>

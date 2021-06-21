@@ -34,8 +34,8 @@
         <!-- colorOnBackground: The color used for elements displayed on top of your background color -->
         <item name="colorOnBackground">@color/md_grey_700</item>
 
-        <item name="toolbarOverrideStyle">@style/Theme.MaterialComponents.NoActionBar</item>
-        <item name="toolbarPopupOverrideStyle">@style/Theme.MaterialComponents.Light.NoActionBar</item>
+        <item name="toolbarOverrideStyle">@style/ThemeOverlay.MaterialComponents.Dark.ActionBar</item>
+        <item name="toolbarPopupOverrideStyle">@style/ThemeOverlay.MaterialComponents.Light</item>
     </style>
 
     <style name="AppThemeDark" parent="Theme.MaterialComponents.NoActionBar">
@@ -65,8 +65,8 @@
         <!-- colorOnBackground: The color used for elements displayed on top of your background color -->
         <item name="colorOnBackground">@color/md_almost_white</item>
 
-        <item name="toolbarOverrideStyle">@style/Theme.MaterialComponents.NoActionBar</item>
-        <item name="toolbarPopupOverrideStyle">@style/Theme.MaterialComponents.NoActionBar</item>
+        <item name="toolbarOverrideStyle">@style/ThemeOverlay.MaterialComponents.Dark.ActionBar</item>
+        <item name="toolbarPopupOverrideStyle">@style/ThemeOverlay.MaterialComponents.Dark</item>
     </style>
 
     <style name="AppThemeDarkGreen" parent="Theme.MaterialComponents.NoActionBar">
@@ -104,7 +104,7 @@
         <item name="android:tint">@color/md_true_green</item>
 
         <item name="toolbarOverrideStyle">@style/AppThemeDarkGreen</item>
-        <item name="toolbarPopupOverrideStyle">@style/Theme.MaterialComponents.NoActionBar</item>
+        <item name="toolbarPopupOverrideStyle">@style/ThemeOverlay.MaterialComponents.Dark</item>
     </style>
 
 </resources>

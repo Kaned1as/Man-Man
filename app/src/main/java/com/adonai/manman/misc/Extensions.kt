@@ -2,14 +2,15 @@ package com.adonai.manman.misc
 
 import android.content.Context
 import android.content.res.Configuration
+import android.graphics.Color
 import android.util.TypedValue
-import android.view.Gravity
+import androidx.core.content.res.use
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentTransaction
-import androidx.transition.Slide
 import com.adonai.manman.R
 import com.adonai.manman.service.Config
+
 
 fun FragmentActivity.setupTheme() {
     when (Config.appTheme) {
@@ -31,13 +32,10 @@ fun FragmentActivity.setupTheme() {
  * Overlays main view of the activity with the specified fragment.
  */
 fun FragmentActivity.showFullscreenFragment(frag: Fragment) {
-    frag.enterTransition = Slide(Gravity.END)
-    frag.exitTransition = Slide(Gravity.START)
-
     supportFragmentManager.beginTransaction()
         .addToBackStack("Showing fragment: $frag")
         .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-        //.add(R.id.ma, frag)
+        .add(R.id.main_layout, frag)
         .commit()
 }
 

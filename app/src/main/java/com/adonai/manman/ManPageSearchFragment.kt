@@ -24,6 +24,7 @@ import com.adonai.manman.databinding.SearchListItemBinding
 import com.adonai.manman.entities.SearchResult
 import com.adonai.manman.entities.SearchResultList
 import com.adonai.manman.misc.resolveAttr
+import com.adonai.manman.misc.showFullscreenFragment
 import com.google.gson.FieldNamingPolicy
 import com.google.gson.GsonBuilder
 import kotlinx.coroutines.*
@@ -200,12 +201,7 @@ class ManPageSearchFragment : Fragment() {
             binding.root.setOnClickListener {
                 mSearchView.clearFocus() // otherwise we have to click "back" twice
                 val mpdf = ManPageDialogFragment.newInstance(command.name, command.url)
-                parentFragmentManager
-                    .beginTransaction()
-                    .addToBackStack("PageFromSearch")
-                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                    .replace(R.id.replacer, mpdf)
-                    .commit()
+                requireActivity().showFullscreenFragment(mpdf)
             }
 
             binding.popupMenu.visibility = View.VISIBLE

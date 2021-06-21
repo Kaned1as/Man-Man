@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.adonai.manman.ManLocalArchiveFragment.LocalArchiveAdapter.*
 import com.adonai.manman.databinding.ChapterCommandListItemBinding
 import com.adonai.manman.databinding.FragmentLocalStorageBinding
+import com.adonai.manman.misc.showFullscreenFragment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -323,12 +324,7 @@ class ManLocalArchiveFragment : Fragment(), OnSharedPreferenceChangeListener {
                 item.root.setOnClickListener {
                     binding.searchEdit.clearFocus() // otherwise we have to click "back" twice
                     val mpdf = ManPageDialogFragment.newInstance(localFile.name, localFile.path)
-                    parentFragmentManager
-                        .beginTransaction()
-                        .addToBackStack("PageFromLocalArchive")
-                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                        .replace(R.id.replacer, mpdf)
-                        .commit()
+                    requireActivity().showFullscreenFragment(mpdf)
                 }
             }
 
