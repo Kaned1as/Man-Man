@@ -59,60 +59,10 @@
 
             </ScrollView>
 
-            <LinearLayout
+            <WebView
+                android:id="@+id/man_content_web"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
-
-                <WebView
-                    android:id="@+id/man_content_web"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1" />
-
-                <LinearLayout
-                    android:id="@+id/search_bar_layout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:visibility="gone">
-
-                    <ImageView
-                        android:contentDescription="@string/close_search"
-                        android:id="@+id/close_search_bar"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:padding="5dp"
-                        android:src="@drawable/close"/>
-
-                    <EditText
-                        android:id="@+id/search_edit"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:inputType="text"
-                        android:hint="@string/search"/>
-
-                    <ImageView
-                        android:id="@+id/find_next_occurrence"
-                        android:contentDescription="@string/find_next"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:padding="10dp"
-                        android:src="@drawable/search_next"
-                        android:scaleType="center"/>
-
-                    <ImageView
-                        android:id="@+id/find_previous_occurrence"
-                        android:contentDescription="@string/find_previous"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:padding="10dp"
-                        android:src="@drawable/search_up"
-                        android:scaleType="center"/>
-
-                </LinearLayout>
-
-            </LinearLayout>
+                android:layout_height="match_parent" />
 
         </com.adonai.manman.views.PassiveSlidingPane>
 

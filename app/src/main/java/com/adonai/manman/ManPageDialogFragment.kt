@@ -6,15 +6,13 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
-import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.provider.Browser
-import android.text.Editable
 import android.text.TextUtils
-import android.text.TextWatcher
 import android.util.Log
 import android.view.*
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.webkit.WebSettings
 import android.webkit.WebView
@@ -23,6 +21,7 @@ import android.widget.*
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
+import androidx.appcompat.widget.SearchView
 import androidx.core.graphics.ColorUtils
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -31,7 +30,6 @@ import androidx.preference.PreferenceManager
 import com.adonai.manman.database.DbProvider
 import com.adonai.manman.databinding.FragmentManPageShowBinding
 import com.adonai.manman.entities.ManPage
-import com.adonai.manman.misc.resolveAttr
 import com.adonai.manman.misc.showFullscreenFragment
 import com.adonai.manman.parser.Man2Html
 import com.adonai.manman.service.Config
@@ -67,7 +65,6 @@ class ManPageDialogFragment : Fragment() {
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        setHasOptionsMenu(true)
         mLocalArchive = File(requireActivity().cacheDir, "manpages.zip")
 
         mPrefs = PreferenceManager.getDefaultSharedPreferences(activity)
@@ -81,12 +78,6 @@ class ManPageDialogFragment : Fragment() {
 
         binding.slidingPane.sliderFadeColor = ColorUtils.setAlphaComponent(Utils.getThemedValue(requireContext(), R.attr.background_color), 200)
         binding.slidingPane.setTrackedView(binding.manContentWeb)
-
-        // search-specific
-        binding.closeSearchBar.setOnClickListener(SearchBarCloser())
-        binding.searchEdit.addTextChangedListener(SearchExecutor())
-        binding.findNextOccurrence.setOnClickListener(SearchFurtherExecutor(true))
-        binding.findPreviousOccurrence.setOnClickListener(SearchFurtherExecutor(false))
 
         // Lollipop blocks mixed content but we should load CSS from filesystem
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -109,15 +100,26 @@ class ManPageDialogFragment : Fragment() {
         binding.manpageToolbar.setNavigationOnClickListener { parentFragmentManager.popBackStack() }
 
         binding.manpageToolbar.inflateMenu(R.menu.man_page_menu)
-        binding.manpageToolbar.setOnMenuItemClickListener { mi ->
-            return@setOnMenuItemClickListener when (mi.itemId) {
-                R.id.show_search_bar -> {
-                    toggleSearchBar(View.VISIBLE)
-                    true
-                }
-                else -> false
+        val searchBar = binding.manpageToolbar.menu.findItem(R.id.show_search_bar).actionView as SearchView
+        searchBar.setOnFocusChangeListener { _, hasFocus -> if (!hasFocus) binding.manContentWeb.clearMatches() }
+        searchBar.setOnQueryTextListener(object: SearchView.OnQueryTextListener {
+
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                binding.manContentWeb.findNext(true)
+                return true
             }
-        }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                if (newText.isNullOrEmpty()) {
+                    binding.manContentWeb.clearMatches()
+                    return true
+                }
+
+                binding.manContentWeb.findAllAsync(newText)
+                return true
+            }
+
+        })
 
         lifecycleScope.launch {
             val manpage = withContext(Dispatchers.IO) { doLoadContent(addressUrl, commandName) }
@@ -262,18 +264,6 @@ class ManPageDialogFragment : Fragment() {
         imm.hideSoftInputFromWindow(binding.manContentWeb.windowToken, 0)
     }
 
-    private fun toggleSearchBar(visibility: Int) {
-        binding.searchBarLayout.visibility = visibility
-        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        if (visibility == View.VISIBLE) {
-            binding.searchEdit.requestFocus()
-            imm.showSoftInput(binding.searchEdit, 0)
-        } else {
-            binding.searchEdit.clearFocus()
-            imm.hideSoftInputFromWindow(binding.searchEdit.windowToken, 0)
-        }
-    }
-
     private fun shakeSlider() {
         if (binding.linkList.childCount == 0) {
             // nothing to show in the links pane, skip
@@ -376,36 +366,6 @@ class ManPageDialogFragment : Fragment() {
                 return false
             }
             return true
-        }
-    }
-
-    /**
-     * Closes the search bar
-     */
-    private inner class SearchBarCloser : View.OnClickListener {
-        override fun onClick(v: View) {
-            toggleSearchBar(View.GONE)
-            binding.manContentWeb.clearMatches()
-        }
-    }
-
-    /**
-     * Finds next occurrence depending on direction
-     */
-    private inner class SearchFurtherExecutor(private val goDown: Boolean) : View.OnClickListener {
-        override fun onClick(v: View) {
-            binding.manContentWeb.findNext(goDown)
-        }
-    }
-
-    /**
-     * Executes search on string change
-     */
-    private inner class SearchExecutor : TextWatcher {
-        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
-        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
-        override fun afterTextChanged(s: Editable) {
-            binding.manContentWeb.findAllAsync(s.toString())
         }
     }
 
