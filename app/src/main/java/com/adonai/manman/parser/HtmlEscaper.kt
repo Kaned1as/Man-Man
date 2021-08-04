@@ -26,17 +26,17 @@ object HtmlEscaper {
                 out.append("&gt;")
             } else if (c == '&') {
                 out.append("&amp;")
-            } else if (c.toInt() in 0xD800..0xDFFF) {
-                if (c.toInt() < 0xDC00 && i + 1 < end) {
+            } else if (c.code in 0xD800..0xDFFF) {
+                if (c.code < 0xDC00 && i + 1 < end) {
                     val d = text[i + 1]
-                    if (d.toInt() in 0xDC00..0xDFFF) {
+                    if (d.code in 0xDC00..0xDFFF) {
                         i++
-                        val codepoint = 0x010000 or (c.toInt() - 0xD800 shl 10) or d.toInt() - 0xDC00
+                        val codepoint = 0x010000 or (c.code - 0xD800 shl 10) or d.code - 0xDC00
                         out.append("&#").append(codepoint).append(";")
                     }
                 }
-            } else if (c.toInt() > 0x7E || c < ' ') {
-                out.append("&#").append(c.toInt()).append(";")
+            } else if (c.code > 0x7E || c < ' ') {
+                out.append("&#").append(c.code).append(";")
             } else if (c == ' ') {
                 while (i + 1 < end && text[i + 1] == ' ') {
                     out.append("&nbsp;")
