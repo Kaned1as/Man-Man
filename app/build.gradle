@@ -10,9 +10,6 @@ android {
         disable 'ExtraTranslation'
     }
 
-    dexOptions {
-        javaMaxHeapSize "4g"
-    }
 
     buildFeatures {
         viewBinding true
