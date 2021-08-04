@@ -13,6 +13,6 @@ import com.google.gson.Gson
 class SearchResult {
     lateinit var name: String
     lateinit var section: String
-    lateinit var description: String
     lateinit var url: String
+    var description: String? = null
 }
