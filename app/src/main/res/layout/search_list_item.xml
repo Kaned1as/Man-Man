@@ -27,7 +27,8 @@
                 android:layout_alignParentEnd="true"
                 android:src="@drawable/overflow_menu"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/popup_menu"/>
+                android:contentDescription="@string/popup_menu"
+                app:tint="?android:attr/colorAccent"/>
 
             <TextView
                 android:layout_width="wrap_content"

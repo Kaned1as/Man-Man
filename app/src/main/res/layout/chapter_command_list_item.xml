@@ -28,18 +28,19 @@
                 android:src="@drawable/overflow_menu"
                 android:scaleType="fitXY"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/popup_menu"/>
+                android:contentDescription="@string/popup_menu"
+                app:tint="?android:attr/colorAccent"/>
 
             <TextView
                 android:id="@+id/command_name_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceListItem"
-                android:text="@string/placeholder_text"
                 android:layout_alignParentStart="true"
                 android:layout_alignParentTop="true"
                 android:layout_toStartOf="@id/popup_menu"
-                android:maxEms="15"/>
+                android:maxEms="15"
+                android:text="@string/placeholder_text"
+                android:textAppearance="?android:attr/textAppearanceListItem" />
 
             <TextView
                 android:id="@+id/command_description_label"

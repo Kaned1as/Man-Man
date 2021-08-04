@@ -16,7 +16,8 @@
         android:src="@drawable/overflow_menu"
         android:scaleType="fitXY"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@string/popup_menu"/>
+        android:contentDescription="@string/popup_menu"
+        app:tint="?android:attr/colorAccent"/>
 
     <TextView
         android:id="@+id/command_name_label"
