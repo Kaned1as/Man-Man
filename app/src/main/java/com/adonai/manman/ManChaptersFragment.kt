@@ -163,7 +163,15 @@ class ManChaptersFragment : Fragment() {
     }
 
     @UiThread
-    private fun triggerLoadPackage(parentChapter: String, url: String) {
+    private fun triggerLoadPackage(name: String, parentChapter: String, url: String) {
+        if (!url.contains("package")) {
+            // this section does not support packages
+            // the url must be a direct manpage redirect
+            val mpdf = ManPageDialogFragment.newInstance(name, url)
+            requireActivity().showFullscreenFragment(mpdf)
+            return
+        }
+
         lifecycleScope.launch {
             val items = withContext(Dispatchers.IO) { doLoadPackage(parentChapter, url) }
 
@@ -308,7 +316,7 @@ class ManChaptersFragment : Fragment() {
                 binding.popupMenu.setOnClickListener(ManChapterItemOnClickListener(requireContext(), pkg))
 
                 binding.root.setOnClickListener {
-                    triggerLoadPackage(pkg.parentChapter, pkg.url)
+                    triggerLoadPackage(pkg.name, pkg.parentChapter, pkg.url)
                 }
             }
 
